@@ -1,0 +1,33 @@
+package dev.crashteam.repricer.repository.postgre.mapper
+
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
+import org.jooq.Record
+import org.springframework.stereotype.Component
+
+@Component
+class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpressAccountShopItemEntity> {
+
+    override fun convert(record: Record): KazanExpressAccountShopItemEntity {
+        return KazanExpressAccountShopItemEntity(
+            id = record.getValue(KE_ACCOUNT_SHOP_ITEM.ID),
+            keAccountId = record.getValue(KE_ACCOUNT_SHOP_ITEM.KE_ACCOUNT_ID),
+            keAccountShopId = record.getValue(KE_ACCOUNT_SHOP_ITEM.KE_ACCOUNT_SHOP_ID),
+            categoryId = record.getValue(KE_ACCOUNT_SHOP_ITEM.CATEGORY_ID),
+            productId = record.getValue(KE_ACCOUNT_SHOP_ITEM.PRODUCT_ID),
+            skuId = record.getValue(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
+            name = record.getValue(KE_ACCOUNT_SHOP_ITEM.NAME),
+            photoKey = record.getValue(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
+            fullPrice = record.getValue(KE_ACCOUNT_SHOP_ITEM.FULL_PRICE),
+            sellPrice = record.getValue(KE_ACCOUNT_SHOP_ITEM.SELL_PRICE),
+            barCode = record.getValue(KE_ACCOUNT_SHOP_ITEM.BARCODE),
+            productSku = record.getValue(KE_ACCOUNT_SHOP_ITEM.PRODUCT_SKU),
+            skuTitle = record.getValue(KE_ACCOUNT_SHOP_ITEM.SKU_TITLE),
+            availableAmount = record.getValue(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
+            minimumThreshold = record.getValue(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
+            maximumThreshold = record.getValue(KE_ACCOUNT_SHOP_ITEM.MAXIMUM_THRESHOLD),
+            step = record.getValue(KE_ACCOUNT_SHOP_ITEM.STEP),
+            lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE)
+        )
+    }
+}

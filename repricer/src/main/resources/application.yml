@@ -1,0 +1,93 @@
+server:
+  port: 8080
+
+management:
+  security:
+    flag: false
+  server:
+    port: 8025
+  metrics:
+    prometheus:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+logging:
+  level:
+    "liquibase": info
+    org.jooq.tools.LoggerListener: DEBUG
+
+spring:
+  application:
+    name: '@project.name@'
+    output:
+      ansi:
+        enabled: always
+  kafka:
+    bootstrap-servers: localhost:9092
+  redis:
+    host: localhost
+    port: 6379
+  datasource:
+    url: '@db.pg.url@'
+    username: '@db.pg.user@'
+    password: '@db.pg.password@'
+  liquibase:
+    enabled: true
+    change-log: "classpath:db/changelog/db.pg.changelog-main.yml"
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org.quartz.scheduler.instanceName: repricer
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.scheduler.skipUpdateCheck: true
+      org.quartz.scheduler.threadsInheritContextClassLoaderOfInitializer: true
+      org.quartz.threadPool.threadCount: 40
+      org.quartz.threadPool.threadPriority: 5
+      org.quartz.jobStore.isClustered: false
+      org.quartz.jobStore.misfireThreshold: 30000
+      org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.jobStore.useProperties: false
+      org.quartz.jobStore.tablePrefix: QRTZ_
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+          issuer-uri: https://securetoken.google.com/${FIREBASE_APP_NAME:marketdb-gloom}
+
+service:
+  proxy:
+    url: http://localhost:8022
+
+actuator:
+  user: basic
+  password: passwd
+
+repricer:
+  jobEnabled: true
+  password-key: x!z%C*F-JaNdRgUkXp2s5v8y/B?D(G+K
+  productCron: '0/40 * * * * ?'
+  accountUpdateDataCron: '0 0 0/1 * * ?'
+  priceChangeCron: '0 0/15 * * * ?'
+  paymentCron: '0/10 * * * * ?'
+  accountInitializeCron: '0/20 * * * * ?'
+  cookieBotProtectionBypassEnabled: true
+
+loki:
+  host: localhost
+  enabled: false
+
+youkassa:
+  shopId: 819837
+  key: 'test_6qE96u7LbOog1NcjX9AocDz8sviH_FIhQ25sO2Jz0Qk'
