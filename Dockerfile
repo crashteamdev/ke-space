@@ -2,7 +2,7 @@ FROM markhobson/maven-chrome:jdk-17
 EXPOSE 8080
 
 WORKDIR root/
-ARG JAR_FILE=target/repricer-*.jar
+ARG JAR_FILE=repricer-*.jar
 COPY ${JAR_FILE} ./app.jar
 
 ENTRYPOINT ["java", "-server", "-Xms256M", "-Xmx1512M",\
