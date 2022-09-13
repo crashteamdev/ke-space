@@ -11,6 +11,5 @@ jobs:
     uses: crashteamdev/jvm-workflows/.github/workflows/maven-service-deploy.yml@v1
     with:
       registry-username: ${{ github.actor }}
-      dockerfile-path: './'
     secrets:
       registry-access-token: ${{ secrets.GITHUB_TOKEN }}

@@ -32,8 +32,6 @@ spring:
     output:
       ansi:
         enabled: always
-  kafka:
-    bootstrap-servers: localhost:9092
   redis:
     host: localhost
     port: 6379
