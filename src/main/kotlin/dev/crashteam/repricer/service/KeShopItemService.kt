@@ -81,6 +81,7 @@ class KeShopItemService(
             return ImageFingerprintHolder(avgHashFingerprint, pHashFingerprint)
         } catch (e: Exception) {
             log.error(e) { "Failed to generate fingerprint from url=${url}; imageByteSize=${imageByteArray.size}" }
+            throw e
         }
     }
 
