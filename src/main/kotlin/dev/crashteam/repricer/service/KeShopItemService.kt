@@ -8,11 +8,14 @@ import dev.crashteam.repricer.client.ke.model.web.ProductPhoto
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEntity
 import dev.crashteam.repricer.service.loader.RemoteImageLoader
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 import javax.imageio.ImageIO
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class KeShopItemService(
