@@ -39,9 +39,7 @@ class KeShopItemService(
             } ?: productData.photos.firstOrNull()
             val url =
                 "https://ke-images.servicecdn.ru/${photo!!.photoKey}/original.jpg" // TODO: avoid static url
-            val imageByteArray = remoteImageLoader.loadResource(url)
-            val avgHashFingerprint = generateFingerprint(imageByteArray, avgHash)
-            val pHashFingerprint = generateFingerprint(imageByteArray, pHash)
+            val (avgHash, pHash) = generateImageFingerprints(url)
             val characteristics = productSplit.characteristics.joinToString {
                 val productCharacteristic = productData.characteristics[it.charIndex]
                 productCharacteristic.values[it.valueIndex].title
@@ -53,8 +51,8 @@ class KeShopItemService(
                 categoryId = productData.category.id,
                 name = productTitle,
                 photoKey = photo.photoKey,
-                avgHashFingerprint = avgHashFingerprint,
-                pHashFingerprint = pHashFingerprint,
+                avgHashFingerprint = avgHash,
+                pHashFingerprint = pHash,
                 price = productSplit.purchasePrice.movePointRight(2).toLong(),
                 availableAmount = productSplit.availableAmount,
                 lastUpdate = LocalDateTime.now()
@@ -74,9 +72,26 @@ class KeShopItemService(
         )
     }
 
+    private fun generateImageFingerprints(url: String): ImageFingerprintHolder {
+        val imageByteArray = remoteImageLoader.loadResource(url)
+        try {
+            val avgHashFingerprint = generateFingerprint(imageByteArray, avgHash)
+            val pHashFingerprint = generateFingerprint(imageByteArray, pHash)
+
+            return ImageFingerprintHolder(avgHashFingerprint, pHashFingerprint)
+        } catch (e: Exception) {
+            log.error(e) { "Failed to generate fingerprint from url=${url}; imageByteSize=${imageByteArray.size}" }
+        }
+    }
+
     private fun generateFingerprint(byteArray: ByteArray, hashAlgorithm: HashingAlgorithm): String {
         val image = ImageIO.read(ByteArrayInputStream(byteArray))
         return hashAlgorithm.hash(image).hashValue.toString(16).uppercase()
     }
+
+    data class ImageFingerprintHolder(
+        val avgHash: String,
+        val pHash: String,
+    )
 
 }
