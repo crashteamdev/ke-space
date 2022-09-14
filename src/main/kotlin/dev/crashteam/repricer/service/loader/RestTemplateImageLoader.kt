@@ -1,6 +1,5 @@
 package dev.crashteam.repricer.service.loader
 
-import dev.crashteam.repricer.service.log
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
