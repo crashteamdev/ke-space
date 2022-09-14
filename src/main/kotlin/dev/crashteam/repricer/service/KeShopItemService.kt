@@ -39,7 +39,7 @@ class KeShopItemService(
             } ?: productData.photos.firstOrNull()
             val url =
                 "https://ke-images.servicecdn.ru/${photo!!.photoKey}/t_product_240_high.jpg" // TODO: avoid static url
-            val (avgHash, pHash) = generateImageFingerprints(url)
+            val imageFingerprints = generateImageFingerprints(url)
             val characteristics = productSplit.characteristics.joinToString {
                 val productCharacteristic = productData.characteristics[it.charIndex]
                 productCharacteristic.values[it.valueIndex].title
@@ -51,8 +51,8 @@ class KeShopItemService(
                 categoryId = productData.category.id,
                 name = productTitle,
                 photoKey = photo.photoKey,
-                avgHashFingerprint = avgHash,
-                pHashFingerprint = pHash,
+                avgHashFingerprint = imageFingerprints?.avgHash,
+                pHashFingerprint = imageFingerprints?.pHash,
                 price = productSplit.purchasePrice.movePointRight(2).toLong(),
                 availableAmount = productSplit.availableAmount,
                 lastUpdate = LocalDateTime.now()
@@ -63,25 +63,29 @@ class KeShopItemService(
 
     fun findSimilarItems(productId: Long, skuId: Long): List<KazanExpressShopItemEntity> {
         val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
-        return keShopItemRepository.findSimilarItems(
-            productId,
-            skuId,
-            targetShopItemEntity.avgHashFingerprint,
-            targetShopItemEntity.pHashFingerprint,
-            targetShopItemEntity.name
-        )
+        if (targetShopItemEntity.avgHashFingerprint != null) {
+            return keShopItemRepository.findSimilarItemsByNameAndHash(
+                productId,
+                skuId,
+                targetShopItemEntity.avgHashFingerprint,
+                targetShopItemEntity.pHashFingerprint,
+                targetShopItemEntity.name
+            )
+        } else {
+            keShopItemRepository.findSimilarItemsByName(productId, skuId, targetShopItemEntity.name)
+        }
     }
 
-    private fun generateImageFingerprints(url: String): ImageFingerprintHolder {
+    private fun generateImageFingerprints(url: String): ImageFingerprintHolder? {
         val imageByteArray = remoteImageLoader.loadResource(url)
-        try {
+        return try {
             val avgHashFingerprint = generateFingerprint(imageByteArray, avgHash)
             val pHashFingerprint = generateFingerprint(imageByteArray, pHash)
 
-            return ImageFingerprintHolder(avgHashFingerprint, pHashFingerprint)
+            ImageFingerprintHolder(avgHashFingerprint, pHashFingerprint)
         } catch (e: Exception) {
-            log.error(e) { "Failed to generate fingerprint from url=${url}; imageByteSize=${imageByteArray.size}" }
-            throw e
+            log.warn(e) { "Failed to generate fingerprint from url=${url}; imageByteSize=${imageByteArray.size}" }
+            null
         }
     }
 

@@ -109,11 +109,11 @@ class KeShopItemRepository(
             .fetchOne()?.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
 
-    fun findSimilarItems(
+    fun findSimilarItemsByNameAndHash(
         productId: Long,
         skuId: Long,
-        avgHash: String,
-        pHash: String,
+        avgHash: String? = null,
+        pHash: String? = null,
         name: String
     ): List<KazanExpressShopItemEntity> {
         val s = KE_SHOP_ITEM
@@ -125,6 +125,22 @@ class KeShopItemRepository(
                         Double::class.java, s.NAME, name
                     ).greaterThan(0.6)
                 ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+            ).limit(30).fetch()
+
+        return records.map { recordToKazanExpressShopItemMapper.convert(it) }
+    }
+
+    fun findSimilarItemsByName(
+        productId: Long,
+        skuId: Long,
+        name: String
+    ): List<KazanExpressShopItemEntity> {
+        val s = KE_SHOP_ITEM
+        val records = dsl.selectFrom(s)
+            .where(DSL.field(
+                "similarity({0}, {1})",
+                Double::class.java, s.NAME, name
+            ).greaterThan(0.6).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
             ).limit(30).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
