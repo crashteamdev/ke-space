@@ -3,6 +3,7 @@ package dev.crashteam.repricer.config.security
 import dev.crashteam.repricer.repository.postgre.AccountRepository
 import dev.crashteam.repricer.repository.postgre.entity.AccountEntity
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -18,7 +19,7 @@ class UserCreationFilter(
     private val accountRepository: AccountRepository
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> = runBlocking {
-        val principal = exchange.getPrincipal<Principal>().awaitSingle()
+        val principal = exchange.getPrincipal<Principal>().awaitSingleOrNull()
         if (principal?.name == null) {
             exchange.response.rawStatusCode = HttpStatus.UNAUTHORIZED.value()
             return@runBlocking exchange.response.setComplete().awaitSingle()
