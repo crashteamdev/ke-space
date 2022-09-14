@@ -38,7 +38,7 @@ class KeShopItemService(
                     .find { photo -> photo.color == value }
             } ?: productData.photos.firstOrNull()
             val url =
-                "https://ke-images.servicecdn.ru/${photo!!.photoKey}/original.jpg" // TODO: avoid static url
+                "https://ke-images.servicecdn.ru/${photo!!.photoKey}/t_product_240_high.jpg" // TODO: avoid static url
             val (avgHash, pHash) = generateImageFingerprints(url)
             val characteristics = productSplit.characteristics.joinToString {
                 val productCharacteristic = productData.characteristics[it.charIndex]
