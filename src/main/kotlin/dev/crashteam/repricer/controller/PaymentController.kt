@@ -29,33 +29,35 @@ class PaymentController(
         idempotencyKey: UUID,
         createSubsriptionPaymentRequest: Mono<CreateSubsriptionPaymentRequest>,
         exchange: ServerWebExchange
-    ): Mono<ResponseEntity<CreateSubsriptionPayment201Response>> = runBlocking {
-        val principal = exchange.getPrincipal<Principal>().awaitSingle()
-        val paymentRequest = createSubsriptionPaymentRequest.awaitSingle()
-        val plan = when (paymentRequest.subscriptionPlan!!) {
-            SubscriptionPlan.DEFAULT -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.default_
-            SubscriptionPlan.ADVANCED -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.advanced
-            SubscriptionPlan.PRO -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.pro
-        }
-        try {
-            try {
-                val paymentUrl = paymentService.createPaymentForSubscription(
-                    principal.name,
-                    paymentRequest.multiply,
-                    paymentRequest.redirectUrl,
-                    plan,
-                    idempotencyKey.toString()
-                )
-                val response = CreateSubsriptionPayment201Response().apply {
-                    this.paymentUrl = paymentUrl
+    ): Mono<ResponseEntity<CreateSubsriptionPayment201Response>> {
+        return exchange.getPrincipal<Principal>().flatMap { principal ->
+            createSubsriptionPaymentRequest.flatMap { request ->
+                val plan = when (request.subscriptionPlan!!) {
+                    SubscriptionPlan.DEFAULT -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.default_
+                    SubscriptionPlan.ADVANCED -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.advanced
+                    SubscriptionPlan.PRO -> dev.crashteam.repricer.db.model.enums.SubscriptionPlan.pro
                 }
-                ResponseEntity.ok(response)
-            } catch (e: PaymentRestrictionException) {
-                ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+                try {
+                    try {
+                        val paymentUrl = paymentService.createPaymentForSubscription(
+                            principal.name,
+                            request.multiply,
+                            request.redirectUrl,
+                            plan,
+                            idempotencyKey.toString()
+                        )
+                        val response = CreateSubsriptionPayment201Response().apply {
+                            this.paymentUrl = paymentUrl
+                        }
+                        ResponseEntity.ok(response).toMono()
+                    } catch (e: PaymentRestrictionException) {
+                        ResponseEntity.status(HttpStatus.FORBIDDEN).build<CreateSubsriptionPayment201Response>().toMono()
+                    }
+                } catch (e: IllegalArgumentException) {
+                    return@flatMap ResponseEntity.badRequest().build<CreateSubsriptionPayment201Response>().toMono()
+                }
             }
-        } catch (e: IllegalArgumentException) {
-            return@runBlocking ResponseEntity.badRequest().build()
         }
-    }.toMono()
+    }
 
 }

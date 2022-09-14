@@ -25,21 +25,22 @@ class UserController(
     override fun getUserSubscription(
         xRequestID: UUID,
         exchange: ServerWebExchange
-    ): Mono<ResponseEntity<AccountSubscription>> = runBlocking {
-        val principal = exchange.getPrincipal<Principal>().awaitSingle()
-        val accountEntity = accountRepository.getAccount(principal.name)
-            ?: return@runBlocking ResponseEntity.notFound().build()
-        if (accountEntity.subscription == null) {
-            return@runBlocking ResponseEntity.notFound().build()
-        }
-        val accountSubscription = AccountSubscription().apply {
-            this.plan = when (accountEntity.subscription.plan) {
-                SubscriptionPlan.default_ -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.DEFAULT
-                SubscriptionPlan.pro -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.PRO
-                SubscriptionPlan.advanced -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.ADVANCED
+    ): Mono<ResponseEntity<AccountSubscription>> {
+        return exchange.getPrincipal<Principal>().flatMap { principal ->
+            val accountEntity = accountRepository.getAccount(principal.name)
+                ?: return@flatMap ResponseEntity.notFound().build<AccountSubscription>().toMono()
+            if (accountEntity.subscription == null) {
+                return@flatMap ResponseEntity.notFound().build<AccountSubscription>().toMono()
             }
-            this.validUntil = accountEntity.subscriptionValidUntil!!.atOffset(ZoneOffset.UTC)
+            val accountSubscription = AccountSubscription().apply {
+                this.plan = when (accountEntity.subscription.plan) {
+                    SubscriptionPlan.default_ -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.DEFAULT
+                    SubscriptionPlan.pro -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.PRO
+                    SubscriptionPlan.advanced -> dev.crashteam.openapi.kerepricer.model.SubscriptionPlan.ADVANCED
+                }
+                this.validUntil = accountEntity.subscriptionValidUntil!!.atOffset(ZoneOffset.UTC)
+            }
+            ResponseEntity.ok(accountSubscription).toMono()
         }
-        ResponseEntity.ok(accountSubscription)
-    }.toMono()
+    }
 }
