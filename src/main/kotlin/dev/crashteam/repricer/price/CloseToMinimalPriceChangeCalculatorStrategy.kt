@@ -6,6 +6,7 @@ import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEntity
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -28,7 +29,15 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
     ): CalculationResult? {
         val shopItemCompetitors =
             keAccountShopItemCompetitorRepository.findShopItemCompetitors(keAccountShopItemId)
-        val minimalPriceCompetitor = shopItemCompetitors.minByOrNull {
+        val minimalPriceCompetitor = shopItemCompetitors.map {
+            val shopItemEntity = keShopItemRepository.findByProductIdAndSkuId(
+                it.productId,
+                it.skuId
+            )!!
+            ShopItemCompetitor(shopItemEntity, it)
+        }.filter {
+            it.shopItemEntity.availableAmount > 0
+        }.minByOrNull {
             getCompetitorPrice(it)!!
         } ?: return null
         val competitorPrice = getCompetitorPrice(minimalPriceCompetitor)!!
@@ -42,33 +51,34 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
 
         if (newPrice == sellPrice) return null // No need to change price
 
-        return CalculationResult(newPrice = newPrice, competitorId = minimalPriceCompetitor.id)
+        return CalculationResult(newPrice = newPrice, competitorId = minimalPriceCompetitor.competitorEntity.id)
     }
 
-    private fun getCompetitorPrice(competitor: KazanExpressAccountShopItemCompetitorEntity): BigDecimal? {
-        val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(
-            competitor.productId,
-            competitor.skuId
-        )!!
-        return if (kazanExpressShopItemEntity.lastUpdate.isBefore(LocalDateTime.now().minusMinutes(30))) {
+    private fun getCompetitorPrice(competitor: ShopItemCompetitor): BigDecimal? {
+        return if (competitor.shopItemEntity.lastUpdate.isBefore(LocalDateTime.now().minusHours(4))) {
             log.info {
                 "Product last update too old. Trying to get info from KE." +
-                        " productId=${competitor.productId}; skuId=${competitor.skuId}"
+                        " productId=${competitor.shopItemEntity.productId}; skuId=${competitor.shopItemEntity.skuId}"
             }
             val productInfo =
-                kazanExpressWebClient.getProductInfo(competitor.productId.toString())
+                kazanExpressWebClient.getProductInfo(competitor.shopItemEntity.productId.toString())
             if (productInfo?.payload == null) {
                 log.error {
                     "Error during try to change price case can't get product info from KE." +
-                            " productId=${competitor.productId}; skuId=${competitor.skuId}"
+                            " productId=${competitor.shopItemEntity.productId}; skuId=${competitor.shopItemEntity.skuId}"
                 }
                 return null
             }
             val productSplit =
-                productInfo.payload.data.skuList!!.find { it.id == competitor.skuId }!!
+                productInfo.payload.data.skuList!!.find { it.id == competitor.shopItemEntity.skuId }!!
             productSplit.purchasePrice
         } else {
-            kazanExpressShopItemEntity.price.toBigDecimal().movePointLeft(2)
+            competitor.shopItemEntity.price.toBigDecimal().movePointLeft(2)
         }
     }
+
+    private data class ShopItemCompetitor(
+        val shopItemEntity: KazanExpressShopItemEntity,
+        val competitorEntity: KazanExpressAccountShopItemCompetitorEntity
+    )
 }
