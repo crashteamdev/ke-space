@@ -17,7 +17,7 @@ import java.time.ZoneOffset
 import java.util.*
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("repricer/v1")
 class UserController(
     private val accountRepository: AccountRepository
 ) : UserApi {

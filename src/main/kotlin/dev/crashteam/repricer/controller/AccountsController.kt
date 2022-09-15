@@ -28,7 +28,7 @@ import java.util.*
 
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("repricer/v1")
 class AccountsController(
     private val keAccountService: KeAccountService,
     private val keAccountShopService: KeAccountShopService,

@@ -19,7 +19,7 @@ import java.security.Principal
 import java.util.*
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("repricer/v1")
 class PaymentController(
     private val paymentService: PaymentService
 ) : PaymentApi {
