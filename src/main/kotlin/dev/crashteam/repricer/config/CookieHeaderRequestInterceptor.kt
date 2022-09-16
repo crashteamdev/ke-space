@@ -4,6 +4,7 @@ import dev.crashteam.repricer.client.ke.KazanExpressLkClient
 import dev.crashteam.repricer.config.properties.RepricerProperties
 import dev.crashteam.repricer.repository.redis.UserCookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
+import mu.KotlinLogging
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.chrome.ChromeDriver
@@ -21,6 +22,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+private val log = KotlinLogging.logger {}
 
 @Component
 class CookieHeaderRequestInterceptor(
@@ -51,7 +53,7 @@ class CookieHeaderRequestInterceptor(
             }
             val webDriver = webDriverThreadLocal.get()
             try {
-                val webDriverWait = WebDriverWait(webDriver, Duration.of(60, ChronoUnit.SECONDS))
+                val webDriverWait = WebDriverWait(webDriver, Duration.of(120, ChronoUnit.SECONDS))
                 webDriver.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
                 // Open yandex page
@@ -87,6 +89,9 @@ class CookieHeaderRequestInterceptor(
                     )
                 )
                 request.headers.add("Cookie", "${qratorJsIdCookie.name}=${qratorJsIdCookie.value}")
+            } catch (e: Exception) {
+                log.error(e) { "Failed to get secure cookie. Page source = ${webDriver.pageSource}" }
+                throw e
             } finally {
                 webDriver.quit()
                 webDriverThreadLocal.remove()
@@ -116,7 +121,7 @@ class CookieHeaderRequestInterceptor(
         options.addArguments("window-size=1920,1080")
 
         // Changing the user agent / browser fingerprint
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36")
+        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.52 Safari/537.36")
 
         // Other
         options.addArguments("disable-infobars")

@@ -1,10 +1,7 @@
 package dev.crashteam.repricer.config
 
 import dev.crashteam.repricer.config.properties.RepricerProperties
-import dev.crashteam.repricer.job.KeAccountInitializeMasterJob
-import dev.crashteam.repricer.job.KeShopItemMasterJob
-import dev.crashteam.repricer.job.KeShopItemPriceChangeMasterJob
-import dev.crashteam.repricer.job.UpdateAccountDataMasterJob
+import dev.crashteam.repricer.job.*
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,7 +99,7 @@ class JobConfiguration(
     fun paymentMasterJob(): JobDetailImpl {
         val jobDetail = JobDetailImpl()
         jobDetail.key = JobKey("master-payment-job")
-        jobDetail.jobClass = KeShopItemPriceChangeMasterJob::class.java
+        jobDetail.jobClass = PaymentMasterJob::class.java
 
         return jobDetail
     }
