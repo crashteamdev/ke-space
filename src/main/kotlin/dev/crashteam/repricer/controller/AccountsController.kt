@@ -107,7 +107,7 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap {
             val removeKeAccountCount = keAccountService.removeKeAccount(it.name, id)
             if (removeKeAccountCount > 0) {
-                ResponseEntity.ok().build<Void>()
+                return@flatMap ResponseEntity.ok().build<Void>().toMono()
             }
             ResponseEntity.notFound().build<Void>().toMono()
         }
