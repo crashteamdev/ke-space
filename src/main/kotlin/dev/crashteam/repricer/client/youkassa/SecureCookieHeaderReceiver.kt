@@ -1,7 +1,5 @@
-package dev.crashteam.repricer.config
+package dev.crashteam.repricer.client.youkassa
 
-import dev.crashteam.repricer.client.ke.KazanExpressLkClient
-import dev.crashteam.repricer.config.properties.RepricerProperties
 import dev.crashteam.repricer.repository.redis.UserCookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
 import mu.KotlinLogging
@@ -11,10 +9,6 @@ import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import org.springframework.http.HttpRequest
-import org.springframework.http.client.ClientHttpRequestExecution
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -25,10 +19,9 @@ import java.util.*
 private val log = KotlinLogging.logger {}
 
 @Component
-class CookieHeaderRequestInterceptor(
+class SecureCookieHeaderReceiver(
     private val userCookieRepository: UserCookieRepository,
-    private val repricerProperties: RepricerProperties,
-) : ClientHttpRequestInterceptor {
+) {
 
     private val webDriverThreadLocal: ThreadLocal<ChromeDriver> = ThreadLocal.withInitial { newChromeDriver() }
 
@@ -36,16 +29,7 @@ class CookieHeaderRequestInterceptor(
         System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
     }
 
-    // TODO: add dynamic proxy
-    override fun intercept(
-        request: HttpRequest,
-        body: ByteArray,
-        execution: ClientHttpRequestExecution
-    ): ClientHttpResponse {
-        if (!repricerProperties.cookieBotProtectionBypassEnabled) {
-            return execution.execute(request, body)
-        }
-        val userId = request.headers[KazanExpressLkClient.USER_ID_HEADER]!!.first()
+    fun getSecureCookie(userId: String): String {
         val cookieEntity = userCookieRepository.getCookie(userId)
         if (cookieEntity == null || cookieEntity.expiryAt.isBefore(LocalDateTime.now())) {
             if (webDriverThreadLocal.get() == null) {
@@ -88,7 +72,8 @@ class CookieHeaderRequestInterceptor(
                         expiryAt = LocalDateTime.ofInstant(qratorJsIdCookie.expiry.toInstant(), ZoneId.of("UTC"))
                     )
                 )
-                request.headers.add("Cookie", "${qratorJsIdCookie.name}=${qratorJsIdCookie.value}")
+
+                return "${qratorJsIdCookie.name}=${qratorJsIdCookie.value}"
             } catch (e: Exception) {
                 log.error(e) { "Failed to get secure cookie. Page source = ${webDriver.pageSource}" }
                 throw e
@@ -97,11 +82,8 @@ class CookieHeaderRequestInterceptor(
                 webDriverThreadLocal.remove()
             }
         } else {
-            request.headers.add("Cookie", "${cookieEntity.name}=${cookieEntity.value}")
+            return "${cookieEntity.name}=${cookieEntity.value}"
         }
-        request.headers.remove(KazanExpressLkClient.USER_ID_HEADER)
-
-        return execution.execute(request, body)
     }
 
     private fun newChromeDriver(): ChromeDriver {
@@ -128,4 +110,5 @@ class CookieHeaderRequestInterceptor(
 
         return ChromeDriver(options)
     }
+
 }

@@ -24,7 +24,6 @@ class RestTemplateConfig {
     @Bean
     fun lkRestTemplate(
         requestFactory: ClientHttpRequestFactory,
-        cookieHeaderRequestInterceptor: CookieHeaderRequestInterceptor
     ): RestTemplate {
         val restTemplate = RestTemplate(requestFactory)
         restTemplate.errorHandler = object : DefaultResponseErrorHandler() {
@@ -32,7 +31,6 @@ class RestTemplateConfig {
                 return false
             }
         }
-        restTemplate.interceptors.add(cookieHeaderRequestInterceptor)
         return restTemplate
     }
 
