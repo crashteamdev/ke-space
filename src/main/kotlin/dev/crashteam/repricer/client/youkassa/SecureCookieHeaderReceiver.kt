@@ -37,7 +37,7 @@ class SecureCookieHeaderReceiver(
             }
             val webDriver = webDriverThreadLocal.get()
             try {
-                val webDriverWait = WebDriverWait(webDriver, Duration.of(120, ChronoUnit.SECONDS))
+                val webDriverWait = WebDriverWait(webDriver, Duration.of(3, ChronoUnit.MINUTES))
                 webDriver.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
                 // Open yandex page
