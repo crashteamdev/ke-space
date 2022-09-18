@@ -114,7 +114,7 @@ class KeAccountServiceTest : ContainerConfiguration() {
         val subscriptionEntity = accountSubscriptionRepository.findSubscriptionByPlan(SubscriptionPlan.default_)
         accountRepository.save(accountEntity.copy(subscription = subscriptionEntity))
         keAccountService.addKeAccount(userId, login, password)
-        keAccountService.addKeAccount(userId, login, password)
+        keAccountService.addKeAccount(userId, "$login-2", password)
         assertThrows(AccountItemPoolLimitExceededException::class.java) {
             keAccountService.addKeAccount(userId, login, password)
         }
