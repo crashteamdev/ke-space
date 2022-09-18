@@ -63,6 +63,8 @@ CREATE TABLE ke_account
 
 CREATE UNIQUE INDEX ke_account_account_id_idx ON ke_account (account_id, external_account_id);
 
+CREATE UNIQUE INDEX ke_account_account_id_login_idx ON ke_account (account_id, login);
+
 CREATE TABLE ke_account_shop
 (
     id               uuid PRIMARY KEY,

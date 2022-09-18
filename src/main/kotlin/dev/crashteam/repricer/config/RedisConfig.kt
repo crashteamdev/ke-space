@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.crashteam.repricer.client.ke.model.web.ProductResponse
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -29,6 +30,7 @@ class RedisConfig(
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "spring.redis", value = ["ssl"], havingValue = "true")
     fun builderCustomizer(): LettuceClientConfigurationBuilderCustomizer {
         return LettuceClientConfigurationBuilderCustomizer { builder: LettuceClientConfiguration.LettuceClientConfigurationBuilder ->
             builder.useSsl().disablePeerVerification()

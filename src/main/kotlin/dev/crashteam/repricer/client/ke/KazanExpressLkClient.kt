@@ -134,15 +134,12 @@ class KazanExpressLkClient(
                 )
             )
         )
-        val httpHeaders = HttpHeaders().apply {
-            set(USER_ID_HEADER, userId)
-        }
         val responseType: ParameterizedTypeReference<StyxResponse<AccountProductInfo>> =
             object : ParameterizedTypeReference<StyxResponse<AccountProductInfo>>() {}
         val styxResponse = lkRestTemplate.exchange(
             "${serviceProperties.proxy!!.url}/v2/proxy",
             HttpMethod.POST,
-            HttpEntity<ProxyRequestBody>(proxyRequestBody, httpHeaders),
+            HttpEntity<ProxyRequestBody>(proxyRequestBody),
             responseType
         ).body
 
@@ -165,22 +162,19 @@ class KazanExpressLkClient(
                     key = "headers",
                     value = mapOf(
                         "Authorization" to "Basic $basicAuthToken",
-                        "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED,
+                        "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         "Cookie" to secureCookie,
                     )
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlParams.encodeToByteArray()))
             )
         )
-        val httpHeaders = HttpHeaders().apply {
-            set(USER_ID_HEADER, userId)
-        }
         val responseType: ParameterizedTypeReference<StyxResponse<AuthResponse>> =
             object : ParameterizedTypeReference<StyxResponse<AuthResponse>>() {}
         val styxResponse = lkRestTemplate.exchange(
             "${serviceProperties.proxy!!.url}/v2/proxy",
             HttpMethod.POST,
-            HttpEntity<ProxyRequestBody>(proxyRequestBody, httpHeaders),
+            HttpEntity<ProxyRequestBody>(proxyRequestBody),
             responseType
         ).body
 
@@ -209,15 +203,12 @@ class KazanExpressLkClient(
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlParams.encodeToByteArray()))
             )
         )
-        val httpHeaders = HttpHeaders().apply {
-            set(USER_ID_HEADER, userId)
-        }
         val responseType: ParameterizedTypeReference<StyxResponse<AuthResponse>> =
             object : ParameterizedTypeReference<StyxResponse<AuthResponse>>() {}
         val styxResponse = lkRestTemplate.exchange(
             "${serviceProperties.proxy!!.url}/v2/proxy",
             HttpMethod.POST,
-            HttpEntity<ProxyRequestBody>(proxyRequestBody, httpHeaders),
+            HttpEntity<ProxyRequestBody>(proxyRequestBody),
             responseType
         ).body
 
@@ -245,15 +236,12 @@ class KazanExpressLkClient(
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlParams.encodeToByteArray()))
             )
         )
-        val httpHeaders = HttpHeaders().apply {
-            set(USER_ID_HEADER, userId)
-        }
         val responseType: ParameterizedTypeReference<StyxResponse<CheckTokenResponse>> =
             object : ParameterizedTypeReference<StyxResponse<CheckTokenResponse>>() {}
         val styxResponse = lkRestTemplate.exchange(
             "${serviceProperties.proxy!!.url}/v2/proxy",
             HttpMethod.POST,
-            HttpEntity<ProxyRequestBody>(proxyRequestBody, httpHeaders),
+            HttpEntity<ProxyRequestBody>(proxyRequestBody),
             responseType
         ).body
 
