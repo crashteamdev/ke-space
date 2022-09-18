@@ -268,7 +268,7 @@ class KazanExpressLkClient(
     }
 
     companion object {
-        const val basicAuthToken = "Basic a2F6YW5leHByZXNzOnNlY3JldEtleQ=="
+        const val basicAuthToken = "a2F6YW5leHByZXNzOnNlY3JldEtleQ=="
         const val USER_ID_HEADER = "X-USER-ID"
     }
 
