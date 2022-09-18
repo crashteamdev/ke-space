@@ -2,6 +2,7 @@ package dev.crashteam.repricer.client.youkassa
 
 import dev.crashteam.repricer.repository.redis.UserCookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
+import io.github.bonigarcia.wdm.WebDriverManager
 import mu.KotlinLogging
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
@@ -26,7 +27,8 @@ class SecureCookieHeaderReceiver(
     private val webDriverThreadLocal: ThreadLocal<ChromeDriver> = ThreadLocal.withInitial { newChromeDriver() }
 
     init {
-        System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
+        //System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
+        WebDriverManager.chromedriver().setup()
     }
 
     fun getSecureCookie(userId: String): String {
@@ -56,12 +58,12 @@ class SecureCookieHeaderReceiver(
                     .click()
 
                 // Switch to new tab
-                Thread.sleep(Random().nextLong(600, 1200))
-                val newTabName = (webDriver.windowHandles as HashSet).toArray()[1].toString()
-                webDriver.switchTo().window(newTabName)
-                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("a[href=\"/seller/signin\"]")) }
-                webDriver.findElement(By.cssSelector("a[href=\"/seller/signin\"]")).click() // Click on signin button
-                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.solid")) }
+//                Thread.sleep(Random().nextLong(600, 1200))
+//                val newTabName = (webDriver.windowHandles as HashSet).toArray()[1].toString()
+//                webDriver.switchTo().window(newTabName)
+//                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("a[href=\"/seller/signin\"]")) }
+//                webDriver.findElement(By.cssSelector("a[href=\"/seller/signin\"]")).click() // Click on signin button
+//                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.solid")) }
 
                 val qratorJsIdCookie = webDriver.manage().getCookieNamed("qrator_jsid")
                 userCookieRepository.saveCookie(
