@@ -24,7 +24,6 @@ management:
 logging:
   level:
     "liquibase": info
-    org.jooq.tools.LoggerListener: DEBUG
 
 spring:
   application:
