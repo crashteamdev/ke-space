@@ -2,7 +2,6 @@ package dev.crashteam.repricer.client.youkassa
 
 import dev.crashteam.repricer.repository.redis.UserCookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
-import io.github.bonigarcia.wdm.WebDriverManager
 import mu.KotlinLogging
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
@@ -27,8 +26,7 @@ class SecureCookieHeaderReceiver(
     private val webDriverThreadLocal: ThreadLocal<ChromeDriver> = ThreadLocal.withInitial { newChromeDriver() }
 
     init {
-        //System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
-        WebDriverManager.chromedriver().setup()
+        System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
     }
 
     fun getSecureCookie(userId: String): String {
