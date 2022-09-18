@@ -172,7 +172,7 @@ class KeAccountServiceTest : ContainerConfiguration() {
         val subscriptionEntity = accountSubscriptionRepository.findSubscriptionByPlan(SubscriptionPlan.default_)
         accountRepository.save(accountEntity.copy(subscription = subscriptionEntity))
         keAccountService.addKeAccount(userId, login, password)
-        val keAccount = keAccountService.addKeAccount(userId, login, password)
+        val keAccount = keAccountService.addKeAccount(userId, "$login-2", password)
         keAccountService.removeKeAccount(userId, keAccount.id!!)
         val keAccountCount = keAccountService.getKeAccounts(userId).size
 
