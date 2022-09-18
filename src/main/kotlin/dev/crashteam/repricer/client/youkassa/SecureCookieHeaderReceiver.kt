@@ -56,9 +56,9 @@ class SecureCookieHeaderReceiver(
                     .click()
 
                 // Switch to new tab
-//                Thread.sleep(Random().nextLong(600, 1200))
-//                val newTabName = (webDriver.windowHandles as HashSet).toArray()[1].toString()
-//                webDriver.switchTo().window(newTabName)
+                Thread.sleep(Random().nextLong(600, 1200))
+                val newTabName = (webDriver.windowHandles as HashSet).toArray()[1].toString()
+                webDriver.switchTo().window(newTabName)
 //                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("a[href=\"/seller/signin\"]")) }
 //                webDriver.findElement(By.cssSelector("a[href=\"/seller/signin\"]")).click() // Click on signin button
 //                webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.solid")) }
