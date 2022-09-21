@@ -5,12 +5,10 @@ import dev.crashteam.repricer.proxy.ProxyManager
 import dev.crashteam.repricer.proxy.model.ProxyAddress
 import dev.crashteam.repricer.repository.redis.CookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
-import io.github.bonigarcia.wdm.WebDriverManager
 import mu.KotlinLogging
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.chrome.ChromeDriverService
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.remote.DesiredCapabilities
@@ -21,7 +19,9 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
-import java.time.*
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
