@@ -59,6 +59,8 @@ class AccountsController(
                     return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<KeAccount>().toMono()
                 }
             }
+        }.doOnError {
+            log.error(it) { "Failed to add ke account" }
         }
     }
 
@@ -80,6 +82,8 @@ class AccountsController(
                 )
                 ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
             }
+        }.doOnError {
+            log.error(it) { "Failed to add ke account shop item competitor. keAccountId=$id" }
         }
     }
 
@@ -100,6 +104,8 @@ class AccountsController(
                 }
                 ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
             }
+        }.doOnError {
+            log.error(it) { "Failed to add shop item into pool. keAccountId=$id" }
         }
     }
 
@@ -114,6 +120,8 @@ class AccountsController(
                 return@flatMap ResponseEntity.ok().build<Void>().toMono()
             }
             ResponseEntity.notFound().build<Void>().toMono()
+        }.doOnError {
+            log.error(it) { "Failed to delete ke account. keAccountId=$id" }
         }
     }
 
@@ -127,6 +135,8 @@ class AccountsController(
             val keAccount = conversionService.convert(kazanExpressAccountEntity, KeAccount::class.java)
 
             ResponseEntity.ok(keAccount).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke account. keAccountId=$id" }
         }
     }
 
@@ -173,6 +183,9 @@ class AccountsController(
                     KeAccountCompetitorShopItem::class.java
                 )!!
             }.toFlux(), httpHeaders, HttpStatus.OK).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke account shop item competitors." +
+                    " keAccountId=$id;shopId=$shopId;shopItemId=$shopItemId;limit=$limit;offset=$offset;filter=$filter;sort=$sort" }
         }
     }
 
@@ -186,6 +199,8 @@ class AccountsController(
                 this.count = shopItemPoolCount
             }
             ResponseEntity.ok(response).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get shop item pool count" }
         }
     }
 
@@ -240,6 +255,8 @@ class AccountsController(
                 shopItemCompetitors.map { it.item }
                     .map { conversionService.convert(it, KeAccountShopItem::class.java)!! }
             ResponseEntity(keAccountShopItems.toFlux(), httpHeaders, HttpStatus.OK).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke account shop items. keAccountId=$id;shopId=$shopId;limit=$limit;offset=$offset;filter=$filter;sort=$sort" }
         }
     }
 
@@ -295,6 +312,8 @@ class AccountsController(
                 shopItemPaginateEntities.map { it.item }
                     .map { conversionService.convert(it, KeAccountShopItem::class.java)!! }
             ResponseEntity(keAccountShopItems.toFlux(), httpHeaders, HttpStatus.OK).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to ke account shop item pool. keAccountId=$id;shopId=$shopId;limit=$limit;offset=$offset;filter=$filter;sort=$sort" }
         }
     }
 
@@ -321,6 +340,8 @@ class AccountsController(
             val keAccounts = keAccountService.getKeAccounts(it.name)
             val keAccountList = keAccounts.map { conversionService.convert(it, KeAccount::class.java)!! }
             ResponseEntity.ok(keAccountList.toFlux()).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke accounts" }
         }
     }
 
@@ -342,6 +363,8 @@ class AccountsController(
                 }
                 response.toMono()
             }
+        }.doOnError {
+            log.error(it) { "Failed to change ke account credentials. keAccountId=$id" }
         }
     }
 
@@ -366,6 +389,8 @@ class AccountsController(
                     ResponseEntity.notFound().build<Void>().toMono()
                 }
             }
+        }.doOnError {
+            log.error(it) { "Failed to change ke account monitor state. keAccountId=$id" }
         }
     }
 
@@ -390,6 +415,8 @@ class AccountsController(
                     ResponseEntity.notFound().build<Void>().toMono()
                 }
             }
+        }.doOnError {
+            log.error(it) { "Failed to remove ke account shop item competitor. keAccountId=$id" }
         }
     }
 
@@ -409,6 +436,8 @@ class AccountsController(
                     ResponseEntity.notFound().build<Void>().toMono()
                 }
             }
+        }.doOnError {
+            log.error(it) { "Failed to remove ke account shop item from pool. keAccountId=$id" }
         }
     }
 
@@ -439,6 +468,8 @@ class AccountsController(
             val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<KeAccountShopItem>().toMono()
             ResponseEntity.ok(conversionService.convert(keAccountShopItem, KeAccountShopItem::class.java)).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke account shop item. keAccountId=$id;shopItemId=$shopItemId" }
         }
     }
 
@@ -488,6 +519,8 @@ class AccountsController(
                     .map { conversionService.convert(it, KeAccountPriceChangeHistory::class.java)!! }
 
             ResponseEntity(keAccountShopItems.toFlux(), httpHeaders, HttpStatus.OK).toMono()
+        }.doOnError {
+            log.error(it) { "Failed to get ke account price history. keAccountId=$id;limit=$limit;offset=$offset;filter=$filter;sort=$sort" }
         }
     }
 
