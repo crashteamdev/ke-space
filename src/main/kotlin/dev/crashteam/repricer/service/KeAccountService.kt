@@ -85,8 +85,12 @@ class KeAccountService(
 
     @Transactional
     fun initializeKeAccountJob(userId: String, keAccountId: UUID): Boolean {
-        keAccountRepository.getKazanExpressAccount(userId, keAccountId)
+        val kazanExpressAccount = keAccountRepository.getKazanExpressAccount(userId, keAccountId)
             ?: throw IllegalArgumentException("Not found KE account. userId=$userId;keAccountId=$keAccountId")
+        if (kazanExpressAccount.initializeState == InitializeState.in_progress) {
+            log.debug { "Initialize task already in progress. userId=$userId;keAccountId=$keAccountId" }
+            return false
+        }
         val jobIdentity = "$keAccountId-keaccount-initialize-job"
         val jobDetail =
             JobBuilder.newJob(KeAccountInitializeJob::class.java).withIdentity(jobIdentity).build()
@@ -108,7 +112,6 @@ class KeAccountService(
                 keAccountId,
                 InitializeState.in_progress
             )
-
             return true
         } catch (e: ObjectAlreadyExistsException) {
             log.warn { "Task still in progress: $jobIdentity" }

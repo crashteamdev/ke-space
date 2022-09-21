@@ -14,11 +14,13 @@ class RecordToKazanExpressAccountEntityMapper : RecordMapper<KazanExpressAccount
             accountId = record.getValue(KE_ACCOUNT.ACCOUNT_ID),
             externalAccountId = record.getValue(KE_ACCOUNT.EXTERNAL_ACCOUNT_ID),
             name = record.getValue(KE_ACCOUNT.NAME),
+            email = record.getValue(KE_ACCOUNT.EMAIL),
             login = record.getValue(KE_ACCOUNT.LOGIN),
             password = record.getValue(KE_ACCOUNT.PASSWORD),
             lastUpdate = record.getValue(KE_ACCOUNT.LAST_UPDATE),
             monitorState = record.getValue(KE_ACCOUNT.MONITOR_STATE),
             updateState = record.getValue(KE_ACCOUNT.UPDATE_STATE),
+            initializeState = record.getValue(KE_ACCOUNT.INITIALIZE_STATE)
         )
     }
 }
