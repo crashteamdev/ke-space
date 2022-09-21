@@ -124,7 +124,7 @@ class UpdateKeAccountService(
                             photoKey = photoKey,
                             purchasePrice = shopItemSku.purchasePrice?.toLong(),
                             price = shopItemSku.price.toLong(),
-                            barCode = shopItemSku.barCode,
+                            barCode = shopItemSku.barcode,
                             productSku = accountShopItem.skuTitle,
                             skuTitle = shopItemSku.skuFullTitle,
                             availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,

@@ -174,7 +174,7 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
                     skuFullTitle = "testFull",
                     productTitle = "test",
                     skuId = 54124,
-                    barCode = 54321623L,
+                    barcode = 54321623L,
                     purchasePrice = BigDecimal.TEN,
                     price = BigDecimal.TEN,
                     quantityActive = 10,
