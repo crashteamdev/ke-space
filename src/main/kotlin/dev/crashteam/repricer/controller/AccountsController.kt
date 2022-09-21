@@ -14,6 +14,7 @@ import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.UpdateKeAccountService
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
+import mu.KotlinLogging
 import org.springframework.core.convert.ConversionService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -28,6 +29,7 @@ import reactor.core.publisher.toMono
 import java.security.Principal
 import java.util.*
 
+private val log = KotlinLogging.logger {}
 
 @RestController
 @RequestMapping("repricer/v1")
@@ -306,6 +308,8 @@ class AccountsController(
             val keAccountShops =
                 kazanExpressAccountShopEntities.map { conversionService.convert(it, KeAccountShop::class.java)!! }
             ResponseEntity.ok(keAccountShops.toFlux()).toMono()
+        }.doOnError {
+            log.error(it) {"Failed to get ke account shops"}
         }
     }
 

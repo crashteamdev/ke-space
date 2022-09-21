@@ -39,7 +39,7 @@ data class ShopItemSku(
     val skuFullTitle: String,
     val productTitle: String,
     val skuId: Long,
-    val barCode: Long,
+    val barcode: Long,
     val purchasePrice: BigDecimal?,
     val price: BigDecimal,
     val quantityActive: Long,
