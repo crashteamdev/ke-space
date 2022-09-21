@@ -18,7 +18,7 @@ class PaymentMasterJob : QuartzJobBean() {
         val applicationContext = context.getApplicationContext()
         val paymentRepository = applicationContext.getBean(PaymentRepository::class.java)
         val paymentEntities = paymentRepository.findByStatus(PaymentStatus.pending)
-        log.info { "Found pending payment count=${paymentEntities.size}" }
+        log.debug { "Found pending payment count=${paymentEntities.size}" }
         for (paymentEntity in paymentEntities) {
             log.info { "Create job for payment. $paymentEntity" }
             val jobIdentity = "${paymentEntity.id}-payment-job"

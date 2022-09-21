@@ -508,6 +508,9 @@ class AccountsController(
                 limit.toLong(),
                 offset.toLong()
             )
+            if (shopItemPriceHistoryPaginateEntities.isEmpty()) {
+                return@flatMap ResponseEntity(emptyList<KeAccountPriceChangeHistory>().toFlux(), HttpStatus.OK).toMono()
+            }
             val paginateEntity = shopItemPriceHistoryPaginateEntities.first()
             val httpHeaders = HttpHeaders().apply {
                 add("Pagination-Total", paginateEntity.total.toString())
