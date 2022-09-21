@@ -5,6 +5,7 @@ import dev.crashteam.repricer.db.model.enums.InitializeState
 import dev.crashteam.repricer.extensions.getApplicationContext
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
 import dev.crashteam.repricer.service.UpdateKeAccountService
+import dev.crashteam.repricer.service.encryption.AESPasswordEncryptor
 import mu.KotlinLogging
 import org.quartz.JobExecutionContext
 import org.springframework.scheduling.quartz.QuartzJobBean
@@ -19,18 +20,21 @@ class KeAccountInitializeJob : QuartzJobBean() {
         val keAccountRepository = applicationContext.getBean(KeAccountRepository::class.java)
         val kazanExpressLkClient = applicationContext.getBean(KazanExpressLkClient::class.java)
         val updateKeAccountService = applicationContext.getBean(UpdateKeAccountService::class.java)
+        val aesPasswordEncryptor = applicationContext.getBean(AESPasswordEncryptor::class.java)
         val keAccountId = context.jobDetail.jobDataMap["keAccountId"] as? UUID
             ?: throw IllegalStateException("keAccountId can't be null")
         val userId = context.jobDetail.jobDataMap["userId"] as? String
             ?: throw IllegalStateException("userId can't be null")
         try {
             val kazanExpressAccount = keAccountRepository.getKazanExpressAccount(keAccountId)!!
+            val password = Base64.getDecoder().decode(kazanExpressAccount.keAccountEntity.password.toByteArray())
+            val decryptedPassword = aesPasswordEncryptor.decryptPassword(password)
             val authResponse = kazanExpressLkClient.auth(
                 userId,
                 kazanExpressAccount.keAccountEntity.login,
-                kazanExpressAccount.keAccountEntity.password
+                decryptedPassword
             )
-            val checkTokenResponse = kazanExpressLkClient.checkToken(userId, authResponse.accessToken)!!.body!!
+            val checkTokenResponse = kazanExpressLkClient.checkToken(userId, authResponse.accessToken).body!!
             keAccountRepository.save(
                 kazanExpressAccount.keAccountEntity.copy(
                     name = checkTokenResponse.firstName,

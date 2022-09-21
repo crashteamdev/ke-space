@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.repository.postgre.entity
 
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.*
 
@@ -10,9 +11,10 @@ data class KazanExpressAccountShopItemPoolFilledEntity(
     val productId: Long,
     val skuId: Long,
     val productSku: String,
-    val sellPrice: Long,
-    val fullPrice: Long,
+    val price: Long,
+    val purchasePrice: Long,
     val externalShopId: Long,
+    val discount: BigInteger? = null,
     val step: Int? = null,
     val minimumThreshold: Long? = null,
     val maximumThreshold: Long? = null,

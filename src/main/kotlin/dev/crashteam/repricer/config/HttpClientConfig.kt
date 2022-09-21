@@ -1,5 +1,7 @@
 package dev.crashteam.repricer.config
 
+import dev.crashteam.repricer.proxy.SecureCookieCredentialProvider
+import dev.crashteam.repricer.proxy.SecureCookieRoutePlanner
 import org.apache.http.HeaderElementIterator
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.conn.ConnectionKeepAliveStrategy
@@ -63,9 +65,35 @@ class HttpClientConfig {
     }
 
     @Bean
-    fun simpleHttpRequestFactory(simpleHttpClient: CloseableHttpClient): HttpComponentsClientHttpRequestFactory {
+    fun proxyHttpClient(
+        secureCookieCredentialProvider: SecureCookieCredentialProvider,
+        secureCookieRoutePlanner: SecureCookieRoutePlanner
+    ): CloseableHttpClient {
+        val requestConfig = RequestConfig.custom()
+            .setConnectionRequestTimeout(REQUEST_TIMEOUT)
+            .setConnectTimeout(CONNECT_TIMEOUT)
+            .setSocketTimeout(SOCKET_TIMEOUT)
+            .build()
+        return HttpClients.custom()
+            .setDefaultRequestConfig(requestConfig)
+            .setDefaultCredentialsProvider(secureCookieCredentialProvider)
+            .setRoutePlanner(secureCookieRoutePlanner)
+            .setKeepAliveStrategy(connectionKeepAliveStrategy())
+            .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+            .build()
+    }
+
+    @Bean
+    fun simpleHttpRequestFactory(httpClient: CloseableHttpClient): HttpComponentsClientHttpRequestFactory {
         val requestFactory = HttpComponentsClientHttpRequestFactory()
-        requestFactory.httpClient = simpleHttpClient
+        requestFactory.httpClient = httpClient
+        return requestFactory
+    }
+
+    @Bean
+    fun proxyHttpRequestFactory(proxyHttpClient: CloseableHttpClient): HttpComponentsClientHttpRequestFactory {
+        val requestFactory = HttpComponentsClientHttpRequestFactory()
+        requestFactory.httpClient = proxyHttpClient
         return requestFactory
     }
 

@@ -10,6 +10,7 @@ import org.jooq.Condition
 import org.jooq.Field
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -200,7 +201,8 @@ class KeAccountShopService(
         keAccountShopItemId: UUID,
         step: Int,
         minimumThreshold: Long,
-        maximumThreshold: Long
+        maximumThreshold: Long,
+        discount: BigDecimal
     ): Int {
         log.debug { "Change shop item price options. keAccountId=$keAccountId; keAccountShopItemId=$keAccountShopItemId" }
         return keAccountShopItemRepository.updatePriceChangeOptions(
@@ -208,7 +210,8 @@ class KeAccountShopService(
             keAccountShopItemId,
             step,
             minimumThreshold,
-            maximumThreshold
+            maximumThreshold,
+            discount
         )
     }
 

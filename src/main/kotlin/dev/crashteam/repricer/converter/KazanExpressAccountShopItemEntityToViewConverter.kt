@@ -16,13 +16,13 @@ class KazanExpressAccountShopItemEntityToViewConverter :
             this.skuId = source.skuId
             this.name = source.name
             this.photoKey = source.photoKey
-            this.fullPrice = BigDecimal.valueOf(source.fullPrice).movePointLeft(2).toDouble()
-            this.sellPrice = BigDecimal.valueOf(source.sellPrice).movePointLeft(2).toDouble()
+            this.price = BigDecimal.valueOf(source.price).movePointLeft(2).toDouble()
             this.barcode = source.barCode
             this.availableAmount = source.availableAmount
             this.minimumThreshold = source.minimumThreshold?.let { BigDecimal.valueOf(it).movePointLeft(2).toDouble() }
             this.maximumThreshold = source.maximumThreshold?.let { BigDecimal.valueOf(it).movePointLeft(2).toDouble() }
             this.step = source.step
+            this.discount = source.discount?.toBigDecimal()
         }
     }
 }

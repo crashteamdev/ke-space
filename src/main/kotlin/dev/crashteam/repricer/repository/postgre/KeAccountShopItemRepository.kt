@@ -9,6 +9,7 @@ import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.springframework.stereotype.Repository
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
@@ -30,8 +31,8 @@ class KeAccountShopItemRepository(
             i.SKU_ID,
             i.NAME,
             i.PHOTO_KEY,
-            i.FULL_PRICE,
-            i.SELL_PRICE,
+            i.PRICE,
+            i.PURCHASE_PRICE,
             i.BARCODE,
             i.PRODUCT_SKU,
             i.SKU_TITLE,
@@ -39,6 +40,7 @@ class KeAccountShopItemRepository(
             i.MINIMUM_THRESHOLD,
             i.MAXIMUM_THRESHOLD,
             i.STEP,
+            i.DISCOUNT,
             i.LAST_UPDATE
         ).values(
             kazanExpressAccountShopItemEntity.id,
@@ -49,8 +51,8 @@ class KeAccountShopItemRepository(
             kazanExpressAccountShopItemEntity.skuId,
             kazanExpressAccountShopItemEntity.name,
             kazanExpressAccountShopItemEntity.photoKey,
-            kazanExpressAccountShopItemEntity.fullPrice,
-            kazanExpressAccountShopItemEntity.sellPrice,
+            kazanExpressAccountShopItemEntity.price,
+            kazanExpressAccountShopItemEntity.purchasePrice,
             kazanExpressAccountShopItemEntity.barCode,
             kazanExpressAccountShopItemEntity.productSku,
             kazanExpressAccountShopItemEntity.skuTitle,
@@ -58,6 +60,7 @@ class KeAccountShopItemRepository(
             kazanExpressAccountShopItemEntity.minimumThreshold,
             kazanExpressAccountShopItemEntity.maximumThreshold,
             kazanExpressAccountShopItemEntity.step,
+            kazanExpressAccountShopItemEntity.discount,
             kazanExpressAccountShopItemEntity.lastUpdate
         ).onDuplicateKeyUpdate()
             .set(
@@ -67,8 +70,8 @@ class KeAccountShopItemRepository(
                     i.SKU_ID to kazanExpressAccountShopItemEntity.skuId,
                     i.NAME to kazanExpressAccountShopItemEntity.name,
                     i.PHOTO_KEY to kazanExpressAccountShopItemEntity.photoKey,
-                    i.FULL_PRICE to kazanExpressAccountShopItemEntity.fullPrice,
-                    i.SELL_PRICE to kazanExpressAccountShopItemEntity.sellPrice,
+                    i.PRICE to kazanExpressAccountShopItemEntity.price,
+                    i.PURCHASE_PRICE to kazanExpressAccountShopItemEntity.purchasePrice,
                     i.BARCODE to kazanExpressAccountShopItemEntity.barCode,
                     i.PRODUCT_SKU to kazanExpressAccountShopItemEntity.productSku,
                     i.SKU_TITLE to kazanExpressAccountShopItemEntity.skuTitle,
@@ -93,8 +96,8 @@ class KeAccountShopItemRepository(
                     i.SKU_ID,
                     i.NAME,
                     i.PHOTO_KEY,
-                    i.FULL_PRICE,
-                    i.SELL_PRICE,
+                    i.PRICE,
+                    i.PURCHASE_PRICE,
                     i.BARCODE,
                     i.PRODUCT_SKU,
                     i.SKU_TITLE,
@@ -102,6 +105,7 @@ class KeAccountShopItemRepository(
                     i.MINIMUM_THRESHOLD,
                     i.MAXIMUM_THRESHOLD,
                     i.STEP,
+                    i.DISCOUNT,
                     i.LAST_UPDATE
                 ).values(
                     kazanExpressAccountShopItemEntity.id,
@@ -112,8 +116,8 @@ class KeAccountShopItemRepository(
                     kazanExpressAccountShopItemEntity.skuId,
                     kazanExpressAccountShopItemEntity.name,
                     kazanExpressAccountShopItemEntity.photoKey,
-                    kazanExpressAccountShopItemEntity.fullPrice,
-                    kazanExpressAccountShopItemEntity.sellPrice,
+                    kazanExpressAccountShopItemEntity.price,
+                    kazanExpressAccountShopItemEntity.purchasePrice,
                     kazanExpressAccountShopItemEntity.barCode,
                     kazanExpressAccountShopItemEntity.productSku,
                     kazanExpressAccountShopItemEntity.skuTitle,
@@ -121,6 +125,7 @@ class KeAccountShopItemRepository(
                     kazanExpressAccountShopItemEntity.minimumThreshold,
                     kazanExpressAccountShopItemEntity.maximumThreshold,
                     kazanExpressAccountShopItemEntity.step,
+                    kazanExpressAccountShopItemEntity.discount,
                     kazanExpressAccountShopItemEntity.lastUpdate
                 ).onDuplicateKeyUpdate()
                     .set(
@@ -128,8 +133,8 @@ class KeAccountShopItemRepository(
                             i.CATEGORY_ID to kazanExpressAccountShopItemEntity.categoryId,
                             i.NAME to kazanExpressAccountShopItemEntity.name,
                             i.PHOTO_KEY to kazanExpressAccountShopItemEntity.photoKey,
-                            i.FULL_PRICE to kazanExpressAccountShopItemEntity.fullPrice,
-                            i.SELL_PRICE to kazanExpressAccountShopItemEntity.sellPrice,
+                            i.PRICE to kazanExpressAccountShopItemEntity.price,
+                            i.PURCHASE_PRICE to kazanExpressAccountShopItemEntity.purchasePrice,
                             i.BARCODE to kazanExpressAccountShopItemEntity.barCode,
                             i.AVAILABLE_AMOUNT to kazanExpressAccountShopItemEntity.availableAmount,
                             i.LAST_UPDATE to kazanExpressAccountShopItemEntity.lastUpdate,
@@ -263,7 +268,8 @@ class KeAccountShopItemRepository(
         keAccountShopItemId: UUID,
         step: Int,
         minimumThreshold: Long,
-        maximumThreshold: Long
+        maximumThreshold: Long,
+        discount: BigDecimal,
     ): Int {
         val i = KE_ACCOUNT_SHOP_ITEM
         return dsl.update(i)
@@ -271,7 +277,8 @@ class KeAccountShopItemRepository(
                 mapOf(
                     i.STEP to step,
                     i.MINIMUM_THRESHOLD to minimumThreshold,
-                    i.MAXIMUM_THRESHOLD to maximumThreshold
+                    i.MAXIMUM_THRESHOLD to maximumThreshold,
+                    i.DISCOUNT to discount,
                 )
             )
             .where(i.KE_ACCOUNT_ID.eq(keAccountId).and(i.ID.eq(keAccountShopItemId)))

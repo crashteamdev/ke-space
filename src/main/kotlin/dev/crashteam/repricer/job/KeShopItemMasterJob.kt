@@ -27,6 +27,7 @@ class KeShopItemMasterJob : QuartzJobBean() {
             val jobDetail =
                 JobBuilder.newJob(KeShopItemJob::class.java).withIdentity(jobIdentity).build()
             val triggerFactoryBean = SimpleTriggerFactoryBean().apply {
+                setPriority(1)
                 setName(jobIdentity)
                 setStartTime(Date())
                 setRepeatInterval(0L)

@@ -5,6 +5,8 @@ import dev.crashteam.openapi.kerepricer.model.*
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.*
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.service.KeAccountService
 import dev.crashteam.repricer.service.KeAccountShopService
@@ -144,7 +146,7 @@ class AccountsController(
                 "name" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "productId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_COMPETITOR.PRODUCT_ID),
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_COMPETITOR.SKU_ID),
-                "price" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SELL_PRICE),
+                "price" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRICE),
                 "availableAmount" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
             )
             val filterCondition = filter?.let {
@@ -203,8 +205,8 @@ class AccountsController(
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
                 "name" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "photoKey" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
-                "fullPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.FULL_PRICE),
-                "sellPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SELL_PRICE),
+                "purchasePrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PURCHASE_PRICE),
+                "price" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRICE),
                 "barCode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
                 "availableAmount" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
                 "minimumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
@@ -257,8 +259,8 @@ class AccountsController(
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
                 "name" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "photoKey" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
-                "fullPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.FULL_PRICE),
-                "sellPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SELL_PRICE),
+                "purchasePrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PURCHASE_PRICE),
+                "price" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRICE),
                 "barCode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
                 "availableAmount" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
                 "minimumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
@@ -451,9 +453,9 @@ class AccountsController(
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
                 "shopName" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "itemName" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
-                "oldPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.FULL_PRICE),
-                "newPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
-                "barcode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
+                "oldPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.OLD_PRICE),
+                "newPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.PRICE),
+                "barcode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
             )
             val filterCondition = filter?.let {
                 FilterOperation.parse(filter, mapFields)
@@ -537,7 +539,8 @@ class AccountsController(
                     shopItemId,
                     request.step,
                     request.minimumThreshold,
-                    request.maximumThreshold
+                    request.maximumThreshold,
+                    request.discount
                 )
                 if (changeCount <= 0) {
                     ResponseEntity.notFound().build<KeAccountShopItem>().toMono()

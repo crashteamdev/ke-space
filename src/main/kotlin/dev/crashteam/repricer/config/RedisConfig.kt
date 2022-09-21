@@ -2,7 +2,6 @@ package dev.crashteam.repricer.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import dev.crashteam.repricer.client.ke.model.web.ProductResponse
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer
@@ -42,27 +41,29 @@ class RedisConfig(
         return RedisCacheManagerBuilderCustomizer { builder: RedisCacheManager.RedisCacheManagerBuilder ->
             val configurationMap: MutableMap<String, RedisCacheConfiguration> =
                 HashMap()
+            val redisSerializer = object : RedisSerializer<Any> {
+                override fun serialize(t: Any?): ByteArray {
+                    return objectMapper.writeValueAsBytes(t)
+                }
+                override fun deserialize(bytes: ByteArray?): Any? {
+                    return if (bytes != null) {
+                        objectMapper.readValue<Any>(bytes)
+                    } else null
+                }
+            }
             configurationMap[KE_CLIENT_CACHE_NAME] = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(object :
-                    RedisSerializer<Any> {
-                    override fun serialize(t: Any?): ByteArray {
-                        return objectMapper.writeValueAsBytes(t)
-                    }
-
-                    override fun deserialize(bytes: ByteArray?): Any? {
-                        return if (bytes != null) {
-                            objectMapper.readValue<ProductResponse>(bytes)
-                        } else null
-                    }
-
-                }))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
                 .entryTtl(Duration.ofSeconds(120))
+            configurationMap[PROXY_SOURCE_NAME] = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
+                .entryTtl(Duration.ofMinutes(40))
             builder.withInitialCacheConfigurations(configurationMap)
         }
     }
 
     companion object {
         const val KE_CLIENT_CACHE_NAME = "ke-products-info"
+        const val PROXY_SOURCE_NAME = "proxy-source"
     }
 
 }

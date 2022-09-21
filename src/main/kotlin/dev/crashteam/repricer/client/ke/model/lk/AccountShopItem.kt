@@ -2,6 +2,10 @@ package dev.crashteam.repricer.client.ke.model.lk
 
 import java.math.BigDecimal
 
+data class AccountShopItemWrapper(
+    val productList: List<AccountShopItem>
+)
+
 data class AccountShopItem(
     val productId: Long,
     val title: String,
@@ -36,7 +40,7 @@ data class ShopItemSku(
     val productTitle: String,
     val skuId: Long,
     val barCode: Long,
-    val purchasePrice: BigDecimal,
+    val purchasePrice: BigDecimal?,
     val price: BigDecimal,
     val quantityActive: Long,
     val quantityAdditional: Long,

@@ -22,5 +22,7 @@ data class RepricerProperties(
     val paymentCron: String? = null,
     @field:NotEmpty
     val accountInitializeCron: String? = null,
+    @field:NotEmpty
+    val repairStuckStateCron: String? = null,
     val cookieBotProtectionBypassEnabled: Boolean = false
 )

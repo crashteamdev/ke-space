@@ -108,7 +108,12 @@ class KeAccountRepository(
         val a = ACCOUNT
         val k = KE_ACCOUNT
         val updateStep = dsl.update(k)
-            .set(k.UPDATE_STATE, updateState)
+            .set(
+                mapOf(
+                    k.UPDATE_STATE to updateState,
+                    k.UPDATE_STATE_LAST_UPDATE to LocalDateTime.now()
+                )
+            )
         if (lastUpdate != null) {
             updateStep.set(k.LAST_UPDATE, lastUpdate)
         }
@@ -136,7 +141,12 @@ class KeAccountRepository(
         val a = ACCOUNT
         val k = KE_ACCOUNT
         return dsl.update(k)
-            .set(k.INITIALIZE_STATE, initializeState)
+            .set(
+                mapOf(
+                    k.INITIALIZE_STATE to initializeState,
+                    k.INITIALIZE_STATE_LAST_UPDATE to LocalDateTime.now()
+                )
+            )
             .from(a)
             .where(a.USER_ID.eq(userId).and(k.ID.eq(keAccountId))).execute()
     }
@@ -167,6 +177,20 @@ class KeAccountRepository(
         return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
     }
 
+    fun findAccountByUpdateStateInProgressAndLastUpdateLessThan(
+        updateStateLastUpdate: LocalDateTime
+    ): List<KazanExpressAccountEntityJoinAccountEntity> {
+        val a = ACCOUNT
+        val k = KE_ACCOUNT
+        val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
+            .where(
+                k.UPDATE_STATE.notEqual(UpdateState.in_progress)
+                    .and(k.UPDATE_STATE_LAST_UPDATE.lessThan(updateStateLastUpdate))
+            )
+            .fetch()
+        return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
+    }
+
     fun findAccountWhereMonitorActiveWithValidSubscription(): List<KazanExpressAccountEntity> {
         val a = ACCOUNT
         val k = KE_ACCOUNT
@@ -184,6 +208,20 @@ class KeAccountRepository(
         val k = KE_ACCOUNT
         val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
             .where(k.INITIALIZE_STATE.eq(InitializeState.not_started))
+            .fetch()
+        return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
+    }
+
+    fun findAccountByInitializeStateInProgressAndLastUpdateLessThan(
+        initializeStateLastUpdate: LocalDateTime
+    ): List<KazanExpressAccountEntityJoinAccountEntity> {
+        val a = ACCOUNT
+        val k = KE_ACCOUNT
+        val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
+            .where(
+                k.INITIALIZE_STATE.notEqual(InitializeState.in_progress)
+                    .and(k.INITIALIZE_STATE_LAST_UPDATE.lessThan(initializeStateLastUpdate))
+            )
             .fetch()
         return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
     }

@@ -27,12 +27,12 @@ class PriceChangeService(
 ) {
 
     @Transactional
-    fun changeUserShopItemPrice(userId: String, keAccountId: UUID) {
+    fun recalculateUserShopItemPrice(userId: String, keAccountId: UUID) {
         val poolItem = keAccountShopItemPoolRepository.findShopItemInPool(userId, keAccountId)
         for (poolFilledEntity in poolItem) {
             val calculationResult = priceChangeCalculatorStrategy.calculatePrice(
                 poolFilledEntity.keAccountShopItemId,
-                BigDecimal.valueOf(poolFilledEntity.sellPrice),
+                BigDecimal.valueOf(poolFilledEntity.price),
                 CalculatorOptions(
                     step = poolFilledEntity.step,
                     minimumThreshold = poolFilledEntity.minimumThreshold,
@@ -50,7 +50,9 @@ class PriceChangeService(
                         skuList = listOf(
                             SkuPriceChangeSku(
                                 id = poolFilledEntity.skuId,
-                                fullPrice = poolFilledEntity.fullPrice, // TODO: решить что делать с этой ценой
+                                fullPrice = calculationResult.newPrice.multiply(
+                                    poolFilledEntity.discount?.toBigDecimal() ?: BigDecimal.ONE
+                                ).toLong(),
                                 sellPrice = calculationResult.newPrice.toLong(),
                                 skuTitle = poolFilledEntity.skuTitle,
                                 barCode = poolFilledEntity.barcode.toString(),
@@ -70,7 +72,7 @@ class PriceChangeService(
                             keAccountShopItemId = poolFilledEntity.keAccountShopItemId,
                             keAccountShopItemCompetitorId = calculationResult.competitorId,
                             changeTime = lastCheckTime,
-                            oldPrice = poolFilledEntity.sellPrice,
+                            oldPrice = poolFilledEntity.price,
                             price = calculationResult.newPrice.toLong()
                         )
                     )
@@ -79,7 +81,7 @@ class PriceChangeService(
                             keAccountId,
                             poolFilledEntity.keAccountShopItemId
                         )!!
-                    keAccountShopItemRepository.save(shopItemEntity.copy(sellPrice = calculationResult.newPrice.toLong()))
+                    keAccountShopItemRepository.save(shopItemEntity.copy(price = calculationResult.newPrice.toLong()))
                     keAccountShopItemPoolRepository.updateLastCheck(
                         poolFilledEntity.keAccountShopItemId,
                         lastCheckTime

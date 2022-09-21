@@ -111,7 +111,7 @@ class KazanExpressWebClient(
         val isError = statusCode.series() == HttpStatus.Series.CLIENT_ERROR
                 || statusCode.series() == HttpStatus.Series.SERVER_ERROR
         if (isError) {
-            throw KazanExpressClientException(
+            throw KazanExpressProxyClientException(
                 originalStatus,
                 styxResponse.body.toString(),
                 "Bad response from KazanExpress. Status=$originalStatus; Body=${styxResponse.body.toString()}"

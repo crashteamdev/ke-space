@@ -48,17 +48,19 @@ CREATE UNIQUE INDEX account_user_id_idx ON account (user_id);
 
 CREATE TABLE ke_account
 (
-    id                  uuid PRIMARY KEY,
-    account_id          BIGINT            NOT NULL REFERENCES account ON DELETE CASCADE,
-    external_account_id BIGINT,
-    name                CHARACTER VARYING,
-    email               CHARACTER VARYING,
-    login               CHARACTER VARYING NOT NULL,
-    password            CHARACTER VARYING NOT NULL,
-    last_update         TIMESTAMP WITHOUT TIME ZONE,
-    monitor_state       monitor_state     NOT NULL DEFAULT 'suspended',
-    update_state        update_state      NOT NULL DEFAULT 'not_started',
-    initialize_state    initialize_state  NOT NULL DEFAULT 'not_started'
+    id                           uuid PRIMARY KEY,
+    account_id                   BIGINT            NOT NULL REFERENCES account ON DELETE CASCADE,
+    external_account_id          BIGINT,
+    name                         CHARACTER VARYING,
+    email                        CHARACTER VARYING,
+    login                        CHARACTER VARYING NOT NULL,
+    password                     CHARACTER VARYING NOT NULL,
+    last_update                  TIMESTAMP WITHOUT TIME ZONE,
+    monitor_state                monitor_state     NOT NULL DEFAULT 'suspended',
+    update_state                 update_state      NOT NULL DEFAULT 'not_started',
+    update_state_last_update     TIMESTAMP WITHOUT TIME ZONE,
+    initialize_state             initialize_state  NOT NULL DEFAULT 'not_started',
+    initialize_state_last_update TIMESTAMP WITHOUT TIME ZONE
 );
 
 CREATE UNIQUE INDEX ke_account_account_id_idx ON ke_account (account_id, external_account_id);
@@ -87,8 +89,8 @@ CREATE TABLE ke_account_shop_item
     sku_id             BIGINT                      NOT NULL,
     name               CHARACTER VARYING           NOT NULL,
     photo_key          CHARACTER VARYING           NOT NULL,
-    full_price         BIGINT,
-    sell_price         BIGINT                      NOT NULL,
+    price              BIGINT                      NOT NULL,
+    purchase_price     BIGINT,
     barcode            BIGINT                      NOT NULL,
     product_sku        CHARACTER VARYING           NOT NULL,
     sku_title          CHARACTER VARYING           NOT NULL,
@@ -96,6 +98,7 @@ CREATE TABLE ke_account_shop_item
     minimum_threshold  BIGINT,
     maximum_threshold  BIGINT,
     step               INT,
+    discount           DECIMAL(100),
     last_update        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 
     CONSTRAINT fk_ke_account_shop_item_ke_account FOREIGN KEY (ke_account_id) REFERENCES ke_account (id) ON DELETE CASCADE,

@@ -94,7 +94,7 @@
         <dependency>
             <groupId>dev.crashteam</groupId>
             <artifactId>openapi-ke-repricer</artifactId>
-            <version>1.29-d8c460b-server</version>
+            <version>1.31-d17acfb-server</version>
         </dependency>
         <dependency>
             <groupId>dev.brachtendorf</groupId>
@@ -131,6 +131,11 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.github.bonigarcia</groupId>-->
+<!--            <artifactId>webdrivermanager</artifactId>-->
+<!--            <version>5.3.0</version>-->
+<!--        </dependency>-->
 
 
         <!-- JOOQ Generator -->

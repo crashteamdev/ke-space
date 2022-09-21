@@ -54,18 +54,20 @@ class KazanExpressSecureService(
         val accessToken = userTokenEntity?.accessToken
         val refreshToken = userTokenEntity?.refreshToken
         val recentUserToken = if (accessToken != null && refreshToken != null) {
-            val checkTokenResponseStyxResponse = kazanExpressClient.checkToken(userId, accessToken)!!
-            val httpSeries = HttpStatus.Series.resolve(checkTokenResponseStyxResponse.code)
+            val checkTokenResponseStyxResponseEntity = kazanExpressClient.checkToken(userId, accessToken)
+            val httpSeries = HttpStatus.Series.resolve(checkTokenResponseStyxResponseEntity.statusCodeValue)
             if (httpSeries == HttpStatus.Series.CLIENT_ERROR) {
-                val refreshAuthResponse = kazanExpressClient.refreshAuth(userId, refreshToken)!!
-                val refreshAuthHttpSeries = HttpStatus.Series.resolve(refreshAuthResponse.code)
+                val refreshAuthResponseEntity = kazanExpressClient.refreshAuth(userId, refreshToken)
+                val refreshAuthHttpSeries = HttpStatus.Series.resolve(refreshAuthResponseEntity.statusCodeValue)
                 if (refreshAuthHttpSeries == HttpStatus.Series.CLIENT_ERROR) {
                     val kazanExpressAccount = accountRepository.getKazanExpressAccount(userId, keAccountId)
                         ?: throw KazanExpressUserAuthException("Not found user by userId=$userId; keAccountId=$keAccountId")
-                    val authResponse = kazanExpressClient.auth(userId, kazanExpressAccount.name!!, kazanExpressAccount.name)
+                    val password = Base64.getDecoder().decode(kazanExpressAccount.password.toByteArray())
+                    val decryptedPassword = passwordEncryptor.decryptPassword(password)
+                    val authResponse = kazanExpressClient.auth(userId, kazanExpressAccount.name!!, decryptedPassword)
                     RecentAuthUserToken(authResponse.accessToken, authResponse.refreshToken)
                 } else {
-                    RecentAuthUserToken(refreshAuthResponse.body!!.accessToken, refreshAuthResponse.body.refreshToken)
+                    RecentAuthUserToken(refreshAuthResponseEntity.body!!.accessToken, refreshAuthResponseEntity.body!!.refreshToken)
                 }
             } else {
                 RecentAuthUserToken(accessToken, refreshToken)

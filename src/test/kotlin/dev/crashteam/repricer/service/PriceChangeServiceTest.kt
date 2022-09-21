@@ -92,8 +92,8 @@ class PriceChangeServiceTest : ContainerConfiguration() {
                 skuId = 789,
                 name = "testName",
                 photoKey = "gfdfqkowef",
-                fullPrice = 50000,
-                sellPrice = 10000,
+                purchasePrice = 50000,
+                price = 10000,
                 barCode = 4535643512893379581L,
                 availableAmount = 10,
                 lastUpdate = LocalDateTime.now(),
@@ -133,7 +133,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         // When
         keShopItemRepository.save(keShopItemEntity)
         keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
-        priceChangeService.changeUserShopItemPrice(userId, keAccountId)
+        priceChangeService.recalculateUserShopItemPrice(userId, keAccountId)
         val paginateEntities =
             priceHistoryRepository.findHistoryByShopItemId(keAccountShopItemId, limit = 10, offset = 0)
         val shopItemEntity = keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopId, keAccountShopItemId)
@@ -144,7 +144,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         assertEquals(10000, paginateEntities.first().item.oldPrice)
         assertEquals(4000, paginateEntities.first().item.price)
         assertTrue(shopItemPoolFilledEntity.lastCheck != null)
-        assertEquals(4000, shopItemEntity?.sellPrice)
+        assertEquals(4000, shopItemEntity?.price)
     }
 
 }

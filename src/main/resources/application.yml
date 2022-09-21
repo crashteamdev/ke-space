@@ -23,7 +23,8 @@ management:
 
 logging:
   level:
-    "liquibase": info
+    "liquibase": INFO
+    org.apache.http: INFO
 
 spring:
   application:
@@ -67,6 +68,10 @@ service:
   proxy:
     url: http://localhost:8022
 
+proxies:
+  proxyline:
+    apiKey: api_key
+
 actuator:
   user: basic
   password: passwd
@@ -79,6 +84,7 @@ repricer:
   priceChangeCron: '0 0/15 * * * ?'
   paymentCron: '0/10 * * * * ?'
   accountInitializeCron: '0/20 * * * * ?'
+  repairStuckStateCron: '0 0 0/1 * * ?'
   cookieBotProtectionBypassEnabled: true
 
 loki:

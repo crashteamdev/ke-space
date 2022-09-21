@@ -7,7 +7,6 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
 
-
 @Repository
 class KeShopItemRepository(
     private val dsl: DSLContext,

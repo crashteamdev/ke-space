@@ -44,6 +44,10 @@ class JobConfiguration(
         if (!schedulerFactoryBean.checkExists(TriggerKey(ACCOUNT_INITIALIZE_TRIGGER_KEY))) {
             schedulerFactoryBean.scheduleJob(keAccountInitializeMasterTrigger())
         }
+        schedulerFactoryBean.addJob(repairStuckStateJob(), true, true)
+        if (!schedulerFactoryBean.checkExists(TriggerKey(REPAIR_STUCK_STATE_TRIGGER_KEY))) {
+            schedulerFactoryBean.scheduleJob(repairStuckStateTrigger())
+        }
     }
 
     fun keShopItemMasterJob(): JobDetailImpl {
@@ -130,13 +134,29 @@ class JobConfiguration(
             .build()
     }
 
+    fun repairStuckStateJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey("repair-stuck-state-job")
+        jobDetail.jobClass = RepairStuckStateJob::class.java
+
+        return jobDetail
+    }
+
+    fun repairStuckStateTrigger(): CronTrigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(repairStuckStateJob())
+            .withIdentity(REPAIR_STUCK_STATE_TRIGGER_KEY)
+            .withPriority(Int.MAX_VALUE)
+            .withSchedule(CronScheduleBuilder.cronSchedule(repricerProperties.accountInitializeCron))
+            .build()
+    }
+
     companion object {
         const val SHOP_TRIGGER_KEY = "master-shop-item-trigger"
         const val ACCOUNT_DATA_UPDATE_TRIGGER_KEY = "master-account-data-update-trigger"
         const val PRICE_CHANGE_TRIGGER_KEY = "master-price-change-trigger"
         const val PAYMENT_TRIGGER_KEY = "master-payment-trigger"
         const val ACCOUNT_INITIALIZE_TRIGGER_KEY = "master-account-initialize-trigger"
+        const val REPAIR_STUCK_STATE_TRIGGER_KEY = "repair-stuck-state-trigger"
     }
-
-
 }
