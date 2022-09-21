@@ -424,6 +424,8 @@ class AccountsController(
             } else {
                 ResponseEntity.ok().build<Void>().toMono()
             }
+        }.doOnError {
+            log.error(it) { "Exception during update ke account data. keAccountId=$id" }
         }
     }
 
@@ -526,6 +528,8 @@ class AccountsController(
             } catch (e: IllegalArgumentException) {
                 return@flatMap ResponseEntity.notFound().build<Void>().toMono()
             }
+        }.doOnError {
+            log.error(it) { "Exception during reinitialize ke account" }
         }
     }
 

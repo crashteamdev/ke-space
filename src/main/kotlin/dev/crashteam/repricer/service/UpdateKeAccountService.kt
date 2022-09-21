@@ -7,6 +7,7 @@ import dev.crashteam.repricer.repository.postgre.KeAccountShopItemRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountShopRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopEntity
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
+import mu.KotlinLogging
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.SimpleTrigger
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class UpdateKeAccountService(
@@ -32,6 +35,7 @@ class UpdateKeAccountService(
         if (kazanExpressAccount.lastUpdate != null) {
             val lastUpdate = kazanExpressAccount.lastUpdate.plusMinutes(10)
             if (lastUpdate?.isAfter(LocalDateTime.now()) == false) {
+                log.debug { "Ke account update data was done recently. Need to try again later. userId=$userId;keAccountId=$keAccountId" }
                 return false
             }
         }

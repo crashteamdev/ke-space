@@ -32,6 +32,7 @@ class UpdateAccountDataJob : QuartzJobBean() {
         val keAccountId = context.jobDetail.jobDataMap["keAccountId"] as? UUID
             ?: throw IllegalStateException("keAccountId can't be null")
         try {
+            log.info { "Execute update ke account job. userId=$userId;keAccountId=$keAccountId" }
             keAccountRepository.changeUpdateState(userId, keAccountId, UpdateState.in_progress)
             TransactionTemplate(transactionManager).execute {
                 val accessToken = kazanExpressSecureService.authUser(userId, keAccountId)
@@ -42,8 +43,11 @@ class UpdateAccountDataJob : QuartzJobBean() {
                     email = checkToken.email
                 )
                 keAccountRepository.save(kazanExpressAccount)
+                log.info { "Update shops. userId=$userId;keAccountId=$keAccountId" }
                 updateKeAccountService.updateShops(userId, keAccountId)
+                log.info { "Update shop items. userId=$userId;keAccountId=$keAccountId" }
                 updateKeAccountService.updateShopItems(userId, keAccountId)
+                log.info { "Change update state to finished. userId=$userId;keAccountId=$keAccountId" }
                 keAccountRepository.changeUpdateState(userId, keAccountId, UpdateState.finished, LocalDateTime.now())
             }
         } catch (e: Exception) {
