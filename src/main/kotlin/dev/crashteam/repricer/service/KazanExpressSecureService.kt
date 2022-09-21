@@ -6,7 +6,8 @@ import dev.crashteam.repricer.client.ke.model.lk.AccountShop
 import dev.crashteam.repricer.client.ke.model.lk.AccountShopItem
 import dev.crashteam.repricer.client.ke.model.lk.ShopItemPriceChangePayload
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
-import dev.crashteam.repricer.repository.redis.UserTokenRepository
+import dev.crashteam.repricer.repository.redis.KeUserTokenRepository
+import dev.crashteam.repricer.repository.redis.entity.UserTokenEntity
 import dev.crashteam.repricer.service.encryption.PasswordEncryptor
 import dev.crashteam.repricer.service.error.KazanExpressUserAuthException
 import org.springframework.http.HttpStatus
@@ -17,7 +18,7 @@ import java.util.*
 class KazanExpressSecureService(
     private val kazanExpressClient: KazanExpressLkClient,
     private val accountRepository: KeAccountRepository,
-    private val userTokenRepository: UserTokenRepository,
+    private val keUserTokenRepository: KeUserTokenRepository,
     private val passwordEncryptor: PasswordEncryptor,
 ) {
 
@@ -50,7 +51,7 @@ class KazanExpressSecureService(
         userId: String,
         keAccountId: UUID,
     ): String {
-        val userTokenEntity = userTokenRepository.getToken(userId, keAccountId.toString())
+        val userTokenEntity = keUserTokenRepository.findById(userId + keAccountId.toString()).orElse(null)
         val accessToken = userTokenEntity?.accessToken
         val refreshToken = userTokenEntity?.refreshToken
         val recentUserToken = if (accessToken != null && refreshToken != null) {
@@ -67,7 +68,10 @@ class KazanExpressSecureService(
                     val authResponse = kazanExpressClient.auth(userId, kazanExpressAccount.name!!, decryptedPassword)
                     RecentAuthUserToken(authResponse.accessToken, authResponse.refreshToken)
                 } else {
-                    RecentAuthUserToken(refreshAuthResponseEntity.body!!.accessToken, refreshAuthResponseEntity.body!!.refreshToken)
+                    RecentAuthUserToken(
+                        refreshAuthResponseEntity.body!!.accessToken,
+                        refreshAuthResponseEntity.body!!.refreshToken
+                    )
                 }
             } else {
                 RecentAuthUserToken(accessToken, refreshToken)
@@ -78,14 +82,17 @@ class KazanExpressSecureService(
             val kePassword = Base64.getDecoder().decode(kazanExpressAccount.password)
             val password = passwordEncryptor.decryptPassword(kePassword)
             val authResponse = kazanExpressClient.auth(userId, kazanExpressAccount.login, password)
+            keUserTokenRepository.save(
+                UserTokenEntity(
+                    userId + keAccountId.toString(),
+                    userId,
+                    keAccountId.toString(),
+                    authResponse.accessToken,
+                    authResponse.refreshToken
+                )
+            )
             RecentAuthUserToken(authResponse.accessToken, authResponse.refreshToken)
         }
-        userTokenRepository.saveToken(
-            userId,
-            keAccountId.toString(),
-            recentUserToken.accessToken,
-            recentUserToken.refreshToken
-        )
 
         return recentUserToken.accessToken
     }
