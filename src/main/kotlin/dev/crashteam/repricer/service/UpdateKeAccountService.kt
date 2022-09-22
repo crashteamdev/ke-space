@@ -31,7 +31,10 @@ class UpdateKeAccountService(
     @Transactional
     fun executeUpdateJob(userId: String, keAccountId: UUID): Boolean {
         val kazanExpressAccount = keAccountRepository.getKazanExpressAccount(userId, keAccountId)!!
-        if (kazanExpressAccount.updateState == UpdateState.in_progress) return false
+        if (kazanExpressAccount.updateState == UpdateState.in_progress) {
+            log.debug { "Ke account update already in progress. userId=$userId;keAccountId=$keAccountId" }
+            return false
+        }
         if (kazanExpressAccount.lastUpdate != null) {
             val lastUpdate = kazanExpressAccount.lastUpdate.plusMinutes(10)
             if (lastUpdate?.isAfter(LocalDateTime.now()) == false) {
