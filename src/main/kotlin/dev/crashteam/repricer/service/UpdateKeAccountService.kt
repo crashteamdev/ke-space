@@ -37,7 +37,7 @@ class UpdateKeAccountService(
         }
         if (kazanExpressAccount.lastUpdate != null) {
             val lastUpdate = kazanExpressAccount.lastUpdate.plusMinutes(10)
-            if (lastUpdate?.isAfter(LocalDateTime.now()) == false) {
+            if (lastUpdate?.isBefore(LocalDateTime.now()) == false) {
                 log.debug { "Ke account update data was done recently. Need to try again later. userId=$userId;keAccountId=$keAccountId" }
                 return false
             }
