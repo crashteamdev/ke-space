@@ -170,6 +170,10 @@ class AccountsController(
             val shopItemCompetitors = keAccountShopService.getShopItemCompetitors(
                 it.name, id, shopId, shopItemId, filterCondition, sortFields, limit.toLong(), offset.toLong()
             )
+            if (shopItemCompetitors.isEmpty()) {
+                return@flatMap ResponseEntity.ok(emptyList<KeAccountCompetitorShopItem>().toFlux()).toMono()
+            }
+
             val paginateEntity = shopItemCompetitors.first()
             val httpHeaders = HttpHeaders().apply {
                 add("Pagination-Total", paginateEntity.total.toString())
