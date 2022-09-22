@@ -5,8 +5,7 @@ import dev.crashteam.openapi.kerepricer.model.*
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
-import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory
-import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.*
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.service.KeAccountService
 import dev.crashteam.repricer.service.KeAccountShopService
@@ -184,8 +183,10 @@ class AccountsController(
                 )!!
             }.toFlux(), httpHeaders, HttpStatus.OK).toMono()
         }.doOnError {
-            log.error(it) { "Failed to get ke account shop item competitors." +
-                    " keAccountId=$id;shopId=$shopId;shopItemId=$shopItemId;limit=$limit;offset=$offset;filter=$filter;sort=$sort" }
+            log.error(it) {
+                "Failed to get ke account shop item competitors." +
+                        " keAccountId=$id;shopId=$shopId;shopItemId=$shopItemId;limit=$limit;offset=$offset;filter=$filter;sort=$sort"
+            }
         }
     }
 
@@ -328,7 +329,7 @@ class AccountsController(
                 kazanExpressAccountShopEntities.map { conversionService.convert(it, KeAccountShop::class.java)!! }
             ResponseEntity.ok(keAccountShops.toFlux()).toMono()
         }.doOnError {
-            log.error(it) {"Failed to get ke account shops"}
+            log.error(it) { "Failed to get ke account shops" }
         }
     }
 
@@ -537,8 +538,12 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap { principal ->
             val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<Flux<SimilarItem>>().toMono()
-            val similarItems =
-                keShopItemService.findSimilarItems(keAccountShopItem.productId, keAccountShopItem.skuId).map {
+            // First trying to find from KE web scraper table
+            val similarItemsByImageHashAndName =
+                keShopItemService.findSimilarItemsByImageHashAndName(
+                    keAccountShopItem.productId,
+                    keAccountShopItem.skuId
+                ).map {
                     SimilarItem().apply {
                         this.productId = it.productId
                         this.skuId = it.skuId
@@ -546,7 +551,25 @@ class AccountsController(
                         this.photoKey = it.photoKey
                     }
                 }
-            ResponseEntity.ok(similarItems.toFlux()).toMono()
+            if (similarItemsByImageHashAndName.isEmpty()) {
+                // Trying to find just by name
+                val similarItems =
+                    keShopItemService.findSimilarItemsByName(
+                        keAccountShopItem.productId,
+                        keAccountShopItem.skuId,
+                        keAccountShopItem.name
+                    ).map {
+                        SimilarItem().apply {
+                            this.productId = it.productId
+                            this.skuId = it.skuId
+                            this.name = it.name
+                            this.photoKey = it.photoKey
+                        }
+                    }
+                return@flatMap ResponseEntity.ok(similarItems.toFlux()).toMono()
+            }
+
+            ResponseEntity.ok(similarItemsByImageHashAndName.toFlux()).toMono()
         }
     }
 

@@ -46,7 +46,17 @@ class KeAccountShopItemCompetitorRepository(
     ): List<PaginateEntity<KazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntity>> {
         val s = KE_SHOP_ITEM
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
-        var select = dsl.selectFrom(c.join(s).on(s.PRODUCT_ID.eq(c.PRODUCT_ID).and(s.SKU_ID.eq(c.SKU_ID))))
+        var select = dsl.select(
+            s.PRODUCT_ID,
+            s.SKU_ID,
+            s.CATEGORY_ID,
+            s.NAME,
+            s.AVAILABLE_AMOUNT,
+            s.PRICE,
+            c.ID,
+            c.KE_ACCOUNT_SHOP_ITEM_ID,
+        )
+            .from(c.join(s).on(s.PRODUCT_ID.eq(c.PRODUCT_ID).and(s.SKU_ID.eq(c.SKU_ID))))
             .where(c.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId))
         if (filter != null) {
             select = select.and(filter)

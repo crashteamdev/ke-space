@@ -76,7 +76,7 @@ class KeShopItemServiceTest : ContainerConfiguration() {
         // When
         keShopItemService.addShopItemFromKeData(firstProduct.payload?.data!!)
         keShopItemService.addShopItemFromKeData(secondProduct.payload?.data!!)
-        val similarItems = keShopItemService.findSimilarItems(firstProductId, firstSkuId)
+        val similarItems = keShopItemService.findSimilarItemsByImageHashAndName(firstProductId, firstSkuId)
 
         // Then
         assertEquals(1, similarItems.size)
