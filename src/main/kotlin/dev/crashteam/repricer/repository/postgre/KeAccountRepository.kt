@@ -184,7 +184,7 @@ class KeAccountRepository(
         val k = KE_ACCOUNT
         val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
             .where(
-                k.UPDATE_STATE.notEqual(UpdateState.in_progress)
+                k.UPDATE_STATE.eq(UpdateState.in_progress)
                     .and(k.UPDATE_STATE_LAST_UPDATE.lessThan(updateStateLastUpdate))
             )
             .fetch()
@@ -219,7 +219,7 @@ class KeAccountRepository(
         val k = KE_ACCOUNT
         val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
             .where(
-                k.INITIALIZE_STATE.notEqual(InitializeState.in_progress)
+                k.INITIALIZE_STATE.eq(InitializeState.in_progress)
                     .and(k.INITIALIZE_STATE_LAST_UPDATE.lessThan(initializeStateLastUpdate))
             )
             .fetch()
