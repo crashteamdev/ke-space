@@ -105,6 +105,9 @@ class SecurityConfig(
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration()
         config.applyPermitDefaultValues()
+        config.addAllowedMethod(HttpMethod.PATCH)
+        config.addAllowedMethod(HttpMethod.PUT)
+        config.addAllowedMethod(HttpMethod.DELETE)
         config.allowCredentials = true
         config.allowedOrigins = null
         config.allowedOriginPatterns = listOf("*")
