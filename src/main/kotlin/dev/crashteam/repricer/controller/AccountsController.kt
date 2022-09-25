@@ -595,10 +595,12 @@ class AccountsController(
                     request.maximumThreshold,
                     request.discount
                 )
+                val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
+                val shopItem = conversionService.convert(keAccountShopItem, KeAccountShopItem::class.java)
                 if (changeCount <= 0) {
                     ResponseEntity.notFound().build<KeAccountShopItem>().toMono()
                 } else {
-                    ResponseEntity.ok().build<KeAccountShopItem>().toMono()
+                    ResponseEntity.ok(shopItem).toMono()
                 }
             }
         }
