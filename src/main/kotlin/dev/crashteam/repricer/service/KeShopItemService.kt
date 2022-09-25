@@ -3,6 +3,7 @@ package dev.crashteam.repricer.service
 import dev.brachtendorf.jimagehash.hashAlgorithms.AverageHash
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash
+import dev.crashteam.openapi.kerepricer.model.SimilarItem
 import dev.crashteam.repricer.client.ke.model.web.ProductData
 import dev.crashteam.repricer.client.ke.model.web.ProductPhoto
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
@@ -59,6 +60,31 @@ class KeShopItemService(
             )
         }
         keShopItemRepository.saveBatch(kazanExpressShopItemEntities)
+    }
+
+    fun findSimilarItems(
+        productId: Long,
+        skuId: Long,
+    ): List<KazanExpressShopItemEntity> {
+        val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
+            ?: throw IllegalArgumentException("Not found product. productId=$productId;skuId=$skuId")
+        val similarItems = if (kazanExpressShopItemEntity.avgHashFingerprint != null) {
+            keShopItemRepository.findSimilarItemsByNameAndHash(
+                productId,
+                skuId,
+                kazanExpressShopItemEntity.avgHashFingerprint,
+                kazanExpressShopItemEntity.pHashFingerprint,
+                kazanExpressShopItemEntity.name
+            )
+        } else {
+            keShopItemRepository.findSimilarItemsByName(
+                kazanExpressShopItemEntity.productId,
+                kazanExpressShopItemEntity.skuId,
+                kazanExpressShopItemEntity.name
+            )
+        }
+
+        return similarItems
     }
 
     fun findSimilarItemsByImageHashAndName(

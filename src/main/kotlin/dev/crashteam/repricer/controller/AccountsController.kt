@@ -545,17 +545,8 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap { principal ->
             val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<Flux<SimilarItem>>().toMono()
-            val kazanExpressShopItemEntity =
-                keShopItemRepository.findByProductIdAndSkuId(keAccountShopItem.productId, keAccountShopItem.skuId)
-            // First trying to find from KE web scraper table
-            val similarItems = if (kazanExpressShopItemEntity?.avgHashFingerprint != null) {
-                keShopItemService.findSimilarItemsByImageHashAndName(
-                    keAccountShopItem.productId,
-                    keAccountShopItem.skuId,
-                    kazanExpressShopItemEntity.avgHashFingerprint,
-                    kazanExpressShopItemEntity.pHashFingerprint,
-                    kazanExpressShopItemEntity.name
-                ).map {
+            val similarItems =
+                keShopItemService.findSimilarItems(keAccountShopItem.productId, keAccountShopItem.skuId).map {
                     SimilarItem().apply {
                         this.productId = it.productId
                         this.skuId = it.skuId
@@ -563,20 +554,6 @@ class AccountsController(
                         this.photoKey = it.photoKey
                     }
                 }
-            } else {
-                keShopItemService.findSimilarItemsByName(
-                    keAccountShopItem.productId,
-                    keAccountShopItem.skuId,
-                    keAccountShopItem.name
-                ).map {
-                    SimilarItem().apply {
-                        this.productId = it.productId
-                        this.skuId = it.skuId
-                        this.name = it.name
-                        this.photoKey = it.photoKey
-                    }
-                }
-            }
 
             ResponseEntity.ok(similarItems.toFlux()).toMono()
         }
