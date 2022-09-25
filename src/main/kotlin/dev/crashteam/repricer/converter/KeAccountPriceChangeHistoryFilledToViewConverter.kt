@@ -15,8 +15,8 @@ class KeAccountPriceChangeHistoryFilledToViewConverter :
             this.skuId = source.skuId
             this.shopName = source.shopName
             this.itemName = source.itemName
-            this.oldPrice = source.oldPrice.toBigDecimal().movePointLeft(2).toDouble()
-            this.newPrice = source.price.toBigDecimal().movePointLeft(2).toDouble()
+            this.oldPrice = source.oldPrice.toBigDecimal().setScale(2).toDouble()
+            this.newPrice = source.price.toBigDecimal().setScale(2).toDouble()
             this.barcode = source.barcode
         }
     }

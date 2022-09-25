@@ -13,7 +13,7 @@ class KeAccountShopItemCompetitorToViewConverter :
             this.name = source.name
             this.productId = source.productId
             this.skuId = source.skuId
-            this.price = BigDecimal.valueOf(source.price).movePointLeft(2).toDouble()
+            this.price = BigDecimal.valueOf(source.price, 2).toDouble()
             this.availableAmount = source.availableAmount
         }
     }
