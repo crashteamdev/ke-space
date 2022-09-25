@@ -27,7 +27,8 @@ class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpres
             minimumThreshold = record.getValue(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
             maximumThreshold = record.getValue(KE_ACCOUNT_SHOP_ITEM.MAXIMUM_THRESHOLD),
             step = record.getValue(KE_ACCOUNT_SHOP_ITEM.STEP),
-            lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE)
+            lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE),
+            discount = record.getValue(KE_ACCOUNT_SHOP_ITEM.DISCOUNT)
         )
     }
 }
