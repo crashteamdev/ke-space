@@ -64,6 +64,7 @@ class SecurityConfig(
     @Order(2)
     fun oAuthWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
+            .securityMatcher(pathMatchers(HttpMethod.OPTIONS,"/**"))
             .cors().configurationSource(createCorsConfigSource()).and()
             .authorizeExchange().anyExchange().authenticated().and()
             .oauth2ResourceServer()
