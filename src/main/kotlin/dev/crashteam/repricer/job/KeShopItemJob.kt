@@ -30,24 +30,25 @@ class KeShopItemJob : QuartzJobBean() {
         val categoryId = context.jobDetail.jobDataMap["categoryId"] as? Long
             ?: throw IllegalStateException("categoryId can't be null")
         log.info { "Start category product collect for $categoryId" }
-        var page = context.jobDetail.jobDataMap["page"] as? Int ?: 0
+        var offset = context.jobDetail.jobDataMap["offset"] as? Int ?: 0
         while (true) {
-            val categoryResponse = kazanExpressClient.getCategory(categoryId = categoryId.toString(), page = page)
-            val products = categoryResponse?.payload?.products ?: break
+            val categoryResponse =
+                kazanExpressClient.getCategoryGraphQL(categoryId = categoryId.toString(), limit = 48, offset = 0)
+            val products = categoryResponse?.items ?: break
             products.mapNotNull { categoryProduct ->
                 Thread.sleep(Random.nextLong(50, 500))
-                val productInfo = kazanExpressClient.getProductInfo(categoryProduct.productId.toString())
+                val productInfo = kazanExpressClient.getProductInfo(categoryProduct.catalogCard.productId.toString())
                 if (productInfo?.payload == null) {
-                    log.warn { "Product info payload can't be empty. productId=${categoryProduct.productId}" }
+                    log.warn { "Product info payload can't be empty. productId=${categoryProduct.catalogCard.productId}" }
                     return@mapNotNull null // skip bad product
                 }
                 val productData = productInfo.payload.data
                 keShopItemService.addShopItemFromKeData(productData)
             }
-            page += 1
-            context.jobDetail.jobDataMap["page"] = page
+            offset += 48
+            context.jobDetail.jobDataMap["offset"] = offset
         }
-        context.jobDetail.jobDataMap["page"] = 0
+        context.jobDetail.jobDataMap["offset"] = 0
         log.info { "Complete category product collect for $categoryId" }
     }
 

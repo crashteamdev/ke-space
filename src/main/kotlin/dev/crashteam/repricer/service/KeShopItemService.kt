@@ -61,13 +61,19 @@ class KeShopItemService(
         keShopItemRepository.saveBatch(kazanExpressShopItemEntities)
     }
 
-    fun findSimilarItemsByImageHashAndName(productId: Long, skuId: Long): List<KazanExpressShopItemEntity> {
+    fun findSimilarItemsByImageHashAndName(
+        productId: Long,
+        skuId: Long,
+        avgHashFingerprint: String,
+        pHashFingerprint: String?,
+        name: String
+    ): List<KazanExpressShopItemEntity> {
         val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
         return keShopItemRepository.findSimilarItemsByNameAndHash(
             productId,
             skuId,
-            targetShopItemEntity.avgHashFingerprint,
-            targetShopItemEntity.pHashFingerprint,
+            avgHashFingerprint,
+            pHashFingerprint,
             targetShopItemEntity.name
         )
     }

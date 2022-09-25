@@ -7,6 +7,7 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
+import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
 import dev.crashteam.repricer.service.KeAccountService
 import dev.crashteam.repricer.service.KeAccountShopService
 import dev.crashteam.repricer.service.KeShopItemService
@@ -38,6 +39,7 @@ class AccountsController(
     private val updateKeAccountService: UpdateKeAccountService,
     private val keShopItemService: KeShopItemService,
     private val keShopItemPriceChangeRepository: KeShopItemPriceHistoryRepository,
+    private val keShopItemRepository: KeShopItemRepository,
     private val conversionService: ConversionService
 ) : AccountsApi {
 
@@ -542,11 +544,16 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap { principal ->
             val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<Flux<SimilarItem>>().toMono()
+            val kazanExpressShopItemEntity =
+                keShopItemRepository.findByProductIdAndSkuId(keAccountShopItem.productId, keAccountShopItem.skuId)
             // First trying to find from KE web scraper table
-            val similarItemsByImageHashAndName =
+            val similarItems = if (kazanExpressShopItemEntity?.avgHashFingerprint != null) {
                 keShopItemService.findSimilarItemsByImageHashAndName(
                     keAccountShopItem.productId,
-                    keAccountShopItem.skuId
+                    keAccountShopItem.skuId,
+                    kazanExpressShopItemEntity.avgHashFingerprint,
+                    kazanExpressShopItemEntity.pHashFingerprint,
+                    kazanExpressShopItemEntity.name
                 ).map {
                     SimilarItem().apply {
                         this.productId = it.productId
@@ -555,25 +562,22 @@ class AccountsController(
                         this.photoKey = it.photoKey
                     }
                 }
-            if (similarItemsByImageHashAndName.isEmpty()) {
-                // Trying to find just by name
-                val similarItems =
-                    keShopItemService.findSimilarItemsByName(
-                        keAccountShopItem.productId,
-                        keAccountShopItem.skuId,
-                        keAccountShopItem.name
-                    ).map {
-                        SimilarItem().apply {
-                            this.productId = it.productId
-                            this.skuId = it.skuId
-                            this.name = it.name
-                            this.photoKey = it.photoKey
-                        }
+            } else {
+                keShopItemService.findSimilarItemsByName(
+                    keAccountShopItem.productId,
+                    keAccountShopItem.skuId,
+                    keAccountShopItem.name
+                ).map {
+                    SimilarItem().apply {
+                        this.productId = it.productId
+                        this.skuId = it.skuId
+                        this.name = it.name
+                        this.photoKey = it.photoKey
                     }
-                return@flatMap ResponseEntity.ok(similarItems.toFlux()).toMono()
+                }
             }
 
-            ResponseEntity.ok(similarItemsByImageHashAndName.toFlux()).toMono()
+            ResponseEntity.ok(similarItems.toFlux()).toMono()
         }
     }
 

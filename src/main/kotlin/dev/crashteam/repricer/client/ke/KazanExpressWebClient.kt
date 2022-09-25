@@ -1,21 +1,24 @@
 package dev.crashteam.repricer.client.ke
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.crashteam.repricer.client.ke.model.ProxyRequestBody
 import dev.crashteam.repricer.client.ke.model.ProxyRequestContext
 import dev.crashteam.repricer.client.ke.model.StyxResponse
-import dev.crashteam.repricer.client.ke.model.web.ProductResponse
-import dev.crashteam.repricer.client.ke.model.web.RootCategoriesResponse
+import dev.crashteam.repricer.client.ke.model.web.*
 import dev.crashteam.repricer.config.RedisConfig
 import dev.crashteam.repricer.config.properties.ServiceProperties
-import dev.crashteam.repricerjober.client.model.CategoryResponse
 import mu.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import java.nio.file.Files
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -25,22 +28,48 @@ class KazanExpressWebClient(
     private val serviceProperties: ServiceProperties
 ) {
 
-    fun getCategory(categoryId: String, size: Int = 24, page: Int = 0): CategoryResponse? {
-        log.debug { "Request category by id. categoryId=$categoryId; size=$size; page=$page" }
+    val categoryGraphQlQuery = lazy {
+        val resource = ClassPathResource(
+            "graphql/category-graphql-query.txt"
+        ).file
+        String(Files.readAllBytes(resource.toPath()))
+    }
+
+    fun getCategoryGraphQL(categoryId: String, limit: Int = 48, offset: Long = 0): CategoryGQLSearchResponse? {
+        val categoryGQLQuery = KazanExpressGQLQuery(
+            operationName = "getMakeSearch",
+            query = categoryGraphQlQuery.value,
+            variables = CategoryGQLQueryVariables(
+                queryInput = CategoryGQLQueryInput(
+                    categoryId = categoryId,
+                    pagination = CategoryGQLQueryInputPagination(
+                        offset = offset,
+                        limit = limit
+                    ),
+                    showAdultContent = "TRUE",
+                    sort = "BY_RELEVANCE_DESC"
+                )
+            )
+        )
+        val query = jacksonObjectMapper().writeValueAsBytes(categoryGQLQuery)
         val proxyRequestBody = ProxyRequestBody(
-            url = "https://api.kazanexpress.ru/api/v2/main/search/product?size=$size&page=$page&categoryId=$categoryId",
-            httpMethod = "GET",
+            url = "https://dshop.kznexpress.ru/",
+            httpMethod = "POST",
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
                         "User-Agent" to USER_AGENT,
+                        "Authorization" to "Basic $AUTH_TOKEN",
+                        "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
+                        "x-request-id" to UUID.randomUUID().toString()
                     )
-                )
+                ),
+                ProxyRequestContext("content", Base64.getEncoder().encodeToString(query))
             )
         )
-        val responseType: ParameterizedTypeReference<StyxResponse<CategoryResponse>> =
-            object : ParameterizedTypeReference<StyxResponse<CategoryResponse>>() {}
+        val responseType: ParameterizedTypeReference<StyxResponse<CategoryGQLResponseWrapper>> =
+            object : ParameterizedTypeReference<StyxResponse<CategoryGQLResponseWrapper>>() {}
         val styxResponse = restTemplate.exchange(
             "${serviceProperties.proxy!!.url}/v2/proxy",
             HttpMethod.POST,
@@ -48,7 +77,7 @@ class KazanExpressWebClient(
             responseType
         ).body
 
-        return handleProxyResponse(styxResponse!!)!!
+        return handleProxyResponse(styxResponse!!)!!.data?.makeSearch
     }
 
     fun getRootCategories(): RootCategoriesResponse? {
@@ -77,7 +106,7 @@ class KazanExpressWebClient(
         return handleProxyResponse(styxResponse!!)!!
     }
 
-    @Cacheable(value = [RedisConfig.KE_CLIENT_CACHE_NAME], key = "#productId", unless="#result == null")
+    @Cacheable(value = [RedisConfig.KE_CLIENT_CACHE_NAME], key = "#productId", unless = "#result == null")
     fun getProductInfo(productId: String): ProductResponse? {
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/v2/product/$productId",
