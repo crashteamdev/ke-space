@@ -2,6 +2,7 @@ package dev.crashteam.repricer.controller
 
 import org.jooq.Record
 import org.jooq.TableField
+import java.math.BigInteger
 import java.util.*
 
 interface ViewFieldToTableFieldMapper<R : Record, T> {
@@ -54,6 +55,18 @@ class IntegerTableFieldMapper<R : Record>(
 
     override fun map(value: String): Int {
         return value.toInt()
+    }
+}
+
+class BigIntegerTableFieldMapper<R : Record>(
+    val tableField: TableField<R, BigInteger>
+) : ViewFieldToTableFieldMapper<R, BigInteger> {
+    override fun tableField(): TableField<R, BigInteger> {
+        return tableField
+    }
+
+    override fun map(value: String): BigInteger {
+        return value.toBigInteger()
     }
 }
 

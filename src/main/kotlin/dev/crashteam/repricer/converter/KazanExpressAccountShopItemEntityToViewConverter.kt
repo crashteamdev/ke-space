@@ -14,6 +14,7 @@ class KazanExpressAccountShopItemEntityToViewConverter :
             this.id = source.id
             this.productId = source.productId
             this.skuId = source.skuId
+            this.skuTitle = source.skuTitle
             this.name = source.name
             this.photoKey = source.photoKey
             this.price = BigDecimal.valueOf(source.price).movePointLeft(2).toDouble()

@@ -235,7 +235,8 @@ class AccountsController(
                 "availableAmount" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
                 "minimumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
                 "maximumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MAXIMUM_THRESHOLD),
-                "step" to IntegerTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.STEP)
+                "step" to IntegerTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.STEP),
+                "discount" to BigIntegerTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.DISCOUNT)
             )
             val filterCondition = filter?.let {
                 FilterOperation.parse(filter, mapFields)
