@@ -64,7 +64,6 @@ class SecurityConfig(
     @Order(2)
     fun oAuthWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
-            .securityMatcher(pathMatchers(HttpMethod.OPTIONS, "/**")).anonymous().and()
             .cors().configurationSource(createCorsConfigSource()).and()
             .authorizeExchange().anyExchange().authenticated().and()
             .oauth2ResourceServer()
@@ -109,6 +108,7 @@ class SecurityConfig(
         config.addAllowedMethod(HttpMethod.PATCH)
         config.addAllowedMethod(HttpMethod.PUT)
         config.addAllowedMethod(HttpMethod.DELETE)
+        config.addAllowedMethod(HttpMethod.OPTIONS)
         config.allowCredentials = true
         config.allowedOrigins = null
         config.allowedOriginPatterns = listOf("*")
