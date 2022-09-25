@@ -112,7 +112,7 @@ class UpdateKeAccountService(
                         keAccountShop.externalShopId,
                         accountShopItem.productId
                     )
-                    val kazanExpressAccountShopItemEntities = accountShopItem.skuList.mapNotNull { shopItemSku ->
+                    val kazanExpressAccountShopItemEntities = accountShopItem.skuList.map { shopItemSku ->
                         val kazanExpressAccountShopItemEntity = keAccountShopItemRepository.findShopItem(
                             keAccountId,
                             keAccountShop.id!!,
@@ -129,8 +129,8 @@ class UpdateKeAccountService(
                             skuId = shopItemSku.skuId,
                             name = shopItemSku.productTitle,
                             photoKey = photoKey,
-                            purchasePrice = shopItemSku.purchasePrice?.toLong(),
-                            price = shopItemSku.price.toLong(),
+                            purchasePrice = shopItemSku.purchasePrice?.setScale(2)?.toLong(),
+                            price = shopItemSku.price.setScale(2).toLong(),
                             barCode = shopItemSku.barcode,
                             productSku = accountShopItem.skuTitle,
                             skuTitle = shopItemSku.skuFullTitle,
