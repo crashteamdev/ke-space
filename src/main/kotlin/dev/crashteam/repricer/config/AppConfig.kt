@@ -13,10 +13,10 @@ class AppConfig {
     fun retryTemplate(): RetryTemplate {
         val retryTemplate = RetryTemplate()
         val fixedBackOffPolicy = FixedBackOffPolicy()
-        fixedBackOffPolicy.backOffPeriod = 5000L
+        fixedBackOffPolicy.backOffPeriod = 30000L
         retryTemplate.setBackOffPolicy(fixedBackOffPolicy)
         val retryPolicy = SimpleRetryPolicy()
-        retryPolicy.maxAttempts = 3
+        retryPolicy.maxAttempts = 5
         retryTemplate.setRetryPolicy(retryPolicy)
 
         return retryTemplate
