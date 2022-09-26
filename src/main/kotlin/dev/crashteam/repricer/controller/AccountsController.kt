@@ -363,6 +363,7 @@ class AccountsController(
             patchKeAccount.flatMap { request ->
                 val response = try {
                     keAccountService.editKeAccount(principal.name, id, request.login, request.password)
+                    keAccountService.initializeKeAccountJob(principal.name, id)
                     ResponseEntity.ok().build()
                 } catch (e: UserNotFoundException) {
                     ResponseEntity.notFound().build<Void>()
