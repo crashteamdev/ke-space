@@ -11,6 +11,7 @@ import mu.KotlinLogging
 import org.quartz.JobBuilder
 import org.quartz.Scheduler
 import org.quartz.SimpleTrigger
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,6 +27,7 @@ class UpdateKeAccountService(
     private val keAccountShopItemRepository: KeAccountShopItemRepository,
     private val kazanExpressSecureService: KazanExpressSecureService,
     private val scheduler: Scheduler,
+    private val retryTemplate: RetryTemplate
 ) {
 
     @Transactional
@@ -95,58 +97,65 @@ class UpdateKeAccountService(
         for (keAccountShop in keAccountShops) {
             var page = 0
             val shopUpdateTime = LocalDateTime.now()
-            while (true) {
-                val accountShopItems = kazanExpressSecureService.getAccountShopItems(
-                    userId,
-                    keAccountId,
-                    keAccountShop.externalShopId,
-                    page
-                )
-
-                if (accountShopItems.isEmpty()) break
-
-                for (accountShopItem in accountShopItems) {
-                    val productInfo = kazanExpressSecureService.getProductInfo(
+            var isActive = true
+            while (isActive) {
+                retryTemplate.execute<Void, Exception> {
+                    val accountShopItems = kazanExpressSecureService.getAccountShopItems(
                         userId,
                         keAccountId,
                         keAccountShop.externalShopId,
-                        accountShopItem.productId
+                        page
                     )
-                    val kazanExpressAccountShopItemEntities = accountShopItem.skuList.map { shopItemSku ->
-                        val kazanExpressAccountShopItemEntity = keAccountShopItemRepository.findShopItem(
-                            keAccountId,
-                            keAccountShop.id!!,
-                            accountShopItem.productId,
-                            shopItemSku.skuId
-                        )
-                        val photoKey = accountShopItem.image.split("/")[3]
-                        KazanExpressAccountShopItemEntity(
-                            id = kazanExpressAccountShopItemEntity?.id ?: UUID.randomUUID(),
-                            keAccountId = keAccountId,
-                            keAccountShopId = keAccountShop.id,
-                            categoryId = productInfo.category.id,
-                            productId = accountShopItem.productId,
-                            skuId = shopItemSku.skuId,
-                            name = shopItemSku.productTitle,
-                            photoKey = photoKey,
-                            purchasePrice = shopItemSku.purchasePrice?.movePointRight(2)?.toLong(),
-                            price = shopItemSku.price.movePointRight(2).toLong(),
-                            barCode = shopItemSku.barcode,
-                            productSku = accountShopItem.skuTitle,
-                            skuTitle = shopItemSku.skuFullTitle,
-                            availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,
-                            lastUpdate = shopUpdateTime
-                        )
+
+                    if (accountShopItems.isEmpty()) {
+                        isActive = false
+                        return@execute null
                     }
-                    keAccountShopItemRepository.saveBatch(kazanExpressAccountShopItemEntities)
+
+                    for (accountShopItem in accountShopItems) {
+                        val productInfo = kazanExpressSecureService.getProductInfo(
+                            userId,
+                            keAccountId,
+                            keAccountShop.externalShopId,
+                            accountShopItem.productId
+                        )
+                        val kazanExpressAccountShopItemEntities = accountShopItem.skuList.map { shopItemSku ->
+                            val kazanExpressAccountShopItemEntity = keAccountShopItemRepository.findShopItem(
+                                keAccountId,
+                                keAccountShop.id!!,
+                                accountShopItem.productId,
+                                shopItemSku.skuId
+                            )
+                            val photoKey = accountShopItem.image.split("/")[3]
+                            KazanExpressAccountShopItemEntity(
+                                id = kazanExpressAccountShopItemEntity?.id ?: UUID.randomUUID(),
+                                keAccountId = keAccountId,
+                                keAccountShopId = keAccountShop.id,
+                                categoryId = productInfo.category.id,
+                                productId = accountShopItem.productId,
+                                skuId = shopItemSku.skuId,
+                                name = shopItemSku.productTitle,
+                                photoKey = photoKey,
+                                purchasePrice = shopItemSku.purchasePrice?.movePointRight(2)?.toLong(),
+                                price = shopItemSku.price.movePointRight(2).toLong(),
+                                barCode = shopItemSku.barcode,
+                                productSku = accountShopItem.skuTitle,
+                                skuTitle = shopItemSku.skuFullTitle,
+                                availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,
+                                lastUpdate = shopUpdateTime
+                            )
+                        }
+                        keAccountShopItemRepository.saveBatch(kazanExpressAccountShopItemEntities)
+                    }
+                    page += 1
+                    null
                 }
-                page += 1
+                keAccountShopItemRepository.deleteWhereOldLastUpdate(
+                    keAccountId,
+                    keAccountShop.id!!,
+                    shopUpdateTime
+                )
             }
-            keAccountShopItemRepository.deleteWhereOldLastUpdate(
-                keAccountId,
-                keAccountShop.id!!,
-                shopUpdateTime
-            )
         }
     }
 
