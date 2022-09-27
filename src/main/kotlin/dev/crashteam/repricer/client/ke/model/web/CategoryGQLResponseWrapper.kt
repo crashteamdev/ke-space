@@ -11,7 +11,7 @@ data class CategoryGQLResponse(
 data class CategoryGQLSearchResponse(
     val category: CategoryGQLInfo,
     val categoryTree: List<CategoryGQLTreeDataWrapper>,
-    val items: List<CategoryGQLCatalogCard>,
+    val items: List<CategoryGQLCatalogCard> = emptyList(),
     val total: Long
 )
 

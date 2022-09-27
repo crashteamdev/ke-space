@@ -34,6 +34,7 @@ class KeShopItemJob : QuartzJobBean() {
         while (true) {
             val categoryResponse =
                 kazanExpressClient.getCategoryGraphQL(categoryId = categoryId.toString(), limit = 48, offset = 0)
+            if (categoryResponse?.items.isNullOrEmpty()) break
             val products = categoryResponse?.items ?: break
             products.mapNotNull { categoryProduct ->
                 Thread.sleep(Random.nextLong(50, 500))
