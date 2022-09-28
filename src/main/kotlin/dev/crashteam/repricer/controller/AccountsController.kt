@@ -39,7 +39,6 @@ class AccountsController(
     private val updateKeAccountService: UpdateKeAccountService,
     private val keShopItemService: KeShopItemService,
     private val keShopItemPriceChangeRepository: KeShopItemPriceHistoryRepository,
-    private val keShopItemRepository: KeShopItemRepository,
     private val conversionService: ConversionService
 ) : AccountsApi {
 
