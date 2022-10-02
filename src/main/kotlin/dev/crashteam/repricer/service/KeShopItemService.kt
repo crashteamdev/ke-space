@@ -30,16 +30,17 @@ class KeShopItemService(
 
     @Transactional
     fun addShopItemFromKeData(productData: ProductData) {
-        val kazanExpressShopItemEntities = productData.skuList!!.map { productSplit ->
-            val photo: ProductPhoto? = productSplit.characteristics.firstNotNullOfOrNull {
+        val kazanExpressShopItemEntities = productData.skuList!!.mapNotNull { productSplit ->
+            val photo: ProductPhoto = productSplit.characteristics.firstNotNullOfOrNull {
                 val productCharacteristic = productData.characteristics[it.charIndex]
                 val characteristicValue = productCharacteristic.values[it.valueIndex]
                 val value = characteristicValue.value
                 productData.photos.filter { photo -> photo.color != null }
                     .find { photo -> photo.color == value }
-            } ?: productData.photos.firstOrNull()
+            } ?: productData.photos.firstOrNull() ?: return@mapNotNull null // Ignore empty photo item
+
             val url =
-                "https://ke-images.servicecdn.ru/${photo!!.photoKey}/t_product_240_high.jpg" // TODO: avoid static url
+                "https://ke-images.servicecdn.ru/${photo.photoKey}/t_product_240_high.jpg" // TODO: avoid static url
             val imageFingerprints = generateImageFingerprints(url)
             val characteristics = productSplit.characteristics.joinToString {
                 val productCharacteristic = productData.characteristics[it.charIndex]
