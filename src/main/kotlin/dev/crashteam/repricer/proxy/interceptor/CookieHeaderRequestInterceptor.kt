@@ -5,7 +5,6 @@ import dev.crashteam.repricer.proxy.ProxyManager
 import dev.crashteam.repricer.proxy.model.ProxyAddress
 import dev.crashteam.repricer.repository.redis.CookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
-import io.github.bonigarcia.wdm.WebDriverManager
 import mu.KotlinLogging
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.ChromeDriver
