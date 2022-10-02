@@ -100,6 +100,7 @@ class UpdateKeAccountService(
             var isActive = true
             while (isActive) {
                 retryTemplate.execute<Void, Exception> {
+                    Thread.sleep(Random().nextLong(1000, 4000))
                     val accountShopItems = kazanExpressSecureService.getAccountShopItems(
                         userId,
                         keAccountId,

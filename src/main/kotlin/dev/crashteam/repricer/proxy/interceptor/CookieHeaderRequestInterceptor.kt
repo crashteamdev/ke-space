@@ -6,8 +6,7 @@ import dev.crashteam.repricer.proxy.model.ProxyAddress
 import dev.crashteam.repricer.repository.redis.CookieRepository
 import dev.crashteam.repricer.repository.redis.entity.CookieEntity
 import mu.KotlinLogging
-import org.openqa.selenium.By
-import org.openqa.selenium.Keys
+import org.openqa.selenium.*
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
@@ -19,11 +18,13 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
+import java.net.URI
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.Predicate
 
 private val log = KotlinLogging.logger {}
 
@@ -141,16 +142,25 @@ class CookieHeaderRequestInterceptor(
         // Other
         options.addArguments("disable-infobars")
 
-        val proxy = org.openqa.selenium.Proxy().apply {
-            socksProxy = "${proxyAddress.host}:${proxyAddress.socksPort}"
-            socksUsername = proxyAddress.login
-            socksPassword = proxyAddress.password
+        val proxy = Proxy().apply {
+            isAutodetect = false
+            proxyType = Proxy.ProxyType.MANUAL
+            httpProxy = "${proxyAddress.host}:${proxyAddress.port}"
+            sslProxy = "${proxyAddress.host}:${proxyAddress.port}"
         }
         val desiredCapabilities = DesiredCapabilities()
         desiredCapabilities.setCapability(CapabilityType.PROXY, proxy)
-        options.merge(desiredCapabilities)
 
-        return ChromeDriver(options)
+        val chromeDriver = ChromeDriver(options.merge(desiredCapabilities))
+        val uriPredicate = Predicate { uri: URI ->
+            uri.host.contains(proxyAddress.host)
+        }
+        (chromeDriver as HasAuthentication).register(
+            uriPredicate,
+            UsernameAndPassword.of(proxyAddress.login, proxyAddress.password)
+        )
+
+        return chromeDriver
     }
 
     data class ChromeBrowser(
