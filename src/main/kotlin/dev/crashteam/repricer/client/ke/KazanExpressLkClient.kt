@@ -74,6 +74,10 @@ class KazanExpressLkClient(
                 HttpMethod.POST,
                 HttpEntity<ShopItemPriceChangePayload>(payload, headers)
             )
+        if (!responseEntity.statusCode.is2xxSuccessful) {
+            log.warn { "Bad response while trying to change item price." +
+                    " statusCode=${responseEntity.statusCode};Body=${responseEntity.body}" }
+        }
 
         return responseEntity.statusCode.is2xxSuccessful
     }
