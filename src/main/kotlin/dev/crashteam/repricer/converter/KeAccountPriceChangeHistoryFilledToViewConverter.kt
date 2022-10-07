@@ -3,6 +3,7 @@ package dev.crashteam.repricer.converter
 import dev.crashteam.openapi.kerepricer.model.KeAccountPriceChangeHistory
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemPriceHistoryEntityJointItemAndShopEntity
 import org.springframework.stereotype.Component
+import java.time.ZoneOffset
 
 @Component
 class KeAccountPriceChangeHistoryFilledToViewConverter :
@@ -18,6 +19,7 @@ class KeAccountPriceChangeHistoryFilledToViewConverter :
             this.oldPrice = source.oldPrice.toBigDecimal().setScale(2).toDouble()
             this.newPrice = source.price.toBigDecimal().setScale(2).toDouble()
             this.barcode = source.barcode
+            this.changeTime = source.changeTime.atOffset(ZoneOffset.UTC)
         }
     }
 }

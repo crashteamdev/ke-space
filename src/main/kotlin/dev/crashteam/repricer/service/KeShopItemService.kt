@@ -70,18 +70,20 @@ class KeShopItemService(
         val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
             ?: throw IllegalArgumentException("Not found product. productId=$productId;skuId=$skuId")
         val similarItems = if (kazanExpressShopItemEntity.avgHashFingerprint != null) {
-            keShopItemRepository.findSimilarItemsByNameAndHash(
+            keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
                 productId,
                 skuId,
                 kazanExpressShopItemEntity.avgHashFingerprint,
                 kazanExpressShopItemEntity.pHashFingerprint,
-                kazanExpressShopItemEntity.name
+                kazanExpressShopItemEntity.name,
+                kazanExpressShopItemEntity.categoryId
             )
         } else {
-            keShopItemRepository.findSimilarItemsByName(
+            keShopItemRepository.findSimilarItemsByNameAndCategoryId(
                 kazanExpressShopItemEntity.productId,
                 kazanExpressShopItemEntity.skuId,
-                kazanExpressShopItemEntity.name
+                kazanExpressShopItemEntity.name,
+                kazanExpressShopItemEntity.categoryId
             )
         }
 
@@ -96,17 +98,19 @@ class KeShopItemService(
         name: String
     ): List<KazanExpressShopItemEntity> {
         val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
-        return keShopItemRepository.findSimilarItemsByNameAndHash(
+        return keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
             productId,
             skuId,
             avgHashFingerprint,
             pHashFingerprint,
-            targetShopItemEntity.name
+            targetShopItemEntity.name,
+            targetShopItemEntity.categoryId
         )
     }
 
     fun findSimilarItemsByName(productId: Long, skuId: Long, name: String): List<KazanExpressShopItemEntity> {
-        return keShopItemRepository.findSimilarItemsByName(productId, skuId, name)
+        val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
+        return keShopItemRepository.findSimilarItemsByNameAndCategoryId(productId, skuId, name, targetShopItemEntity.categoryId)
     }
 
     private fun generateImageFingerprints(url: String): ImageFingerprintHolder? {

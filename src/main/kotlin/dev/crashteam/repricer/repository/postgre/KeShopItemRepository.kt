@@ -108,12 +108,20 @@ class KeShopItemRepository(
             .fetchOne()?.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
 
-    fun findSimilarItemsByNameAndHash(
+    fun findByProductId(productId: Long): List<KazanExpressShopItemEntity> {
+        val s = KE_SHOP_ITEM
+        return dsl.selectFrom(s)
+            .where(s.PRODUCT_ID.eq(productId))
+            .fetch().map { recordToKazanExpressShopItemMapper.convert(it) }
+    }
+
+    fun findSimilarItemsByNameAndHashAndCategoryId(
         productId: Long,
         skuId: Long,
         avgHash: String? = null,
         pHash: String? = null,
-        name: String
+        name: String,
+        categoryId: Long,
     ): List<KazanExpressShopItemEntity> {
         val s = KE_SHOP_ITEM
         val records = dsl.selectFrom(s)
@@ -123,23 +131,26 @@ class KeShopItemRepository(
                         "similarity({0}, {1})",
                         Double::class.java, s.NAME, name
                     ).greaterThan(0.6)
-                ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+                ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId))).and(s.CATEGORY_ID.eq(categoryId))
             ).limit(30).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
 
-    fun findSimilarItemsByName(
+    fun findSimilarItemsByNameAndCategoryId(
         productId: Long,
         skuId: Long,
-        name: String
+        name: String,
+        categoryId: Long,
     ): List<KazanExpressShopItemEntity> {
         val s = KE_SHOP_ITEM
         val records = dsl.selectFrom(s)
-            .where(DSL.field(
-                "similarity({0}, {1})",
-                Double::class.java, s.NAME, name
-            ).greaterThan(0.4).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+            .where(
+                DSL.field(
+                    "similarity({0}, {1})",
+                    Double::class.java, s.NAME, name
+                ).greaterThan(0.4).and(s.CATEGORY_ID.eq(categoryId))
+                    .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
             ).limit(30).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }

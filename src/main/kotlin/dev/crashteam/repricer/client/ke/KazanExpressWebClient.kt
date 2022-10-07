@@ -55,7 +55,7 @@ class KazanExpressWebClient(
                         "User-Agent" to USER_AGENT,
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
-                        "x-request-id" to UUID.randomUUID().toString()
+                        "x-iid" to UUID.randomUUID().toString()
                     )
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(query))
