@@ -94,7 +94,7 @@
         <dependency>
             <groupId>dev.crashteam</groupId>
             <artifactId>openapi-ke-repricer</artifactId>
-            <version>1.32-2b56147-server</version>
+            <version>1.33-51147d2-server</version>
         </dependency>
         <dependency>
             <groupId>dev.brachtendorf</groupId>
