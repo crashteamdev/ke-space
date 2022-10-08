@@ -66,10 +66,11 @@ class KeShopItemService(
     fun findSimilarItems(
         productId: Long,
         skuId: Long,
+        categoryId: Long,
+        productName: String
     ): List<KazanExpressShopItemEntity> {
         val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
-            ?: throw IllegalArgumentException("Not found product. productId=$productId;skuId=$skuId")
-        val similarItems = if (kazanExpressShopItemEntity.avgHashFingerprint != null) {
+        val similarItems = if (kazanExpressShopItemEntity?.avgHashFingerprint != null) {
             keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
                 productId,
                 skuId,
@@ -80,10 +81,10 @@ class KeShopItemService(
             )
         } else {
             keShopItemRepository.findSimilarItemsByNameAndCategoryId(
-                kazanExpressShopItemEntity.productId,
-                kazanExpressShopItemEntity.skuId,
-                kazanExpressShopItemEntity.name,
-                kazanExpressShopItemEntity.categoryId
+                productId,
+                skuId,
+                productName,
+                categoryId,
             )
         }
 

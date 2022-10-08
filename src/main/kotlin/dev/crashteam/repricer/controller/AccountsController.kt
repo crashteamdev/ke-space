@@ -7,7 +7,6 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
-import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
 import dev.crashteam.repricer.service.*
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
@@ -559,7 +558,12 @@ class AccountsController(
             val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<Flux<SimilarItem>>().toMono()
             val similarItems =
-                keShopItemService.findSimilarItems(keAccountShopItem.productId, keAccountShopItem.skuId).map {
+                keShopItemService.findSimilarItems(
+                    keAccountShopItem.productId,
+                    keAccountShopItem.skuId,
+                    keAccountShopItem.categoryId,
+                    keAccountShopItem.name
+                ).map {
                     SimilarItem().apply {
                         this.productId = it.productId
                         this.skuId = it.skuId
@@ -570,8 +574,10 @@ class AccountsController(
 
             ResponseEntity.ok(similarItems.toFlux()).toMono()
         }.doOnError {
-            log.warn(it) { "Failed to get ke account item similar items" +
-                    ". keAccountId=$id;shopId=$shopId;shopItemId=$shopItemId" }
+            log.warn(it) {
+                "Failed to get ke account item similar items" +
+                        ". keAccountId=$id;shopId=$shopId;shopItemId=$shopItemId"
+            }
         }
     }
 

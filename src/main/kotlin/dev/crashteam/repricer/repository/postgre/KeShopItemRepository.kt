@@ -130,7 +130,7 @@ class KeShopItemRepository(
                     DSL.field(
                         "similarity({0}, {1})",
                         Double::class.java, s.NAME, name
-                    ).greaterThan(0.6)
+                    ).greaterThan(0.5)
                 ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId))).and(s.CATEGORY_ID.eq(categoryId))
             ).limit(30).fetch()
 
@@ -149,7 +149,7 @@ class KeShopItemRepository(
                 DSL.field(
                     "similarity({0}, {1})",
                     Double::class.java, s.NAME, name
-                ).greaterThan(0.4).and(s.CATEGORY_ID.eq(categoryId))
+                ).greaterThan(0.5).and(s.CATEGORY_ID.eq(categoryId))
                     .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
             ).limit(30).fetch()
 

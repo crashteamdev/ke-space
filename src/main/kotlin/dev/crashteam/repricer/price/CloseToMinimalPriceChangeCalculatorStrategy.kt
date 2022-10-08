@@ -54,6 +54,7 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
         return CalculationResult(newPrice = newPrice, competitorId = minimalPriceCompetitor.competitorEntity.id)
     }
 
+    // TODO: вынести отсюда получение цены конкурента что еще обновляло в базе запись
     private fun getCompetitorPrice(competitor: ShopItemCompetitor): BigDecimal? {
         return if (competitor.shopItemEntity.lastUpdate.isBefore(LocalDateTime.now().minusHours(4))) {
             log.info {
