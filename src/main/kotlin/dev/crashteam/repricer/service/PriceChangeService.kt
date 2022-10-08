@@ -74,7 +74,7 @@ class PriceChangeService(
                 sellPrice = if (poolFilledEntity.discount != null) {
                     (calculationResult.newPrice - ((calculationResult.newPrice * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
                         100
-                    ))).toLong()
+                    ))).movePointLeft(2).toLong()
                 } else calculationResult.newPrice.movePointLeft(2).toLong(),
                 skuTitle = poolFilledEntity.skuTitle,
                 barCode = poolFilledEntity.barcode.toString(),
