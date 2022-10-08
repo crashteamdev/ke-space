@@ -8,7 +8,7 @@ data class AccountProductDescription(
     val commission: Short,
     val hasActiveCalendarEvents: Boolean,
     val hasCustomCharacteristics: Boolean,
-    val definedCharacteristicList: List<DefinedCharacteristic>?,
+    val definedCharacteristicList: List<DefinedCharacteristic>,
     val customCharacteristicList: List<CustomCharacteristic>,
     val skuList: List<AccountProductSku>
 )
@@ -16,7 +16,7 @@ data class AccountProductDescription(
 data class DefinedCharacteristic(
     val characteristicTitle: String,
     val orderingNumber: Int,
-    val definedCharacteristicList: List<DefinedCharacteristicValue>
+    val characteristicValues: List<DefinedCharacteristicValue>
 )
 
 data class DefinedCharacteristicValue(
