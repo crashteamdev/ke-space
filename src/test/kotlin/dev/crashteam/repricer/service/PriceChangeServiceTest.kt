@@ -1,6 +1,7 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.ContainerConfiguration
+import dev.crashteam.repricer.client.ke.model.lk.AccountProductDescription
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.enums.UpdateState
 import dev.crashteam.repricer.repository.postgre.*
@@ -128,6 +129,20 @@ class PriceChangeServiceTest : ContainerConfiguration() {
             lastUpdate = LocalDateTime.now()
         )
         keShopItemPoolRepository.save(KazanExpressAccountShopItemPoolEntity(keAccountShopItemId))
+        whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
+            AccountProductDescription(
+                id = 12345L,
+                shopSkuTitle = "skuTitle",
+                title = "justTitle",
+                productSkuTitle = "productSkuTitle",
+                commission = 1,
+                hasActiveCalendarEvents = true,
+                hasCustomCharacteristics = false,
+                definedCharacteristicList = emptyList(),
+                customCharacteristicList = emptyList(),
+                skuList = emptyList()
+            )
+        }
         whenever(kazanExpressSecureService.changeAccountShopItemPrice(any(), any(), any(), any())).then { true }
 
         // When
