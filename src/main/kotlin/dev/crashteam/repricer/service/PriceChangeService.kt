@@ -67,10 +67,10 @@ class PriceChangeService(
                 }
                 val changeSku = SkuPriceChangeSku(
                     id = poolFilledEntity.skuId,
-                    fullPrice = calculationResult.newPrice.multiply(
-                        poolFilledEntity.discount?.toBigDecimal() ?: BigDecimal.ONE
-                    ).toLong(),
-                    sellPrice = calculationResult.newPrice.toLong(),
+                    fullPrice = if (poolFilledEntity.discount != null) {
+                        ((calculationResult.newPrice * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(100)).toLong()
+                    } else calculationResult.newPrice.movePointLeft(2).toLong(),
+                    sellPrice = calculationResult.newPrice.movePointLeft(2).toLong(),
                     skuTitle = poolFilledEntity.skuTitle,
                     barCode = poolFilledEntity.barcode.toString(),
                 )
