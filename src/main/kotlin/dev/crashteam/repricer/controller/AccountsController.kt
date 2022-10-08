@@ -8,10 +8,7 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACC
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
-import dev.crashteam.repricer.service.KeAccountService
-import dev.crashteam.repricer.service.KeAccountShopService
-import dev.crashteam.repricer.service.KeShopItemService
-import dev.crashteam.repricer.service.UpdateKeAccountService
+import dev.crashteam.repricer.service.*
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
 import mu.KotlinLogging
@@ -39,7 +36,8 @@ class AccountsController(
     private val updateKeAccountService: UpdateKeAccountService,
     private val keShopItemService: KeShopItemService,
     private val keShopItemPriceChangeRepository: KeShopItemPriceHistoryRepository,
-    private val conversionService: ConversionService
+    private val conversionService: ConversionService,
+    private val urlToProductResolver: UrlToProductResolver
 ) : AccountsApi {
 
     override fun addKeAccount(
@@ -72,13 +70,25 @@ class AccountsController(
     ): Mono<ResponseEntity<Void>> {
         return exchange.getPrincipal<Principal>().flatMap { principal ->
             addKeAccountShopItemCompetitorRequest.flatMap { request ->
+                var productId = request.competitorProductId?.toLong()
+                var skuId = request.competitorSkuId?.toLong()
+                if (request.url != null) {
+                    val resolvedKeProduct = urlToProductResolver.resolve(request.url)
+                    if (resolvedKeProduct != null) {
+                        productId = resolvedKeProduct.productId.toLong()
+                        skuId = resolvedKeProduct.skuId.toLong()
+                    }
+                }
+                if (productId == null || skuId == null) {
+                    return@flatMap ResponseEntity.badRequest().build<Void>().toMono()
+                }
                 keAccountShopService.addShopItemCompetitor(
                     principal.name,
                     id,
                     request.shopItemRef.shopId,
                     request.shopItemRef.shopItemId,
-                    request.competitorProductId.toLong(),
-                    request.competitorSkuId.toLong()
+                    productId,
+                    skuId
                 )
                 ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
             }
