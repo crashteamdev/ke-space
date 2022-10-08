@@ -8,6 +8,7 @@ import dev.crashteam.repricer.repository.postgre.KeAccountShopItemRepository
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemPriceHistoryEntity
 import mu.KotlinLogging
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -23,6 +24,7 @@ class PriceChangeService(
     private val keShopItemPriceHistoryRepository: KeShopItemPriceHistoryRepository,
     private val keAccountShopItemRepository: KeAccountShopItemRepository,
     private val priceChangeCalculatorStrategy: PriceChangeCalculatorStrategy,
+    private val retryTemplate: RetryTemplate
 ) {
 
     @Transactional
@@ -39,12 +41,14 @@ class PriceChangeService(
                 )
             )
             if (calculationResult != null) {
-                val accountProductDescription = kazanExpressSecureService.getProductDescription(
-                    userId = userId,
-                    keAccountId = keAccountId,
-                    shopId = poolFilledEntity.externalShopId,
-                    productId = poolFilledEntity.productId
-                )
+                val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
+                    kazanExpressSecureService.getProductDescription(
+                        userId = userId,
+                        keAccountId = keAccountId,
+                        shopId = poolFilledEntity.externalShopId,
+                        productId = poolFilledEntity.productId
+                    )
+                }
                 val skuList = accountProductDescription.skuList.filter { it.id != poolFilledEntity.skuId }.map {
                     SkuPriceChangeSku(
                         id = it.id,
