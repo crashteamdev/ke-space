@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.client.ke
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.config.properties.ServiceProperties
 import mu.KotlinLogging
@@ -77,7 +78,8 @@ class KazanExpressLkClient(
         if (!responseEntity.statusCode.is2xxSuccessful) {
             log.warn {
                 "Bad response while trying to change item price." +
-                        " statusCode=${responseEntity.statusCode};responseBody=${responseEntity.body}"
+                        " statusCode=${responseEntity.statusCode};responseBody=${responseEntity.body};" +
+                        "requestBody=${jacksonObjectMapper().writeValueAsString(payload)}"
             }
         }
 
