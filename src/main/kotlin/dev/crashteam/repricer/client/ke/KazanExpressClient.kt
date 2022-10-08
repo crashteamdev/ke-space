@@ -14,8 +14,8 @@ interface KazanExpressClient {
         shopId: Long,
         payload: ShopItemPriceChangePayload
     ): Boolean
-
     fun getProductInfo(userId: String, userToken: String, shopId: Long, productId: Long): AccountProductInfo
+    fun getProductDescription(userId: String, userToken: String, shopId: Long, productId: Long): AccountProductDescription
     fun auth(userId: String, username: String, password: String): AuthResponse
     fun refreshAuth(userId: String, refreshToken: String): ResponseEntity<AuthResponse>?
     fun checkToken(userId: String, token: String): ResponseEntity<CheckTokenResponse>

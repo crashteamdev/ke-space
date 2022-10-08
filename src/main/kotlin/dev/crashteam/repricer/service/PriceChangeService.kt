@@ -1,7 +1,6 @@
 package dev.crashteam.repricer.service
 
-import dev.crashteam.repricer.client.ke.model.lk.ShopItemPriceChangePayload
-import dev.crashteam.repricer.client.ke.model.lk.SkuPriceChangeSku
+import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.price.PriceChangeCalculatorStrategy
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemPoolRepository
@@ -40,6 +39,40 @@ class PriceChangeService(
                 )
             )
             if (calculationResult != null) {
+                val accountProductDescription = kazanExpressSecureService.getProductDescription(
+                    userId = userId,
+                    keAccountId = keAccountId,
+                    shopId = poolFilledEntity.externalShopId,
+                    productId = poolFilledEntity.productId
+                )
+                val skuList = accountProductDescription.skuList.filter { it.id != poolFilledEntity.skuId }.map {
+                    SkuPriceChangeSku(
+                        id = it.id,
+                        fullPrice = it.fullPrice,
+                        sellPrice = it.sellPrice,
+                        skuTitle = it.skuTitle,
+                        barCode = it.barcode,
+                        skuCharacteristicList = it.skuCharacteristicList.map {
+                            SkuCharacteristic(
+                                it.characteristicTitle,
+                                it.definedType,
+                                it.characteristicValue
+                            )
+                        }
+                    )
+                }
+                val changeSku = SkuPriceChangeSku(
+                    id = poolFilledEntity.skuId,
+                    fullPrice = calculationResult.newPrice.multiply(
+                        poolFilledEntity.discount?.toBigDecimal() ?: BigDecimal.ONE
+                    ).toLong(),
+                    sellPrice = calculationResult.newPrice.toLong(),
+                    skuTitle = poolFilledEntity.skuTitle,
+                    barCode = poolFilledEntity.barcode.toString(),
+                )
+                val allSkuList = skuList.toMutableList().apply {
+                    add(changeSku)
+                }
                 val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
                     userId = userId,
                     keAccountId = keAccountId,
@@ -47,17 +80,19 @@ class PriceChangeService(
                     payload = ShopItemPriceChangePayload(
                         productId = poolFilledEntity.productId,
                         skuForProduct = poolFilledEntity.productSku,
-                        skuList = listOf(
-                            SkuPriceChangeSku(
-                                id = poolFilledEntity.skuId,
-                                fullPrice = calculationResult.newPrice.multiply(
-                                    poolFilledEntity.discount?.toBigDecimal() ?: BigDecimal.ONE
-                                ).toLong(),
-                                sellPrice = calculationResult.newPrice.toLong(),
-                                skuTitle = poolFilledEntity.skuTitle,
-                                barCode = poolFilledEntity.barcode.toString(),
-                            )
-                        )
+                        skuList = allSkuList,
+                        skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics) {
+                            accountProductDescription.customCharacteristicList.map { customCharacteristic ->
+                                SkuTitleCharacteristic(
+                                    customCharacteristic.characteristicTitle,
+                                    customCharacteristic.characteristicValues.map {
+                                        CustomCharacteristicSkuValue(
+                                            it.title,
+                                            it.skuValue
+                                        )
+                                    })
+                            }
+                        } else emptyList()
                     )
                 )
                 if (!changeAccountShopItemPrice) {

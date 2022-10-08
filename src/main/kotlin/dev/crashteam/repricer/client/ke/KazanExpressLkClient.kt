@@ -100,6 +100,27 @@ class KazanExpressLkClient(
         return handleResponse(responseEntity)
     }
 
+    override fun getProductDescription(
+        userId: String,
+        userToken: String,
+        shopId: Long,
+        productId: Long
+    ): AccountProductDescription {
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer $userToken")
+            set("User-Agent", USER_AGENT)
+            set(USER_ID_HEADER, userId)
+        }
+        val responseEntity =
+            lkRestTemplate.exchange<AccountProductDescription>(
+                "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/$productId/description-response",
+                HttpMethod.GET,
+                HttpEntity<Void>(headers)
+            )
+
+        return handleResponse(responseEntity)
+    }
+
     override fun auth(userId: String, username: String, password: String): AuthResponse {
         val map = LinkedMultiValueMap<Any, Any>().apply {
             set("grant_type", "password")

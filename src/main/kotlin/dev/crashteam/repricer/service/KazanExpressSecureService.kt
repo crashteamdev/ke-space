@@ -1,10 +1,7 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.KazanExpressLkClient
-import dev.crashteam.repricer.client.ke.model.lk.AccountProductInfo
-import dev.crashteam.repricer.client.ke.model.lk.AccountShop
-import dev.crashteam.repricer.client.ke.model.lk.AccountShopItem
-import dev.crashteam.repricer.client.ke.model.lk.ShopItemPriceChangePayload
+import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
 import dev.crashteam.repricer.repository.redis.KeUserTokenRepository
 import dev.crashteam.repricer.repository.redis.entity.UserTokenEntity
@@ -45,6 +42,16 @@ class KazanExpressSecureService(
     ): Boolean {
         val userToken = authUser(userId, keAccountId)
         return kazanExpressClient.changeAccountShopItemPrice(userId, userToken, shopId, payload)
+    }
+
+    fun getProductDescription(
+        userId: String,
+        keAccountId: UUID,
+        shopId: Long,
+        productId: Long
+    ): AccountProductDescription {
+        val userToken = authUser(userId, keAccountId)
+        return kazanExpressClient.getProductDescription(userId, userToken, shopId, productId)
     }
 
     fun authUser(
