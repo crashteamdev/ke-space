@@ -1,4 +1,4 @@
-package dev.crashteam.repricer.service
+package dev.crashteam.repricer.service.resolver
 
 interface UrlToProductResolver {
     fun resolve(url: String): ResolvedKeProduct?

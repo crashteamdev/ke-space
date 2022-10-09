@@ -10,6 +10,7 @@ import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepositor
 import dev.crashteam.repricer.service.*
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
+import dev.crashteam.repricer.service.resolver.UrlToProductResolver
 import mu.KotlinLogging
 import org.springframework.core.convert.ConversionService
 import org.springframework.http.HttpHeaders

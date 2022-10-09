@@ -1,4 +1,4 @@
-package dev.crashteam.repricer.service
+package dev.crashteam.repricer.service.resolver
 
 import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
