@@ -522,7 +522,7 @@ class AccountsController(
                 SortOperation.parse(sort, mapFields)
             } else null
 
-            val shopItemPriceHistoryPaginateEntities = keShopItemPriceChangeRepository.findHistoryByShopItemId(
+            val shopItemPriceHistoryPaginateEntities = keShopItemPriceChangeRepository.findHistoryByKeAccountId(
                 id,
                 filterCondition,
                 sortFields,
