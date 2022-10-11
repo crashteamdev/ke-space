@@ -7,4 +7,6 @@ class AdvancedAccountRestriction : AccountRestriction {
     override fun keAccountLimit(): Int = 5
 
     override fun itemPoolLimit(): Int = 50
+
+    override fun itemCompetitorLimit(): Int = 20
 }

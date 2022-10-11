@@ -4,6 +4,7 @@ import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.repository.postgre.*
 import dev.crashteam.repricer.repository.postgre.entity.*
 import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidator
+import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import mu.KotlinLogging
 import org.jooq.Condition
@@ -97,6 +98,11 @@ class KeAccountShopService(
             "Add shop item competitor. userId=$userId; keAccountId=$keAccountId;" +
                     " keAccountShopId=${keAccountShopId}; keAccountShopItemId=${keAccountShopItemId}"
         }
+        val isValidCompetitorItemCount =
+            accountSubscriptionRestrictionValidator.validateItemCompetitorCount(userId, keAccountShopItemId)
+        if (!isValidCompetitorItemCount)
+            throw AccountItemCompetitorLimitExceededException("Pool limit exceeded for user. userId=$userId")
+
         val kazanExpressAccountShopItemEntity =
             keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopId, keAccountShopItemId)
                 ?: throw IllegalArgumentException(

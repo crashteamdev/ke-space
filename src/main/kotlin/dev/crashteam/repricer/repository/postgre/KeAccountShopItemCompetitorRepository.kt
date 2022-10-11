@@ -85,6 +85,16 @@ class KeAccountShopItemCompetitorRepository(
         return records.map { recordToKazanExpressAccountShopItemCompetitorMapper.convert(it) }
     }
 
+    fun findShopItemCompetitorsCount(
+        keAccountShopItemId: UUID
+    ): Int {
+        val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
+        return dsl.selectCount()
+            .from(KE_ACCOUNT_SHOP_ITEM_COMPETITOR)
+            .where(c.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId))
+            .fetchOne(0, Int::class.java) ?: 0
+    }
+
     fun findShopItemCompetitorsWithData(
         keAccountShopItemId: UUID,
     ): List<KazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntity> {

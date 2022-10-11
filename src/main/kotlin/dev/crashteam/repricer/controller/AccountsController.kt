@@ -8,6 +8,7 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACC
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.service.*
+import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
 import dev.crashteam.repricer.service.resolver.UrlToProductResolver
@@ -82,14 +83,18 @@ class AccountsController(
                 if (productId == null || skuId == null) {
                     return@flatMap ResponseEntity.badRequest().build<Void>().toMono()
                 }
-                keAccountShopService.addShopItemCompetitor(
-                    principal.name,
-                    id,
-                    request.shopItemRef.shopId,
-                    request.shopItemRef.shopItemId,
-                    productId,
-                    skuId
-                )
+                try {
+                    keAccountShopService.addShopItemCompetitor(
+                        principal.name,
+                        id,
+                        request.shopItemRef.shopId,
+                        request.shopItemRef.shopItemId,
+                        productId,
+                        skuId
+                    )
+                } catch (e: AccountItemCompetitorLimitExceededException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                }
                 ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
             }
         }.doOnError {
