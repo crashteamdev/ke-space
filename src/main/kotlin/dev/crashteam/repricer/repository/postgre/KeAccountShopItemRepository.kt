@@ -1,6 +1,8 @@
 package dev.crashteam.repricer.repository.postgre
 
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.*
 import dev.crashteam.repricer.extensions.paginate
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
 import dev.crashteam.repricer.repository.postgre.entity.PaginateEntity
@@ -185,8 +187,9 @@ class KeAccountShopItemRepository(
         keAccountShopItemId: UUID
     ): KazanExpressAccountShopItemEntity? {
         val i = KE_ACCOUNT_SHOP_ITEM
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
         val record = dsl.select()
-            .from(i)
+            .from(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
             .where(
                 i.KE_ACCOUNT_ID.eq(keAccountId),
                 i.ID.eq(keAccountShopItemId),
@@ -216,7 +219,8 @@ class KeAccountShopItemRepository(
         offset: Long,
     ): MutableList<PaginateEntity<KazanExpressAccountShopItemEntity>> {
         val i = KE_ACCOUNT_SHOP_ITEM
-        var select = dsl.selectFrom(i)
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        var select = dsl.selectFrom(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
             .where(
                 i.KE_ACCOUNT_ID.eq(keAccountId),
                 i.KE_ACCOUNT_SHOP_ID.eq(keAccountShopId)

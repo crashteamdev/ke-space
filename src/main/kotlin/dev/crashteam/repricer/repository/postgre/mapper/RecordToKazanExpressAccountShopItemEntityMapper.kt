@@ -1,6 +1,7 @@
 package dev.crashteam.repricer.repository.postgre.mapper
 
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
 import org.jooq.Record
 import org.springframework.stereotype.Component
@@ -28,7 +29,8 @@ class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpres
             maximumThreshold = record.getValue(KE_ACCOUNT_SHOP_ITEM.MAXIMUM_THRESHOLD),
             step = record.getValue(KE_ACCOUNT_SHOP_ITEM.STEP),
             lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE),
-            discount = record.getValue(KE_ACCOUNT_SHOP_ITEM.DISCOUNT)
+            discount = record.getValue(KE_ACCOUNT_SHOP_ITEM.DISCOUNT),
+            isInPool = record.get(KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL.KE_ACCOUNT_SHOP_ITEM_ID) != null
         )
     }
 }

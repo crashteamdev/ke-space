@@ -35,7 +35,8 @@ class RecentPriceService(
                 productInfo.payload.data.skuList!!.find { it.id == competitor.shopItemEntity.skuId }!!
             keShopItemRepository.save(
                 competitor.shopItemEntity.copy(
-                    price = productSplit.purchasePrice.movePointRight(2).toLong()
+                    price = productSplit.purchasePrice.movePointRight(2).toLong(),
+                    lastUpdate = LocalDateTime.now()
                 )
             )
 

@@ -2,10 +2,12 @@ package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.price.PriceChangeCalculatorStrategy
+import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemPoolRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemRepository
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemPoolFilledEntity
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemPriceHistoryEntity
 import mu.KotlinLogging
 import org.springframework.retry.support.RetryTemplate
@@ -52,36 +54,7 @@ class PriceChangeService(
                     productId = poolFilledEntity.productId
                 )
             }
-            val skuList = accountProductDescription.skuList.filter { it.id != poolFilledEntity.skuId }.map {
-                SkuPriceChangeSku(
-                    id = it.id,
-                    fullPrice = it.fullPrice,
-                    sellPrice = it.sellPrice,
-                    skuTitle = it.skuTitle,
-                    barCode = it.barcode,
-                    skuCharacteristicList = it.skuCharacteristicList.map {
-                        SkuCharacteristic(
-                            it.characteristicTitle,
-                            it.definedType,
-                            it.characteristicValue
-                        )
-                    }
-                )
-            }
-            val changeSku = SkuPriceChangeSku(
-                id = poolFilledEntity.skuId,
-                fullPrice = calculationResult.newPrice.movePointLeft(2).toLong(),
-                sellPrice = if (poolFilledEntity.discount != null) {
-                    (calculationResult.newPrice - ((calculationResult.newPrice * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
-                        100
-                    ))).movePointLeft(2).toLong()
-                } else calculationResult.newPrice.movePointLeft(2).toLong(),
-                skuTitle = poolFilledEntity.skuTitle,
-                barCode = poolFilledEntity.barcode.toString(),
-            )
-            val allSkuList = skuList.toMutableList().apply {
-                add(changeSku)
-            }
+            val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity, calculationResult)
             val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
                 userId = userId,
                 keAccountId = keAccountId,
@@ -89,7 +62,7 @@ class PriceChangeService(
                 payload = ShopItemPriceChangePayload(
                     productId = poolFilledEntity.productId,
                     skuForProduct = poolFilledEntity.productSku,
-                    skuList = allSkuList,
+                    skuList = newSkuList,
                     skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics) {
                         accountProductDescription.customCharacteristicList.map { customCharacteristic ->
                             SkuTitleCharacteristic(
@@ -135,6 +108,53 @@ class PriceChangeService(
                             "id=${poolFilledEntity.keAccountShopItemId}; productId=${poolFilledEntity.productId}; skuId=${poolFilledEntity.skuId}"
                 }
             }
+        }
+    }
+
+    private fun buildNewSkuList(
+        userId: String,
+        keAccountId: UUID,
+        poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity,
+        calculationResult: CalculationResult
+    ): List<SkuPriceChangeSku> {
+        val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
+            kazanExpressSecureService.getProductDescription(
+                userId = userId,
+                keAccountId = keAccountId,
+                shopId = poolFilledEntity.externalShopId,
+                productId = poolFilledEntity.productId
+            )
+        }
+        val skuList = accountProductDescription.skuList.filter { it.id != poolFilledEntity.skuId }.map {
+            SkuPriceChangeSku(
+                id = it.id,
+                fullPrice = it.fullPrice,
+                sellPrice = it.sellPrice,
+                skuTitle = it.skuTitle,
+                barCode = it.barcode,
+                skuCharacteristicList = it.skuCharacteristicList.map {
+                    SkuCharacteristic(
+                        it.characteristicTitle,
+                        it.definedType,
+                        it.characteristicValue
+                    )
+                }
+            )
+        }
+        val changeSku = SkuPriceChangeSku(
+            id = poolFilledEntity.skuId,
+            fullPrice = calculationResult.newPrice.movePointLeft(2).toLong(),
+            sellPrice = if (poolFilledEntity.discount != null) {
+                (calculationResult.newPrice - ((calculationResult.newPrice * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
+                    100
+                ))).movePointLeft(2).toLong()
+            } else calculationResult.newPrice.movePointLeft(2).toLong(),
+            skuTitle = poolFilledEntity.skuTitle,
+            barCode = poolFilledEntity.barcode.toString(),
+        )
+
+        return skuList.toMutableList().apply {
+            add(changeSku)
         }
     }
 

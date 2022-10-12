@@ -24,6 +24,7 @@ class KazanExpressAccountShopItemEntityToViewConverter :
             this.maximumThreshold = source.maximumThreshold?.let { BigDecimal.valueOf(it).movePointLeft(2).toDouble() }
             this.step = source.step
             this.discount = source.discount?.toBigDecimal()
+            this.isInPool = source.isInPool
         }
     }
 }
