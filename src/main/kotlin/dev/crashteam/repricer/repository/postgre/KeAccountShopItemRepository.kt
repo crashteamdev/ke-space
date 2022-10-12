@@ -172,8 +172,9 @@ class KeAccountShopItemRepository(
         keAccountShopItemId: UUID
     ): KazanExpressAccountShopItemEntity? {
         val i = KE_ACCOUNT_SHOP_ITEM
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
         val record = dsl.select()
-            .from(i)
+            .from(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
             .where(
                 i.KE_ACCOUNT_ID.eq(keAccountId),
                 i.KE_ACCOUNT_SHOP_ID.eq(keAccountShopId),
@@ -247,7 +248,8 @@ class KeAccountShopItemRepository(
         keAccountShopId: UUID
     ): List<KazanExpressAccountShopItemEntity> {
         val i = KE_ACCOUNT_SHOP_ITEM
-        val records = dsl.selectFrom(i)
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        val records = dsl.selectFrom(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
             .where(
                 i.KE_ACCOUNT_ID.eq(keAccountId),
                 i.KE_ACCOUNT_SHOP_ID.eq(keAccountShopId)

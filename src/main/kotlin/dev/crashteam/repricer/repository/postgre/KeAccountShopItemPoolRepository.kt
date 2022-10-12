@@ -82,7 +82,7 @@ class KeAccountShopItemPoolRepository(
         val s = KE_ACCOUNT_SHOP
         val i = KE_ACCOUNT_SHOP_ITEM
         val p = KE_ACCOUNT_SHOP_ITEM_POOL
-        var select = dsl.select(*KE_ACCOUNT_SHOP_ITEM.fields())
+        var select = dsl.select(*KE_ACCOUNT_SHOP_ITEM.fields(), p.KE_ACCOUNT_SHOP_ITEM_ID)
             .from(i)
             .join(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
             .join(s).on(i.KE_ACCOUNT_SHOP_ID.eq(s.ID))
