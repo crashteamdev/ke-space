@@ -92,6 +92,7 @@ class CookieHeaderRequestInterceptor(
                 val newTabName = (chromeDriver.windowHandles as HashSet).toArray()[1].toString()
                 chromeDriver.switchTo().window(newTabName)
                 webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("a[href=\"/seller/signin\"]")) }
+                Thread.sleep(Random().nextLong(1000, 2000))
                 chromeDriver.findElement(By.cssSelector("a[href=\"/seller/signin\"]")).click() // Click on signin button
                 webDriverWait.until { ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.solid")) }
 
