@@ -18,7 +18,8 @@ class RecordToKazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntityMap
             skuId = record.getValue(KE_ACCOUNT_SHOP_ITEM_COMPETITOR.SKU_ID),
             name = record.getValue(KE_SHOP_ITEM.NAME),
             availableAmount = record.getValue(KE_SHOP_ITEM.AVAILABLE_AMOUNT),
-            price = record.getValue(KE_SHOP_ITEM.PRICE)
+            price = record.getValue(KE_SHOP_ITEM.PRICE),
+            photoKey = record.getValue(KE_SHOP_ITEM.PHOTO_KEY)
         )
     }
 }

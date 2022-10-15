@@ -10,4 +10,5 @@ data class KazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntity(
     val name: String,
     val availableAmount: Long,
     val price: Long,
+    val photoKey: String,
 )

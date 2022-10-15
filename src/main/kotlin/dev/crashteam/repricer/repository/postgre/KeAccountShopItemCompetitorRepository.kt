@@ -53,6 +53,7 @@ class KeAccountShopItemCompetitorRepository(
             s.NAME,
             s.AVAILABLE_AMOUNT,
             s.PRICE,
+            s.PHOTO_KEY,
             c.ID,
             c.KE_ACCOUNT_SHOP_ITEM_ID,
         )
