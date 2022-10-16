@@ -19,7 +19,7 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
         val keAccountRepository = applicationContext.getBean(KeAccountRepository::class.java)
         val updateKeAccountService = applicationContext.getBean(UpdateKeAccountService::class.java)
         val kazanExpressAccountEntities =
-            keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(1))
+            keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(3))
         log.info { "Execute update account job for ${kazanExpressAccountEntities.size} ke account" }
         for (kazanExpressAccountEntity in kazanExpressAccountEntities) {
             val updateJob = updateKeAccountService.executeUpdateJob(
