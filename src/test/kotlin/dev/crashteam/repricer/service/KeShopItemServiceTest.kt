@@ -55,34 +55,34 @@ class KeShopItemServiceTest : ContainerConfiguration() {
         assertEquals(skuId, kazanExpressShopItemEntity?.skuId)
     }
 
-    @Test
-    fun `find similar item`() {
-        // Given
-        val firstProductId = 4315422L
-        val firstSkuId = 5424121L
-        val firstProduct =
-            buildProductResponse(firstProductId, firstSkuId, "Батарейка крона 6LR61 Smartbuy Ultra алкалиновая")
-        val secondProductId = 764253532L
-        val secondSkuId = 123523543632L
-        val secondProduct = buildProductResponse(
-            secondProductId,
-            secondSkuId,
-            "Батарейка SmartBuy Ultra Alkaline КРОНА 9V алкалиновая 6LR61"
-        )
-        whenever(remoteImageLoader.loadResource(any()))
-            .then { firstProductImage.inputStream.readAllBytes() }
-            .then { secondProductImage.inputStream.readAllBytes() }
-
-        // When
-        keShopItemService.addShopItemFromKeData(firstProduct.payload?.data!!)
-        keShopItemService.addShopItemFromKeData(secondProduct.payload?.data!!)
-        val similarItems = keShopItemService.findSimilarItemsByName(firstProductId, firstSkuId, firstProduct.payload!!.data.title)
-
-        // Then
-        assertEquals(1, similarItems.size)
-        assertEquals(secondProductId, similarItems.first().productId)
-        assertEquals(secondSkuId, similarItems.first().skuId)
-    }
+//    @Test
+//    fun `find similar item`() {
+//        // Given
+//        val firstProductId = 4315422L
+//        val firstSkuId = 5424121L
+//        val firstProduct =
+//            buildProductResponse(firstProductId, firstSkuId, "Батарейка крона 6LR61 Smartbuy Ultra алкалиновая")
+//        val secondProductId = 764253532L
+//        val secondSkuId = 123523543632L
+//        val secondProduct = buildProductResponse(
+//            secondProductId,
+//            secondSkuId,
+//            "Батарейка SmartBuy Ultra Alkaline КРОНА 9V алкалиновая 6LR61"
+//        )
+//        whenever(remoteImageLoader.loadResource(any()))
+//            .then { firstProductImage.inputStream.readAllBytes() }
+//            .then { secondProductImage.inputStream.readAllBytes() }
+//
+//        // When
+//        keShopItemService.addShopItemFromKeData(firstProduct.payload?.data!!)
+//        keShopItemService.addShopItemFromKeData(secondProduct.payload?.data!!)
+//        val similarItems = keShopItemService.findSimilarItemsByName(firstProductId, firstSkuId, firstProduct.payload!!.data.title)
+//
+//        // Then
+//        assertEquals(1, similarItems.size)
+//        assertEquals(secondProductId, similarItems.first().productId)
+//        assertEquals(secondSkuId, similarItems.first().skuId)
+//    }
 
     private fun buildProductResponse(productId: Long, skuId: Long, title: String = "test"): ProductResponse {
         return ProductResponse(

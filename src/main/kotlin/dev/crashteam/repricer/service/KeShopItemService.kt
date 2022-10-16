@@ -3,7 +3,6 @@ package dev.crashteam.repricer.service
 import dev.brachtendorf.jimagehash.hashAlgorithms.AverageHash
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash
-import dev.crashteam.openapi.kerepricer.model.SimilarItem
 import dev.crashteam.repricer.client.ke.model.web.ProductData
 import dev.crashteam.repricer.client.ke.model.web.ProductPhoto
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
+import java.util.*
 import javax.imageio.ImageIO
 
 private val log = KotlinLogging.logger {}
@@ -63,7 +63,9 @@ class KeShopItemService(
         keShopItemRepository.saveBatch(kazanExpressShopItemEntities)
     }
 
+    // TODO: Refactor and optimize
     fun findSimilarItems(
+        shopItemId: UUID,
         productId: Long,
         skuId: Long,
         categoryId: Long,
@@ -72,6 +74,7 @@ class KeShopItemService(
         val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
         val similarItems = if (kazanExpressShopItemEntity?.avgHashFingerprint != null) {
             keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
+                shopItemId,
                 productId,
                 skuId,
                 kazanExpressShopItemEntity.avgHashFingerprint,
@@ -81,6 +84,7 @@ class KeShopItemService(
             )
         } else {
             keShopItemRepository.findSimilarItemsByNameAndCategoryId(
+                shopItemId,
                 productId,
                 skuId,
                 productName,
@@ -91,27 +95,20 @@ class KeShopItemService(
         return similarItems
     }
 
-    fun findSimilarItemsByImageHashAndName(
+    fun findSimilarItemsByName(
+        shopItemId: UUID,
         productId: Long,
         skuId: Long,
-        avgHashFingerprint: String,
-        pHashFingerprint: String?,
         name: String
     ): List<KazanExpressShopItemEntity> {
         val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
-        return keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
+        return keShopItemRepository.findSimilarItemsByNameAndCategoryId(
+            shopItemId,
             productId,
             skuId,
-            avgHashFingerprint,
-            pHashFingerprint,
-            targetShopItemEntity.name,
+            name,
             targetShopItemEntity.categoryId
         )
-    }
-
-    fun findSimilarItemsByName(productId: Long, skuId: Long, name: String): List<KazanExpressShopItemEntity> {
-        val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
-        return keShopItemRepository.findSimilarItemsByNameAndCategoryId(productId, skuId, name, targetShopItemEntity.categoryId)
     }
 
     private fun generateImageFingerprints(url: String): ImageFingerprintHolder? {
