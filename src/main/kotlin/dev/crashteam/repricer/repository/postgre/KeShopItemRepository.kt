@@ -140,8 +140,12 @@ class KeShopItemRepository(
                         Double::class.java, s.NAME, name
                     ).greaterThan(0.5)
                 ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId))).and(s.CATEGORY_ID.eq(categoryId))
-                    .andNotExists(dsl.selectOne().from(c).where(c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId)))
-                    .and(c.PRODUCT_ID.eq(s.PRODUCT_ID)).and(c.SKU_ID.eq(s.SKU_ID))
+                    .andNotExists(
+                        dsl.selectOne().from(c).where(
+                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                                .and(c.SKU_ID.eq(s.SKU_ID))
+                        )
+                    )
                     .andNotExists(
                         dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
                             .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
@@ -169,8 +173,12 @@ class KeShopItemRepository(
                     Double::class.java, s.NAME, name
                 ).greaterThan(0.5).and(s.CATEGORY_ID.eq(categoryId))
                     .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
-                    .andNotExists(dsl.selectOne().from(c).where(c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId)))
-                    .and(c.PRODUCT_ID.eq(s.PRODUCT_ID)).and(c.SKU_ID.eq(s.SKU_ID))
+                    .andNotExists(
+                        dsl.selectOne().from(c).where(
+                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                                .and(c.SKU_ID.eq(s.SKU_ID))
+                        )
+                    )
                     .andNotExists(
                         dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
                             .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
