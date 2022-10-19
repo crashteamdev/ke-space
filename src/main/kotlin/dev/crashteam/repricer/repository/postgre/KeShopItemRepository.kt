@@ -1,11 +1,15 @@
 package dev.crashteam.repricer.repository.postgre
 
+import dev.crashteam.repricer.db.model.tables.KeAccount.KE_ACCOUNT
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeShopItem.KE_SHOP_ITEM
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEntity
 import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressShopItemMapper
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 class KeShopItemRepository(
@@ -116,6 +120,7 @@ class KeShopItemRepository(
     }
 
     fun findSimilarItemsByNameAndHashAndCategoryId(
+        shopItemId: UUID,
         productId: Long,
         skuId: Long,
         avgHash: String? = null,
@@ -123,6 +128,9 @@ class KeShopItemRepository(
         name: String,
         categoryId: Long,
     ): List<KazanExpressShopItemEntity> {
+        val a = KE_ACCOUNT
+        val i = KE_ACCOUNT_SHOP_ITEM
+        val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         val s = KE_SHOP_ITEM
         val records = dsl.selectFrom(s)
             .where(
@@ -132,17 +140,31 @@ class KeShopItemRepository(
                         Double::class.java, s.NAME, name
                     ).greaterThan(0.5)
                 ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId))).and(s.CATEGORY_ID.eq(categoryId))
+                    .andNotExists(
+                        dsl.selectOne().from(c).where(
+                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                                .and(c.SKU_ID.eq(s.SKU_ID))
+                        )
+                    )
+                    .andNotExists(
+                        dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
+                            .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
+                    )
             ).limit(30).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
 
     fun findSimilarItemsByNameAndCategoryId(
+        shopItemId: UUID,
         productId: Long,
         skuId: Long,
         name: String,
         categoryId: Long,
     ): List<KazanExpressShopItemEntity> {
+        val a = KE_ACCOUNT
+        val i = KE_ACCOUNT_SHOP_ITEM
+        val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         val s = KE_SHOP_ITEM
         val records = dsl.selectFrom(s)
             .where(
@@ -151,6 +173,16 @@ class KeShopItemRepository(
                     Double::class.java, s.NAME, name
                 ).greaterThan(0.5).and(s.CATEGORY_ID.eq(categoryId))
                     .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+                    .andNotExists(
+                        dsl.selectOne().from(c).where(
+                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                                .and(c.SKU_ID.eq(s.SKU_ID))
+                        )
+                    )
+                    .andNotExists(
+                        dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
+                            .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
+                    )
             ).limit(30).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }

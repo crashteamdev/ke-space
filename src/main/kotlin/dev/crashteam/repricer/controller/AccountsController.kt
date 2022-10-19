@@ -565,6 +565,7 @@ class AccountsController(
                 ?: return@flatMap ResponseEntity.notFound().build<Flux<SimilarItem>>().toMono()
             val similarItems =
                 keShopItemService.findSimilarItems(
+                    shopItemId,
                     keAccountShopItem.productId,
                     keAccountShopItem.skuId,
                     keAccountShopItem.categoryId,
