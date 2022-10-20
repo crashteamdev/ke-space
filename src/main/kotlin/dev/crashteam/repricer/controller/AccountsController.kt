@@ -3,6 +3,7 @@ package dev.crashteam.repricer.controller
 import dev.crashteam.openapi.kerepricer.api.AccountsApi
 import dev.crashteam.openapi.kerepricer.model.*
 import dev.crashteam.repricer.db.model.enums.MonitorState
+import dev.crashteam.repricer.db.model.tables.KeAccountShop.*
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
@@ -514,8 +515,8 @@ class AccountsController(
             val mapFields = mapOf(
                 "productId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRODUCT_ID),
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
-                "shopName" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
-                "itemName" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
+                "shopName" to StringTableFieldMapper(KE_ACCOUNT_SHOP.NAME),
+                "itemName" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "oldPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.OLD_PRICE),
                 "newPrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.PRICE),
                 "barcode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
