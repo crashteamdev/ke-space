@@ -7,7 +7,9 @@ enum class FilterOperation(
     val operationName: String,
     val operation: FilterCondition
 ) {
-    EQUALS(":", { tableField, value -> if (value is String) tableField.like(value) else tableField.eq(value) }),
+    EQUALS(
+        ":",
+        { tableField, value -> if (value is String) tableField.likeIgnoreCase(value) else tableField.eq(value) }),
     NOT_EQUALS("!", { tableField, value -> tableField.notEqual(value) });
 
     companion object {
