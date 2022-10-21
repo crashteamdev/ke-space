@@ -9,7 +9,7 @@ enum class FilterOperation(
 ) {
     EQUALS(
         ":",
-        { tableField, value -> if (value is String) tableField.likeIgnoreCase(value) else tableField.eq(value) }),
+        { tableField, value -> if (value is String) tableField.likeIgnoreCase("%$value%") else tableField.eq(value) }),
     NOT_EQUALS("!", { tableField, value -> tableField.notEqual(value) });
 
     companion object {
