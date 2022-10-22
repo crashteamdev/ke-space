@@ -32,8 +32,11 @@ class PriceChangeService(
     @Transactional
     fun recalculateUserShopItemPrice(userId: String, keAccountId: UUID) {
         val poolItem = keAccountShopItemPoolRepository.findShopItemInPool(userId, keAccountId)
+        log.debug { "Found ${poolItem.size} pool items. userId=$userId;keAccountId=$keAccountId" }
         for (poolFilledEntity in poolItem) {
             try {
+                log.debug { "Begin calculate item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
+                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
                 val calculationResult = priceChangeCalculatorStrategy.calculatePrice(
                     poolFilledEntity.keAccountShopItemId,
                     BigDecimal.valueOf(poolFilledEntity.price),
@@ -43,8 +46,11 @@ class PriceChangeService(
                         maximumThreshold = poolFilledEntity.maximumThreshold
                     )
                 )
+                log.debug { "Calculation result = $calculationResult. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
+                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
                 if (calculationResult == null) {
-                    log.info { "No need to change item price. productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
+                    log.info { "No need to change item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
+                            "productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
                     return
                 }
                 val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
@@ -56,6 +62,9 @@ class PriceChangeService(
                     )
                 }
                 val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity, calculationResult)
+                log.debug { "Trying to change account shop item price. " +
+                        "keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
+                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
                 val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
                     userId = userId,
                     keAccountId = keAccountId,
