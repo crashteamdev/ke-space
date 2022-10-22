@@ -33,80 +33,85 @@ class PriceChangeService(
     fun recalculateUserShopItemPrice(userId: String, keAccountId: UUID) {
         val poolItem = keAccountShopItemPoolRepository.findShopItemInPool(userId, keAccountId)
         for (poolFilledEntity in poolItem) {
-            val calculationResult = priceChangeCalculatorStrategy.calculatePrice(
-                poolFilledEntity.keAccountShopItemId,
-                BigDecimal.valueOf(poolFilledEntity.price),
-                CalculatorOptions(
-                    step = poolFilledEntity.step,
-                    minimumThreshold = poolFilledEntity.minimumThreshold,
-                    maximumThreshold = poolFilledEntity.maximumThreshold
+            try {
+                val calculationResult = priceChangeCalculatorStrategy.calculatePrice(
+                    poolFilledEntity.keAccountShopItemId,
+                    BigDecimal.valueOf(poolFilledEntity.price),
+                    CalculatorOptions(
+                        step = poolFilledEntity.step,
+                        minimumThreshold = poolFilledEntity.minimumThreshold,
+                        maximumThreshold = poolFilledEntity.maximumThreshold
+                    )
                 )
-            )
-            if (calculationResult == null) {
-                log.info { "No need to change item price. productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
-                return
-            }
-            val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
-                kazanExpressSecureService.getProductDescription(
+                if (calculationResult == null) {
+                    log.info { "No need to change item price. productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
+                    return
+                }
+                val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
+                    kazanExpressSecureService.getProductDescription(
+                        userId = userId,
+                        keAccountId = keAccountId,
+                        shopId = poolFilledEntity.externalShopId,
+                        productId = poolFilledEntity.productId
+                    )
+                }
+                val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity, calculationResult)
+                val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
                     userId = userId,
                     keAccountId = keAccountId,
                     shopId = poolFilledEntity.externalShopId,
-                    productId = poolFilledEntity.productId
-                )
-            }
-            val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity, calculationResult)
-            val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
-                userId = userId,
-                keAccountId = keAccountId,
-                shopId = poolFilledEntity.externalShopId,
-                payload = ShopItemPriceChangePayload(
-                    productId = poolFilledEntity.productId,
-                    skuForProduct = poolFilledEntity.productSku,
-                    skuList = newSkuList,
-                    skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics) {
-                        accountProductDescription.customCharacteristicList.map { customCharacteristic ->
-                            SkuTitleCharacteristic(
-                                customCharacteristic.characteristicTitle,
-                                customCharacteristic.characteristicValues.map {
-                                    CustomCharacteristicSkuValue(
-                                        it.title,
-                                        it.skuValue
-                                    )
-                                })
-                        }
-                    } else emptyList()
-                )
-            )
-            if (!changeAccountShopItemPrice) {
-                log.warn {
-                    "Failed to change price for item." +
-                            " id=${poolFilledEntity.keAccountShopItemId}; productId=${poolFilledEntity.productId}; skuId=${poolFilledEntity.skuId}"
-                }
-            } else {
-                val lastCheckTime = LocalDateTime.now()
-                keShopItemPriceHistoryRepository.save(
-                    KazanExpressShopItemPriceHistoryEntity(
-                        keAccountShopItemId = poolFilledEntity.keAccountShopItemId,
-                        keAccountShopItemCompetitorId = calculationResult.competitorId,
-                        changeTime = lastCheckTime,
-                        oldPrice = poolFilledEntity.price,
-                        price = calculationResult.newPrice.toLong()
+                    payload = ShopItemPriceChangePayload(
+                        productId = poolFilledEntity.productId,
+                        skuForProduct = poolFilledEntity.productSku,
+                        skuList = newSkuList,
+                        skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics) {
+                            accountProductDescription.customCharacteristicList.map { customCharacteristic ->
+                                SkuTitleCharacteristic(
+                                    customCharacteristic.characteristicTitle,
+                                    customCharacteristic.characteristicValues.map {
+                                        CustomCharacteristicSkuValue(
+                                            it.title,
+                                            it.skuValue
+                                        )
+                                    })
+                            }
+                        } else emptyList()
                     )
                 )
-                val shopItemEntity =
-                    keAccountShopItemRepository.findShopItem(
-                        keAccountId,
-                        poolFilledEntity.keAccountShopItemId
-                    )!!
-                keAccountShopItemRepository.save(shopItemEntity.copy(price = calculationResult.newPrice.toLong()))
-                keAccountShopItemPoolRepository.updateLastCheck(
-                    poolFilledEntity.keAccountShopItemId,
-                    lastCheckTime
-                )
-                log.info {
-                    "Successfully change price for item. " +
-                            "id=${poolFilledEntity.keAccountShopItemId}; productId=${poolFilledEntity.productId}; skuId=${poolFilledEntity.skuId}"
+                if (!changeAccountShopItemPrice) {
+                    log.warn {
+                        "Failed to change price for item." +
+                                " id=${poolFilledEntity.keAccountShopItemId}; productId=${poolFilledEntity.productId}; skuId=${poolFilledEntity.skuId}"
+                    }
+                } else {
+                    val lastCheckTime = LocalDateTime.now()
+                    keShopItemPriceHistoryRepository.save(
+                        KazanExpressShopItemPriceHistoryEntity(
+                            keAccountShopItemId = poolFilledEntity.keAccountShopItemId,
+                            keAccountShopItemCompetitorId = calculationResult.competitorId,
+                            changeTime = lastCheckTime,
+                            oldPrice = poolFilledEntity.price,
+                            price = calculationResult.newPrice.toLong()
+                        )
+                    )
+                    val shopItemEntity =
+                        keAccountShopItemRepository.findShopItem(
+                            keAccountId,
+                            poolFilledEntity.keAccountShopItemId
+                        )!!
+                    keAccountShopItemRepository.save(shopItemEntity.copy(price = calculationResult.newPrice.toLong()))
+                    keAccountShopItemPoolRepository.updateLastCheck(
+                        poolFilledEntity.keAccountShopItemId,
+                        lastCheckTime
+                    )
+                    log.info {
+                        "Successfully change price for item. " +
+                                "id=${poolFilledEntity.keAccountShopItemId}; productId=${poolFilledEntity.productId}; skuId=${poolFilledEntity.skuId}"
+                    }
                 }
+            } catch (e: Exception) {
+                log.warn(e) { "Failed to change item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId}" +
+                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
             }
         }
     }
