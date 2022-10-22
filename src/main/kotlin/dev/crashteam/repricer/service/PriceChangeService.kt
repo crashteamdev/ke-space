@@ -51,7 +51,7 @@ class PriceChangeService(
                 if (calculationResult == null) {
                     log.info { "No need to change item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                             "productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
-                    return
+                    continue
                 }
                 val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
                     kazanExpressSecureService.getProductDescription(
