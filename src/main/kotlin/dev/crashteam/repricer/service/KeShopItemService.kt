@@ -24,9 +24,9 @@ class KeShopItemService(
     private val remoteImageLoader: RemoteImageLoader
 ) {
 
-    private val avgHash = AverageHash(32)
+    private val avgHash = AverageHash(64)
 
-    private val pHash = PerceptiveHash(32)
+    private val pHash = PerceptiveHash(64)
 
     @Transactional
     fun addShopItemFromKeData(productData: ProductData) {
