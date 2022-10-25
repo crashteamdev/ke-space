@@ -58,6 +58,6 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
 
         if (newPriceMinor == sellPriceMinor) return null // No need to change price
 
-        return CalculationResult(newPrice = newPrice, competitorId = minimalPriceCompetitor.competitorEntity.id)
+        return CalculationResult(newPriceMinor = newPriceMinor, competitorId = minimalPriceCompetitor.competitorEntity.id)
     }
 }

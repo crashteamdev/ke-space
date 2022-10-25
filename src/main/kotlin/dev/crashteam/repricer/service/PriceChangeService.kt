@@ -100,7 +100,7 @@ class PriceChangeService(
                             keAccountShopItemCompetitorId = calculationResult.competitorId,
                             changeTime = lastCheckTime,
                             oldPrice = poolFilledEntity.price,
-                            price = calculationResult.newPrice.toLong()
+                            price = calculationResult.newPriceMinor.toLong()
                         )
                     )
                     val shopItemEntity =
@@ -108,7 +108,7 @@ class PriceChangeService(
                             keAccountId,
                             poolFilledEntity.keAccountShopItemId
                         )!!
-                    keAccountShopItemRepository.save(shopItemEntity.copy(price = calculationResult.newPrice.toLong()))
+                    keAccountShopItemRepository.save(shopItemEntity.copy(price = calculationResult.newPriceMinor.toLong()))
                     keAccountShopItemPoolRepository.updateLastCheck(
                         poolFilledEntity.keAccountShopItemId,
                         lastCheckTime
@@ -157,12 +157,12 @@ class PriceChangeService(
         }
         val changeSku = SkuPriceChangeSku(
             id = poolFilledEntity.skuId,
-            fullPrice = calculationResult.newPrice.movePointLeft(2).toLong(),
+            fullPrice = calculationResult.newPriceMinor.movePointLeft(2).toLong(),
             sellPrice = if (poolFilledEntity.discount != null) {
-                (calculationResult.newPrice - ((calculationResult.newPrice * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
+                (calculationResult.newPriceMinor - ((calculationResult.newPriceMinor * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
                     100
                 ))).movePointLeft(2).toLong()
-            } else calculationResult.newPrice.movePointLeft(2).toLong(),
+            } else calculationResult.newPriceMinor.movePointLeft(2).toLong(),
             skuTitle = poolFilledEntity.skuTitle,
             barCode = poolFilledEntity.barcode.toString(),
         )
