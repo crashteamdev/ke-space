@@ -8,7 +8,7 @@ import java.util.*
 interface PriceChangeCalculatorStrategy {
     fun calculatePrice(
         keAccountShopItemId: UUID,
-        sellPrice: BigDecimal,
+        sellPriceMinor: BigDecimal,
         options: CalculatorOptions? = null
     ): CalculationResult?
 }
