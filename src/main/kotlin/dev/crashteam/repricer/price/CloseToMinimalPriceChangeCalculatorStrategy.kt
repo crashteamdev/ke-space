@@ -3,8 +3,8 @@ package dev.crashteam.repricer.price
 import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
-import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
-import dev.crashteam.repricer.service.RecentPriceService
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
+import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -16,8 +16,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class CloseToMinimalPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
-    private val keShopItemRepository: KeShopItemRepository,
-    private val recentPriceService: RecentPriceService,
+    private val keShopItemService: KeShopItemService,
 ) : PriceChangeCalculatorStrategy {
 
     override fun calculatePrice(
@@ -25,21 +24,23 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
         sellPrice: BigDecimal,
         options: CalculatorOptions?
     ): CalculationResult? {
-        val shopItemCompetitors =
+        val shopItemCompetitors: List<KazanExpressAccountShopItemCompetitorEntity> =
             keAccountShopItemCompetitorRepository.findShopItemCompetitors(keAccountShopItemId)
-        val minimalPriceCompetitor = shopItemCompetitors.map {
-            val shopItemEntity = keShopItemRepository.findByProductIdAndSkuId(
+        val minimalPriceCompetitor: ShopItemCompetitor = shopItemCompetitors.mapNotNull {
+            val shopItemEntity = keShopItemService.findShopItem(
                 it.productId,
                 it.skuId
-            )!!
+            ) ?: return@mapNotNull null
             ShopItemCompetitor(shopItemEntity, it)
         }.filter {
             it.shopItemEntity.availableAmount > 0
         }.minByOrNull {
-            recentPriceService.getCompetitorPrice(it)!!
+            keShopItemService.getRecentPrice(it.shopItemEntity)!!
         } ?: return null
-        val competitorPrice = recentPriceService.getCompetitorPrice(minimalPriceCompetitor)!!
+        log.debug { "Minimal price competitor: $minimalPriceCompetitor" }
+        val competitorPrice = keShopItemService.getRecentPrice(minimalPriceCompetitor.shopItemEntity)!!
         var newPrice = (competitorPrice - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO)).movePointRight(2)
+        log.debug { "Competitor price = $competitorPrice vs New price = $newPrice" }
 
         if (options?.minimumThreshold != null && newPrice < BigDecimal.valueOf(options.minimumThreshold)) {
             newPrice = BigDecimal.valueOf(options.minimumThreshold)

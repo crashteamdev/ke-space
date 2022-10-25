@@ -28,6 +28,7 @@ logging:
     "liquibase": INFO
     org.apache.http: INFO
     dev.crashteam.repricer.service: DEBUG
+    dev.crashteam.repricer.price: DEBUG
 
 spring:
   application:

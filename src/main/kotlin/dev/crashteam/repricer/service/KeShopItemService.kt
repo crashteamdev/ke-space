@@ -3,6 +3,7 @@ package dev.crashteam.repricer.service
 import dev.brachtendorf.jimagehash.hashAlgorithms.AverageHash
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash
+import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.client.ke.model.web.ProductData
 import dev.crashteam.repricer.client.ke.model.web.ProductPhoto
 import dev.crashteam.repricer.repository.postgre.KeShopItemRepository
@@ -12,6 +13,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 import javax.imageio.ImageIO
@@ -21,7 +23,8 @@ private val log = KotlinLogging.logger {}
 @Service
 class KeShopItemService(
     private val keShopItemRepository: KeShopItemRepository,
-    private val remoteImageLoader: RemoteImageLoader
+    private val remoteImageLoader: RemoteImageLoader,
+    private val kazanExpressWebClient: KazanExpressWebClient,
 ) {
 
     private val avgHash = AverageHash(64)
@@ -61,6 +64,51 @@ class KeShopItemService(
             )
         }
         keShopItemRepository.saveBatch(kazanExpressShopItemEntities)
+    }
+
+    fun getRecentPrice(shopItemEntity: KazanExpressShopItemEntity): BigDecimal? {
+        return if (shopItemEntity.lastUpdate.isBefore(LocalDateTime.now().minusHours(4))) {
+            log.info {
+                "Product last update too old. Trying to get info from KE." +
+                        " productId=${shopItemEntity.productId}; skuId=${shopItemEntity.skuId}"
+            }
+            val productInfo =
+                kazanExpressWebClient.getProductInfo(shopItemEntity.productId.toString())
+            if (productInfo?.payload == null) {
+                log.error {
+                    "Error during try to change price case can't get product info from KE." +
+                            " productId=${shopItemEntity.productId}; skuId=${shopItemEntity.skuId}"
+                }
+                return null
+            }
+
+            // Update recent price
+            val keShopItemEntity = findShopItem(shopItemEntity.productId, shopItemEntity.skuId)
+                ?: throw IllegalArgumentException("Unknown product. productId=${shopItemEntity.productId};skuId=${shopItemEntity.skuId}")
+            val productSplit =
+                productInfo.payload.data.skuList!!.find { it.id == shopItemEntity.skuId }!!
+            keShopItemRepository.save(
+                keShopItemEntity.copy(
+                    price = productSplit.purchasePrice.movePointRight(2).toLong(),
+                    lastUpdate = LocalDateTime.now()
+                )
+            )
+
+            productSplit.purchasePrice
+        } else {
+            shopItemEntity.price.toBigDecimal().movePointLeft(2)
+        }
+    }
+
+    fun findShopItem(productId: Long, skuId: Long): KazanExpressShopItemEntity? {
+        val keShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
+        if (keShopItemEntity == null) {
+            val productInfo = kazanExpressWebClient.getProductInfo(productId.toString())
+            if (productInfo?.payload == null)
+                throw IllegalStateException("Failed to get product info from KE")
+            addShopItemFromKeData(productInfo.payload.data)
+        }
+        return keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
     }
 
     // TODO: Refactor and optimize
