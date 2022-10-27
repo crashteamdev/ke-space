@@ -74,7 +74,7 @@ class KeShopItemPriceHistoryRepository(
         if (filter != null) {
             select = select.and(filter)
         }
-        val sortFields = sortFields ?: listOf(p.CHANGE_TIME to SortType.ASC)
+        val sortFields = sortFields ?: listOf(p.CHANGE_TIME to SortType.DESC)
         val records = dsl.paginate(select, sortFields, limit, offset).fetch()
 
         return records.map {

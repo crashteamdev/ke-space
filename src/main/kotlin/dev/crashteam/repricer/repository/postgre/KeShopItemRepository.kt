@@ -8,6 +8,7 @@ import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEnti
 import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressShopItemMapper
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
+import org.jooq.impl.DSL.bitXor
 import org.springframework.stereotype.Repository
 import java.util.*
 

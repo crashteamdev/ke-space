@@ -55,6 +55,7 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
         } else if (options?.maximumThreshold != null && newPriceMinor > BigDecimal.valueOf(options.maximumThreshold)) {
             newPriceMinor = BigDecimal.valueOf(options.maximumThreshold)
         }
+        log.debug { "newPriceMinor=$newPriceMinor;sellPriceMinor=$sellPriceMinor" }
 
         if (newPriceMinor == sellPriceMinor) return null // No need to change price
 
