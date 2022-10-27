@@ -15,6 +15,7 @@ class KeAccountEntityToViewConverter : DataConverter<KazanExpressAccountEntity, 
             this.id = source.id
             this.name = source.name
             this.email = source.email
+            this.login = source.login
             this.lastUpdate = source.lastUpdate?.atOffset(ZoneOffset.UTC)
             this.monitorState = when (source.monitorState) {
                 MonitorState.active -> dev.crashteam.openapi.kerepricer.model.MonitorState.ACTIVE
