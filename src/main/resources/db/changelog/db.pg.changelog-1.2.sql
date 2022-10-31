@@ -1,3 +1,5 @@
+--liquibase formatted sql
+--changeset vitaxa:recreate-competitor-fk
 ALTER TABLE ke_account_shop_item_competitor
     DROP CONSTRAINT fk_ke_account_shop_item_competitor_ke_account_shop_item;
 

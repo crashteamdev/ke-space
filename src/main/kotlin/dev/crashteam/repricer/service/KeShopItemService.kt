@@ -120,13 +120,11 @@ class KeShopItemService(
         productName: String
     ): List<KazanExpressShopItemEntity> {
         val kazanExpressShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId)
-        val similarItems = if (kazanExpressShopItemEntity?.avgHashFingerprint != null) {
+        val similarItems = if (kazanExpressShopItemEntity?.pHashFingerprint != null) {
             keShopItemRepository.findSimilarItemsByNameAndHashAndCategoryId(
                 shopItemId,
                 productId,
                 skuId,
-                kazanExpressShopItemEntity.avgHashFingerprint,
-                kazanExpressShopItemEntity.pHashFingerprint,
                 kazanExpressShopItemEntity.name,
                 kazanExpressShopItemEntity.categoryId
             )

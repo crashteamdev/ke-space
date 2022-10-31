@@ -8,7 +8,6 @@ import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEnti
 import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressShopItemMapper
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
-import org.jooq.impl.DSL.bitXor
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -124,8 +123,6 @@ class KeShopItemRepository(
         shopItemId: UUID,
         productId: Long,
         skuId: Long,
-        avgHash: String? = null,
-        pHash: String? = null,
         name: String,
         categoryId: Long,
     ): List<KazanExpressShopItemEntity> {
@@ -133,14 +130,27 @@ class KeShopItemRepository(
         val i = KE_ACCOUNT_SHOP_ITEM
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         val s = KE_SHOP_ITEM
+        val n = s.`as`("nest")
         val records = dsl.selectFrom(s)
             .where(
-                s.AVG_HASH_FINGERPRINT.eq(avgHash).or(
-                    DSL.field(
-                        "similarity({0}, {1})",
-                        Double::class.java, s.NAME, name
-                    ).greaterThan(0.5)
-                ).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId))).and(s.CATEGORY_ID.eq(categoryId))
+                DSL.field(
+                    "similarity({0}, {1})",
+                    Double::class.java, s.NAME, name
+                ).greaterThan(0.5)
+                    .or(
+                        s.P_HASH_FINGERPRINT.`in`(
+                            dsl.select(s.P_HASH_FINGERPRINT).from(n).where(
+                                n.CATEGORY_ID.eq(categoryId).and(
+                                    DSL.field(
+                                        "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
+                                        Double::class.java, s.P_HASH_FINGERPRINT, n.P_HASH_FINGERPRINT
+                                    ).greaterThan(0.9)
+                                )
+                            )
+                        )
+                    )
+                    .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+                    .and(s.CATEGORY_ID.eq(categoryId))
                     .andNotExists(
                         dsl.selectOne().from(c).where(
                             c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
@@ -172,7 +182,8 @@ class KeShopItemRepository(
                 DSL.field(
                     "similarity({0}, {1})",
                     Double::class.java, s.NAME, name
-                ).greaterThan(0.5).and(s.CATEGORY_ID.eq(categoryId))
+                ).greaterThan(0.5)
+                    .and(s.CATEGORY_ID.eq(categoryId))
                     .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
                     .andNotExists(
                         dsl.selectOne().from(c).where(
