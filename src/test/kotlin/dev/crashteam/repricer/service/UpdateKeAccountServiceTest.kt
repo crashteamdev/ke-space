@@ -1,7 +1,12 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.ContainerConfiguration
+import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.client.ke.model.lk.*
+import dev.crashteam.repricer.client.ke.model.web.ProductCategory
+import dev.crashteam.repricer.client.ke.model.web.ProductData
+import dev.crashteam.repricer.client.ke.model.web.ProductDataWrapper
+import dev.crashteam.repricer.client.ke.model.web.ProductResponse
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.enums.SubscriptionPlan
 import dev.crashteam.repricer.db.model.enums.UpdateState
@@ -45,6 +50,9 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
 
     @MockBean
     lateinit var kazanExpressSecureService: KazanExpressSecureService
+
+    @MockBean
+    lateinit var kazanExpressWebClient: KazanExpressWebClient
 
     val userId = UUID.randomUUID().toString()
 
@@ -195,6 +203,11 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
         whenever(
             kazanExpressSecureService.getProductInfo(any(), any(), any(), any())
         ).then { accountProductInfo }
+        whenever(
+            kazanExpressWebClient.getProductInfo(any())
+        ).then {
+            null
+        }
 
         // When
         updateKeAccountService.updateShopItems(userId, keAccountId)
