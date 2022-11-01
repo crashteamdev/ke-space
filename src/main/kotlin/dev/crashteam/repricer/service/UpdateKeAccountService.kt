@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.service
 
+import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.db.model.enums.UpdateState
 import dev.crashteam.repricer.job.UpdateAccountDataJob
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
@@ -26,6 +27,8 @@ class UpdateKeAccountService(
     private val keAccountShopRepository: KeAccountShopRepository,
     private val keAccountShopItemRepository: KeAccountShopItemRepository,
     private val kazanExpressSecureService: KazanExpressSecureService,
+    private val kazanExpressWebClient: KazanExpressWebClient,
+    private val keShopItemService: KeShopItemService,
     private val scheduler: Scheduler,
     private val retryTemplate: RetryTemplate
 ) {
@@ -114,6 +117,12 @@ class UpdateKeAccountService(
                     }
 
                     for (accountShopItem in accountShopItems) {
+                        // Update product data from web KE
+                        val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
+                        if (productResponse?.payload?.data != null) {
+                            keShopItemService.addShopItemFromKeData(productResponse.payload.data)
+                        }
+                        // Update product data from LK KE
                         val productInfo = kazanExpressSecureService.getProductInfo(
                             userId,
                             keAccountId,
