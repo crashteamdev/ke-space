@@ -11,6 +11,7 @@ class KazanExpressAccountShopEntityToViewConverter : DataConverter<KazanExpressA
         return KeAccountShop().apply {
             id = source.id
             name = source.name
+            skuTitle = source.skuTitle
         }
     }
 }

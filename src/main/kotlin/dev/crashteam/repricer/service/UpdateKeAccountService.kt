@@ -87,7 +87,8 @@ class UpdateKeAccountService(
                         id = UUID.randomUUID(),
                         keAccountId = keAccountId,
                         externalShopId = accountShop.id,
-                        name = accountShop.shopTitle
+                        name = accountShop.shopTitle,
+                        skuTitle = accountShop.skuTitle
                     )
                 )
             }

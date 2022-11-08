@@ -6,5 +6,6 @@ data class KazanExpressAccountShopEntity(
     val id: UUID? = null,
     val keAccountId: UUID,
     val externalShopId: Long,
-    val name: String
+    val name: String,
+    val skuTitle: String
 )

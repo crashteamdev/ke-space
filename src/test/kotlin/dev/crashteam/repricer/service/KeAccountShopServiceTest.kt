@@ -95,7 +95,8 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
             id = keAccountShopId,
             keAccountId = kazanExpressAccountEntity.id!!,
             externalShopId = 123432,
-            name = "Test"
+            name = "Test",
+            skuTitle = "TEST-SHOP"
         )
         keAccountShopRepository.save(kazanExpressAccountShopEntity)
         keAccountShopItemRepository.save(

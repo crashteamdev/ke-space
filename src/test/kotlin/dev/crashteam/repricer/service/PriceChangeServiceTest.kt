@@ -80,7 +80,8 @@ class PriceChangeServiceTest : ContainerConfiguration() {
             id = keAccountShopId,
             keAccountId = keAccountId,
             externalShopId = 123432,
-            name = "Test"
+            name = "Test",
+            skuTitle = "TEST-SHOP"
         )
         keAccountShopRepository.save(kazanExpressAccountShopEntity)
         keAccountShopItemRepository.save(

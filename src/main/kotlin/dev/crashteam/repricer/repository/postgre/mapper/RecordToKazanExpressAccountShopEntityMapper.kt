@@ -13,7 +13,8 @@ class RecordToKazanExpressAccountShopEntityMapper : RecordMapper<KazanExpressAcc
             id = record.getValue(KE_ACCOUNT_SHOP.ID),
             keAccountId = record.getValue(KE_ACCOUNT_SHOP.KE_ACCOUNT_ID),
             externalShopId = record.getValue(KE_ACCOUNT_SHOP.EXTERNAL_SHOP_ID),
-            name = record.getValue(KE_ACCOUNT_SHOP.NAME)
+            name = record.getValue(KE_ACCOUNT_SHOP.NAME),
+            skuTitle = record.getValue(KE_ACCOUNT_SHOP.SKU_TITLE)
         )
     }
 }

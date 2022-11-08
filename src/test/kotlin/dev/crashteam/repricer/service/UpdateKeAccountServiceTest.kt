@@ -133,7 +133,8 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
                 id = UUID.randomUUID(),
                 keAccountId = keAccountId,
                 externalShopId = firstAccountShop.id,
-                name = firstAccountShop.shopTitle
+                name = firstAccountShop.shopTitle,
+                skuTitle = firstAccountShop.skuTitle
             )
         )
         keAccountShopRepository.save(
@@ -141,7 +142,8 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
                 id = UUID.randomUUID(),
                 keAccountId = keAccountId,
                 externalShopId = secondAccountShop.id,
-                name = secondAccountShop.shopTitle
+                name = secondAccountShop.shopTitle,
+                skuTitle = secondAccountShop.skuTitle
             )
         )
         whenever(kazanExpressSecureService.getAccountShops(any(), any())).then {
@@ -164,7 +166,8 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
             id = UUID.randomUUID(),
             keAccountId = keAccountId,
             externalShopId = 1,
-            name = "test"
+            name = "test",
+            skuTitle = "TEST-SHOP"
         )
         keAccountShopRepository.save(keAccountShopEntity)
         val keShopItem = AccountShopItem(

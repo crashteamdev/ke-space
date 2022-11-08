@@ -23,12 +23,14 @@ class KeAccountShopRepository(
             s.ID,
             s.KE_ACCOUNT_ID,
             s.EXTERNAL_SHOP_ID,
-            s.NAME
+            s.NAME,
+            s.SKU_TITLE
         ).values(
             keAccountShopEntity.id,
             keAccountShopEntity.keAccountId,
             keAccountShopEntity.externalShopId,
-            keAccountShopEntity.name
+            keAccountShopEntity.name,
+            keAccountShopEntity.skuTitle
         ).onDuplicateKeyUpdate()
             .set(
                 mapOf(
@@ -46,7 +48,8 @@ class KeAccountShopRepository(
                 it.id,
                 it.keAccountId,
                 it.externalShopId,
-                it.name
+                it.name,
+                it.skuTitle
             )
         }
         dsl.batchInsert(records).execute()
