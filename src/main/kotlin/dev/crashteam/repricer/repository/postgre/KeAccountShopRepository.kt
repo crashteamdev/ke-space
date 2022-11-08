@@ -35,7 +35,8 @@ class KeAccountShopRepository(
             .set(
                 mapOf(
                     s.EXTERNAL_SHOP_ID to keAccountShopEntity.externalShopId,
-                    s.NAME to keAccountShopEntity.name
+                    s.NAME to keAccountShopEntity.name,
+                    s.SKU_TITLE to keAccountShopEntity.skuTitle
                 )
             )
             .returningResult(s.ID)
