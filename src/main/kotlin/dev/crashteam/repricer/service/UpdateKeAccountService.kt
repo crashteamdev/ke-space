@@ -79,7 +79,11 @@ class UpdateKeAccountService(
                 keAccountShopRepository.getKeAccountShopByShopId(keAccountId, accountShop.id)
             if (kazanExpressAccountShopEntity != null) {
                 val updateKeShopEntity =
-                    kazanExpressAccountShopEntity.copy(externalShopId = accountShop.id, name = accountShop.shopTitle)
+                    kazanExpressAccountShopEntity.copy(
+                        externalShopId = accountShop.id,
+                        name = accountShop.shopTitle,
+                        skuTitle = accountShop.skuTitle
+                    )
                 keAccountShopRepository.save(updateKeShopEntity)
             } else {
                 keAccountShopRepository.save(
