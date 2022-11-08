@@ -113,7 +113,7 @@ class SecurityConfig(
         config.allowedOrigins = null
         config.allowedOriginPatterns = listOf("*")
         config.allowedHeaders = listOf("*")
-        config.addExposedHeader("Authorization")
+        config.addExposedHeader("*")
         source.registerCorsConfiguration("/**", config)
         return source
     }
