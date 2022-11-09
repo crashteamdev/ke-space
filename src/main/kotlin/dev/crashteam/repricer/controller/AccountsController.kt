@@ -242,6 +242,7 @@ class AccountsController(
             val mapFields = mapOf(
                 "productId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRODUCT_ID),
                 "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
+                "skuTitle" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_TITLE),
                 "name" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
                 "photoKey" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
                 "purchasePrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PURCHASE_PRICE),
