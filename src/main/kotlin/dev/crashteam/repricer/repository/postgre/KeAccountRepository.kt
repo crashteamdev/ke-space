@@ -172,6 +172,7 @@ class KeAccountRepository(
                 k.INITIALIZE_STATE.eq(InitializeState.finished)
                     .and(k.UPDATE_STATE.notEqual(UpdateState.in_progress))
                     .and(k.LAST_UPDATE.lessThan(lastUpdate))
+                    .and(a.SUBSCRIPTION_VALID_UNTIL.greaterThan(LocalDateTime.now()))
             )
             .fetch()
         return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
