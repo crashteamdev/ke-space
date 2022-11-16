@@ -130,38 +130,55 @@ class KeShopItemRepository(
         val i = KE_ACCOUNT_SHOP_ITEM
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         val s = KE_SHOP_ITEM
-        val n = s.`as`("nest")
-        val records = dsl.selectFrom(s)
+        val p = s.`as`("p")
+        val nested = dsl.select(
+            s.PRODUCT_ID,
+            s.SKU_ID,
+            s.CATEGORY_ID,
+            s.NAME,
+            s.PHOTO_KEY,
+            s.AVG_HASH_FINGERPRINT,
+            s.P_HASH_FINGERPRINT,
+            s.PRICE,
+            s.AVAILABLE_AMOUNT,
+            s.LAST_UPDATE,
+            DSL.field(
+                "similarity({0}, {1})",
+                Double::class.java, s.NAME, name
+            ).`as`("name_similarity")
+        ).from(s).where(s.CATEGORY_ID.eq(categoryId))
+            .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+            .andNotExists(
+                dsl.selectOne().from(c).where(
+                    c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                        .and(c.SKU_ID.eq(s.SKU_ID))
+                )
+            )
+            .andNotExists(
+                dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
+                    .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
+            )
+            .asTable("nested")
+        val subQuery = dsl.select(*nested.fields())
+            .distinctOn(nested.field(s.PRODUCT_ID))
+            .from(nested)
             .where(
-                DSL.field(
-                    "similarity({0}, {1})",
-                    Double::class.java, s.NAME, name
-                ).greaterThan(0.5)
-                    .or(
-                        s.P_HASH_FINGERPRINT.`in`(
-                            dsl.select(s.P_HASH_FINGERPRINT).from(n).where(
-                                n.CATEGORY_ID.eq(categoryId).and(
-                                    DSL.field(
-                                        "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
-                                        Double::class.java, s.P_HASH_FINGERPRINT, n.P_HASH_FINGERPRINT
-                                    ).greaterThan(0.9)
-                                )
+                nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
+                    nested.field(s.P_HASH_FINGERPRINT)!!.`in`(
+                        dsl.select(s.P_HASH_FINGERPRINT).from(p).where(
+                            p.CATEGORY_ID.eq(categoryId).and(
+                                DSL.field(
+                                    "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
+                                    Double::class.java, s.P_HASH_FINGERPRINT, p.P_HASH_FINGERPRINT
+                                ).greaterThan(0.9)
                             )
                         )
                     )
-                    .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
-                    .and(s.CATEGORY_ID.eq(categoryId))
-                    .andNotExists(
-                        dsl.selectOne().from(c).where(
-                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
-                                .and(c.SKU_ID.eq(s.SKU_ID))
-                        )
-                    )
-                    .andNotExists(
-                        dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
-                            .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
-                    )
-            ).limit(30).fetch()
+                )
+            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+        val records = dsl.select(*subQuery.fields())
+            .from(subQuery)
+            .orderBy(subQuery.field("product_id")).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
@@ -177,25 +194,93 @@ class KeShopItemRepository(
         val i = KE_ACCOUNT_SHOP_ITEM
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         val s = KE_SHOP_ITEM
-        val records = dsl.selectFrom(s)
+        val nested = dsl.select(
+            s.PRODUCT_ID,
+            s.SKU_ID,
+            s.CATEGORY_ID,
+            s.NAME,
+            s.PHOTO_KEY,
+            s.AVG_HASH_FINGERPRINT,
+            s.P_HASH_FINGERPRINT,
+            s.PRICE,
+            s.AVAILABLE_AMOUNT,
+            s.LAST_UPDATE,
+            DSL.field(
+                "similarity({0}, {1})",
+                Double::class.java, s.NAME, name
+            ).`as`("name_similarity")
+        ).from(s).where(s.CATEGORY_ID.eq(categoryId))
+            .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+            .andNotExists(
+                dsl.selectOne().from(c).where(
+                    c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
+                        .and(c.SKU_ID.eq(s.SKU_ID))
+                )
+            )
+            .andNotExists(
+                dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
+                    .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
+            )
+            .asTable("nested")
+        val subQuery = dsl.select(*nested.fields())
+            .distinctOn(nested.field(s.PRODUCT_ID))
+            .from(nested)
             .where(
-                DSL.field(
-                    "similarity({0}, {1})",
-                    Double::class.java, s.NAME, name
-                ).greaterThan(0.5)
-                    .and(s.CATEGORY_ID.eq(categoryId))
-                    .and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
-                    .andNotExists(
-                        dsl.selectOne().from(c).where(
-                            c.KE_ACCOUNT_SHOP_ITEM_ID.eq(shopItemId).and(c.PRODUCT_ID.eq(s.PRODUCT_ID))
-                                .and(c.SKU_ID.eq(s.SKU_ID))
+                nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5)
+            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+        val records = dsl.select(*subQuery.fields())
+            .from(subQuery)
+            .orderBy(subQuery.field("product_id")).fetch()
+
+        return records.map { recordToKazanExpressShopItemMapper.convert(it) }
+    }
+
+    fun findSimilarItemsByProductIdAndSkuId(
+        productId: Long,
+        skuId: Long,
+        name: String,
+        categoryId: Long,
+    ): List<KazanExpressShopItemEntity> {
+        val s = KE_SHOP_ITEM
+        val p = s.`as`("p")
+        val nested = dsl.select(
+            s.PRODUCT_ID,
+            s.SKU_ID,
+            s.CATEGORY_ID,
+            s.NAME,
+            s.PHOTO_KEY,
+            s.AVG_HASH_FINGERPRINT,
+            s.P_HASH_FINGERPRINT,
+            s.PRICE,
+            s.AVAILABLE_AMOUNT,
+            s.LAST_UPDATE,
+            DSL.field(
+                "similarity({0}, {1})",
+                Double::class.java, s.NAME, name
+            ).`as`("name_similarity")
+        ).from(s).where(s.CATEGORY_ID.eq(categoryId)).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
+            .asTable("nested")
+        val subQuery = dsl.select(*nested.fields())
+            .distinctOn(nested.field(s.PRODUCT_ID))
+            .from(nested)
+            .where(
+                nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
+                    nested.field(s.P_HASH_FINGERPRINT)!!.`in`(
+                        dsl.select(s.P_HASH_FINGERPRINT).from(p).where(
+                            p.CATEGORY_ID.eq(categoryId).and(
+                                DSL.field(
+                                    "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
+                                    Double::class.java, s.P_HASH_FINGERPRINT, p.P_HASH_FINGERPRINT
+                                ).greaterThan(0.9)
+                            )
                         )
                     )
-                    .andNotExists(
-                        dsl.selectOne().from(i.join(a).on(i.KE_ACCOUNT_ID.eq(a.ID)))
-                            .where(i.PRODUCT_ID.eq(s.PRODUCT_ID)).and(i.SKU_ID.eq(s.SKU_ID))
-                    )
-            ).limit(30).fetch()
+                )
+            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+        val records = dsl.select(*subQuery.fields())
+            .from(subQuery)
+            .orderBy(subQuery.field("product_id")).fetch()
+
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }

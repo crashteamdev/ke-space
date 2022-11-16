@@ -21,11 +21,11 @@ class QuartzConfig {
     }
 
     @Bean
-    fun schedulerFactoryBean(dataSource: DataSource): SchedulerFactoryBean {
+    fun schedulerFactoryBean(poolDataSource: DataSource): SchedulerFactoryBean {
         val schedulerFactoryBean = SchedulerFactoryBean()
         schedulerFactoryBean.setQuartzProperties(getAllProperties())
         schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(true)
-        schedulerFactoryBean.setDataSource(dataSource)
+        schedulerFactoryBean.setDataSource(poolDataSource)
         schedulerFactoryBean.setApplicationContextSchedulerContextKey("applicationContext")
 
         return schedulerFactoryBean

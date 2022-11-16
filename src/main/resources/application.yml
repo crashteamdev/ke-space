@@ -44,8 +44,8 @@ spring:
     username: postgres
     password: postgres
     hikari:
-      minimum-idle: 15
-      maximum-pool-size: 20
+      minimum-idle: 5
+      maximum-pool-size: 12
   liquibase:
     enabled: true
     change-log: "classpath:db/changelog/db.pg.changelog-main.yml"
@@ -101,3 +101,9 @@ loki:
 youkassa:
   shopId: 819837
   key: 'test_6qE96u7LbOog1NcjX9AocDz8sviH_FIhQ25sO2Jz0Qk'
+
+data-source:
+  pool-source:
+    url: jdbc:postgresql://localhost:5432/repricer
+    username: postgres
+    password: postgres
