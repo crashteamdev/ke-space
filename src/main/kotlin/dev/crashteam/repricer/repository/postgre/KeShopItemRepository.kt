@@ -165,7 +165,7 @@ class KeShopItemRepository(
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
                     nested.field(s.P_HASH_FINGERPRINT)!!.`in`(
-                        dsl.select(s.P_HASH_FINGERPRINT).from(p).where(
+                        dsl.select(p.P_HASH_FINGERPRINT).from(p).where(
                             p.CATEGORY_ID.eq(categoryId).and(
                                 DSL.field(
                                     "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
@@ -266,7 +266,7 @@ class KeShopItemRepository(
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
                     nested.field(s.P_HASH_FINGERPRINT)!!.`in`(
-                        dsl.select(s.P_HASH_FINGERPRINT).from(p).where(
+                        dsl.select(p.P_HASH_FINGERPRINT).from(p).where(
                             p.CATEGORY_ID.eq(categoryId).and(
                                 DSL.field(
                                     "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
