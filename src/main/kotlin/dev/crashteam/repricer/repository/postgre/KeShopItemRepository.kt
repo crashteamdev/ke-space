@@ -169,7 +169,7 @@ class KeShopItemRepository(
                             p.CATEGORY_ID.eq(categoryId).and(
                                 DSL.field(
                                     "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
-                                    Double::class.java, s.P_HASH_FINGERPRINT, p.P_HASH_FINGERPRINT
+                                    Double::class.java, nested.field(s.P_HASH_FINGERPRINT), p.P_HASH_FINGERPRINT
                                 ).greaterThan(0.9)
                             )
                         )
@@ -178,7 +178,7 @@ class KeShopItemRepository(
             ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
         val records = dsl.select(*subQuery.fields())
             .from(subQuery)
-            .orderBy(subQuery.field("product_id")).fetch()
+            .orderBy(subQuery.field("name_similarity")).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
@@ -230,7 +230,7 @@ class KeShopItemRepository(
             ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
         val records = dsl.select(*subQuery.fields())
             .from(subQuery)
-            .orderBy(subQuery.field("product_id")).fetch()
+            .orderBy(subQuery.field("name_similarity")).fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
@@ -270,7 +270,7 @@ class KeShopItemRepository(
                             p.CATEGORY_ID.eq(categoryId).and(
                                 DSL.field(
                                     "1 - bit_count(('x' || {0})::bit(16) # ('x' || {1})::bit(16))::decimal / 64",
-                                    Double::class.java, s.P_HASH_FINGERPRINT, p.P_HASH_FINGERPRINT
+                                    Double::class.java, nested.field(s.P_HASH_FINGERPRINT), p.P_HASH_FINGERPRINT
                                 ).greaterThan(0.9)
                             )
                         )
@@ -279,7 +279,7 @@ class KeShopItemRepository(
             ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
         val records = dsl.select(*subQuery.fields())
             .from(subQuery)
-            .orderBy(subQuery.field("product_id")).fetch()
+            .orderBy(subQuery.field("name_similarity")).fetch()
 
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
