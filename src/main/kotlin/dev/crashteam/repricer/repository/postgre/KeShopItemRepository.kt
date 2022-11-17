@@ -175,7 +175,7 @@ class KeShopItemRepository(
                         )
                     )
                 )
-            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+            ).orderBy(nested.field(s.PRODUCT_ID)).limit(30)
         val records = dsl.select(*subQuery.fields())
             .from(subQuery)
             .orderBy(subQuery.field("name_similarity")).fetch()
@@ -227,7 +227,7 @@ class KeShopItemRepository(
             .from(nested)
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5)
-            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+            ).orderBy(nested.field(s.PRODUCT_ID)).limit(30)
         val records = dsl.select(*subQuery.fields())
             .from(subQuery)
             .orderBy(subQuery.field("name_similarity")).fetch()
