@@ -25,7 +25,7 @@ management:
 
 logging:
   level:
-    "liquibase": INFO
+    "liquibase": DEBUG
     org.apache.http: INFO
     dev.crashteam.repricer.service: DEBUG
     dev.crashteam.repricer.price: DEBUG
