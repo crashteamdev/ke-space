@@ -101,9 +101,3 @@ loki:
 youkassa:
   shopId: 819837
   key: 'test_6qE96u7LbOog1NcjX9AocDz8sviH_FIhQ25sO2Jz0Qk'
-
-data-source:
-  pool-source:
-    url: jdbc:postgresql://localhost:5432/repricer
-    username: postgres
-    password: postgres
