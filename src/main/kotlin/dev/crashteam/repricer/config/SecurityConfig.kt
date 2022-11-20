@@ -42,11 +42,11 @@ class SecurityConfig(
     fun basicAuthWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
             .cors().configurationSource(createCorsConfigSource()).and()
-            .securityMatcher(pathMatchers("/actuator/**"))
+            .securityMatcher(pathMatchers("/actuator/**", "repricer/v1/similar/products"))
             .httpBasic().authenticationManager { basicAuthenticationDummyAuthentication(it) }.and()
             .authorizeExchange { spec ->
                 run {
-                    spec.pathMatchers("/actuator/**").authenticated()
+                    spec.pathMatchers("/actuator/**", "repricer/v1/similar/products").authenticated()
                 }
             }
             .exceptionHandling()
