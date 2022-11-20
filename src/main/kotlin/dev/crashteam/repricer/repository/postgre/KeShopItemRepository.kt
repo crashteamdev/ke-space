@@ -160,7 +160,6 @@ class KeShopItemRepository(
             )
             .asTable("nested")
         val subQuery = dsl.select(*nested.fields())
-            .distinctOn(nested.field(s.PRODUCT_ID))
             .from(nested)
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
@@ -175,10 +174,12 @@ class KeShopItemRepository(
                         )
                     )
                 )
-            ).orderBy(nested.field(s.PRODUCT_ID)).limit(30)
+            ).limit(30)
         val records = dsl.select(*subQuery.fields())
+            .distinctOn(subQuery.field(s.PRODUCT_ID))
             .from(subQuery)
-            .orderBy(subQuery.field("name_similarity")).fetch()
+            .orderBy(subQuery.field("product_id"), subQuery.field("name_similarity"))
+            .fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
@@ -223,14 +224,15 @@ class KeShopItemRepository(
             )
             .asTable("nested")
         val subQuery = dsl.select(*nested.fields())
-            .distinctOn(nested.field(s.PRODUCT_ID))
             .from(nested)
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5)
-            ).orderBy(nested.field(s.PRODUCT_ID)).limit(30)
+            ).limit(30)
         val records = dsl.select(*subQuery.fields())
+            .distinctOn(subQuery.field(s.PRODUCT_ID))
             .from(subQuery)
-            .orderBy(subQuery.field("name_similarity")).fetch()
+            .orderBy(subQuery.field("product_id"), subQuery.field("name_similarity"))
+            .fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
@@ -261,7 +263,6 @@ class KeShopItemRepository(
         ).from(s).where(s.CATEGORY_ID.eq(categoryId)).and(s.PRODUCT_ID.notEqual(productId).and(s.SKU_ID.notEqual(skuId)))
             .asTable("nested")
         val subQuery = dsl.select(*nested.fields())
-            .distinctOn(nested.field(s.PRODUCT_ID))
             .from(nested)
             .where(
                 nested.field("name_similarity", Double::class.java)!!.greaterThan(0.5).or(
@@ -276,11 +277,12 @@ class KeShopItemRepository(
                         )
                     )
                 )
-            ).orderBy(nested.field(s.PRODUCT_ID)).limit(50)
+            ).limit(50)
         val records = dsl.select(*subQuery.fields())
+            .distinctOn(subQuery.field(s.PRODUCT_ID))
             .from(subQuery)
-            .orderBy(subQuery.field("name_similarity")).fetch()
-
+            .orderBy(subQuery.field("product_id"), subQuery.field("name_similarity"))
+            .fetch()
 
         return records.map { recordToKazanExpressShopItemMapper.convert(it) }
     }
