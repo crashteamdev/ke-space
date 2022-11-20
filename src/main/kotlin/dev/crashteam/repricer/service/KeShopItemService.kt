@@ -157,6 +157,16 @@ class KeShopItemService(
         )
     }
 
+    fun findSimilarItemsByProductIdSkuId(productId: Long, skuId: Long): List<KazanExpressShopItemEntity> {
+        val targetShopItemEntity = keShopItemRepository.findByProductIdAndSkuId(productId, skuId) ?: return emptyList()
+        return keShopItemRepository.findSimilarItemsByProductIdAndSkuId(
+            productId,
+            skuId,
+            targetShopItemEntity.name,
+            targetShopItemEntity.categoryId
+        )
+    }
+
     private fun generateImageFingerprints(url: String): ImageFingerprintHolder? {
         val imageByteArray = remoteImageLoader.loadResource(url)
         return try {

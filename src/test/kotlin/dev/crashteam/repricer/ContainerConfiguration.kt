@@ -33,6 +33,9 @@ class ContainerConfiguration {
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("data-source.pool-source.url", postgresql::getJdbcUrl)
+            registry.add("data-source.pool-source.password", postgresql::getPassword)
+            registry.add("data-source.pool-source.username", postgresql::getUsername)
             registry.add("spring.datasource.url", postgresql::getJdbcUrl)
             registry.add("spring.datasource.password", postgresql::getPassword)
             registry.add("spring.datasource.username", postgresql::getUsername)
