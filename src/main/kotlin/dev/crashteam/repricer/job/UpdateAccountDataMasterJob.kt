@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.job
 
+import dev.crashteam.repricer.config.properties.RepricerProperties
 import dev.crashteam.repricer.extensions.getApplicationContext
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
 import dev.crashteam.repricer.service.UpdateKeAccountService
@@ -18,8 +19,13 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
         val applicationContext = context.getApplicationContext()
         val keAccountRepository = applicationContext.getBean(KeAccountRepository::class.java)
         val updateKeAccountService = applicationContext.getBean(UpdateKeAccountService::class.java)
+        val repricerProperties = applicationContext.getBean(RepricerProperties::class.java)
+        val keAccountUpdateInProgressCount = keAccountRepository.findAccountUpdateInProgressCount()
+
+        if (keAccountUpdateInProgressCount >= (repricerProperties.maxUpdateInProgress ?: 3)) return
+
         val kazanExpressAccountEntities =
-            keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(3))
+            keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(6))
         log.info { "Execute update account job for ${kazanExpressAccountEntities.size} ke account" }
         for (kazanExpressAccountEntity in kazanExpressAccountEntities) {
             val updateJob = updateKeAccountService.executeUpdateJob(

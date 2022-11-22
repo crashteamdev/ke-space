@@ -94,6 +94,7 @@ repricer:
   accountInitializeCron: '0/20 * * * * ?'
   repairStuckStateCron: '0 0 0/1 * * ?'
   cookieBotProtectionBypassEnabled: true
+  maxUpdateInProgress: 3
 
 loki:
   host: localhost

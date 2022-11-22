@@ -120,8 +120,7 @@ class UpdateKeAccountService(
                         isActive = false
                         return@execute null
                     }
-
-                    for (accountShopItem in accountShopItems) {
+                    val shopItemEntities = accountShopItems.flatMap { accountShopItem ->
                         // Update product data from web KE
                         val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
                         if (productResponse?.payload?.data != null) {
@@ -160,8 +159,9 @@ class UpdateKeAccountService(
                                 lastUpdate = shopUpdateTime
                             )
                         }
-                        keAccountShopItemRepository.saveBatch(kazanExpressAccountShopItemEntities)
+                        kazanExpressAccountShopItemEntities
                     }
+                    keAccountShopItemRepository.saveBatch(shopItemEntities)
                     page += 1
                     null
                 }

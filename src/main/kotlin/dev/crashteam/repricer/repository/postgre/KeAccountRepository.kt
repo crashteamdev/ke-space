@@ -178,6 +178,14 @@ class KeAccountRepository(
         return records.map { recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(it) }
     }
 
+    fun findAccountUpdateInProgressCount(): Int {
+        val k = KE_ACCOUNT
+        return dsl.selectCount()
+            .from(k)
+            .where(k.UPDATE_STATE.notEqual(UpdateState.in_progress))
+            .fetchOne(0, Int::class.java) ?: 0
+    }
+
     fun findAccountByUpdateStateInProgressAndLastUpdateLessThan(
         updateStateLastUpdate: LocalDateTime
     ): List<KazanExpressAccountEntityJoinAccountEntity> {
