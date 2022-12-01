@@ -31,7 +31,7 @@ import java.util.*
 private val log = KotlinLogging.logger {}
 
 @RestController
-@RequestMapping("repricer/v1")
+@RequestMapping("/v1")
 class AccountsController(
     private val keAccountService: KeAccountService,
     private val keAccountShopService: KeAccountShopService,

@@ -18,7 +18,7 @@ import java.util.*
 private val log = KotlinLogging.logger {}
 
 @RestController
-@RequestMapping("repricer/v1")
+@RequestMapping("/v1")
 class OtherController(
     private val keShopItemService: KeShopItemService
 ) : SimilarApi {
