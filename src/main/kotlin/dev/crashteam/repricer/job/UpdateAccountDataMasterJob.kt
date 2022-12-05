@@ -43,6 +43,10 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
                             "userId=${kazanExpressAccountEntity.userId}; keAccountId=${kazanExpressAccountEntity.keAccountEntity.id}"
                 }
             }
+
+            if (keAccountRepository.findAccountUpdateInProgressCount() >=
+                (repricerProperties.maxUpdateInProgress ?: 3)
+            ) break
         }
     }
 }

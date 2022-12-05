@@ -39,26 +39,38 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
         } ?: return null
         log.debug { "Minimal price competitor: $minimalPriceCompetitor" }
         val competitorPrice: BigDecimal = keShopItemService.getRecentPrice(minimalPriceCompetitor.shopItemEntity)!!
+        val competitorPriceMinor = competitorPrice.movePointRight(2)
 
-        if (competitorPrice.movePointRight(2) >= sellPriceMinor) {
+        if (competitorPriceMinor >= sellPriceMinor) {
             log.debug { "Competitor price is the same or higher." +
-                    " competitorPrice=${competitorPrice.movePointRight(2)}; sellPrice=$sellPriceMinor" }
-            return null
+                    " competitorPrice=${competitorPriceMinor}; sellPrice=$sellPriceMinor" }
+            // If price too much higher than our we need to rise our price
+            val expectedPriceMinor = competitorPrice - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO).movePointRight(2)
+            if (expectedPriceMinor > sellPriceMinor) {
+                return CalculationResult(
+                    newPriceMinor = expectedPriceMinor,
+                    competitorId = minimalPriceCompetitor.competitorEntity.id
+                )
+            }
+            return null // No need to change price
+        } else {
+            val newPrice: BigDecimal = (competitorPrice - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO))
+            log.debug { "Competitor price = $competitorPrice. New price = $newPrice. Current sell price = $sellPriceMinor" }
+
+            var newPriceMinor = newPrice.movePointRight(2)
+            if (options?.minimumThreshold != null && newPriceMinor < BigDecimal.valueOf(options.minimumThreshold)) {
+                newPriceMinor = BigDecimal.valueOf(options.minimumThreshold)
+            } else if (options?.maximumThreshold != null && newPriceMinor > BigDecimal.valueOf(options.maximumThreshold)) {
+                newPriceMinor = BigDecimal.valueOf(options.maximumThreshold)
+            }
+            log.debug { "newPriceMinor=$newPriceMinor;sellPriceMinor=$sellPriceMinor" }
+
+            if (newPriceMinor == sellPriceMinor) return null // No need to change price
+
+            return CalculationResult(
+                newPriceMinor = newPriceMinor,
+                competitorId = minimalPriceCompetitor.competitorEntity.id
+            )
         }
-
-        val newPrice: BigDecimal = (competitorPrice - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO))
-        log.debug { "Competitor price = $competitorPrice. New price = $newPrice. Current sell price = $sellPriceMinor" }
-
-        var newPriceMinor = newPrice.movePointRight(2)
-        if (options?.minimumThreshold != null && newPriceMinor < BigDecimal.valueOf(options.minimumThreshold)) {
-            newPriceMinor = BigDecimal.valueOf(options.minimumThreshold)
-        } else if (options?.maximumThreshold != null && newPriceMinor > BigDecimal.valueOf(options.maximumThreshold)) {
-            newPriceMinor = BigDecimal.valueOf(options.maximumThreshold)
-        }
-        log.debug { "newPriceMinor=$newPriceMinor;sellPriceMinor=$sellPriceMinor" }
-
-        if (newPriceMinor == sellPriceMinor) return null // No need to change price
-
-        return CalculationResult(newPriceMinor = newPriceMinor, competitorId = minimalPriceCompetitor.competitorEntity.id)
     }
 }
