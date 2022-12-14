@@ -22,7 +22,10 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
         val repricerProperties = applicationContext.getBean(RepricerProperties::class.java)
         val keAccountUpdateInProgressCount = keAccountRepository.findAccountUpdateInProgressCount()
 
-        if (keAccountUpdateInProgressCount >= (repricerProperties.maxUpdateInProgress ?: 3)) return
+        if (keAccountUpdateInProgressCount >= (repricerProperties.maxUpdateInProgress ?: 3)) {
+            log.info { "Too mutch account update in progress - $keAccountUpdateInProgressCount" }
+            return
+        }
 
         val kazanExpressAccountEntities =
             keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(6))
