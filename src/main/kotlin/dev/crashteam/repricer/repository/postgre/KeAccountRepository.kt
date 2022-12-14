@@ -182,7 +182,7 @@ class KeAccountRepository(
         val k = KE_ACCOUNT
         return dsl.selectCount()
             .from(k)
-            .where(k.UPDATE_STATE.notEqual(UpdateState.in_progress))
+            .where(k.UPDATE_STATE.eq(UpdateState.in_progress))
             .fetchOne(0, Int::class.java) ?: 0
     }
 

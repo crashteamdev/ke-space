@@ -34,7 +34,7 @@ class RestTemplateConfig {
                 return false
             }
         }
-        restTemplate.interceptors.add(cookieHeaderRequestInterceptor)
+        //restTemplate.interceptors.add(cookieHeaderRequestInterceptor)
         return restTemplate
     }
 
