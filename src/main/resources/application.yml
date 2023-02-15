@@ -39,6 +39,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/repricer
     username: postgres
     password: postgres
+    type: org.springframework.jdbc.datasource.SimpleDriverDataSource
     hikari:
       minimum-idle: 5
       maximum-pool-size: 12
