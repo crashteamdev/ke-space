@@ -5,7 +5,7 @@ WORKDIR root/
 ARG JAR_FILE=repricer-*.jar
 COPY ${JAR_FILE} ./app.jar
 
-ENTRYPOINT ["java", "-server", "-Xms256M", "-Xmx856M",\
+ENTRYPOINT ["java", "-server", "-Xms256M", "-Xmx512M",\
             "-XX:+UnlockDiagnosticVMOptions", "-XX:+UseContainerSupport",\
             "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=dump.hprof", "-Djava.security.egd=/dev/zrandom",\
             "-jar", "/root/app.jar"]
