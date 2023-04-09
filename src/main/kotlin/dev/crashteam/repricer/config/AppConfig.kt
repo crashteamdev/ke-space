@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.config
 
+import dev.crashteam.repricer.config.retry.ErrorRetryListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.retry.backoff.FixedBackOffPolicy
@@ -18,6 +19,7 @@ class AppConfig {
         val retryPolicy = SimpleRetryPolicy()
         retryPolicy.maxAttempts = 10
         retryTemplate.setRetryPolicy(retryPolicy)
+        retryTemplate.setListeners(arrayOf(ErrorRetryListener()))
 
         return retryTemplate
     }
