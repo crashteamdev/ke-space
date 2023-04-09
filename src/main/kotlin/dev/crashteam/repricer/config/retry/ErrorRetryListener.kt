@@ -9,22 +9,22 @@ private val log = KotlinLogging.logger {}
 
 class ErrorRetryListener : RetryListenerSupport() {
 
-    override fun <T : Any?, E : Throwable?> open(context: RetryContext, callback: RetryCallback<T, E>): Boolean {
+    override fun <T : Any?, E : Throwable?> open(context: RetryContext?, callback: RetryCallback<T, E>?): Boolean {
         return super.open(context, callback)
     }
 
     override fun <T : Any?, E : Throwable?> close(
-        context: RetryContext,
-        callback: RetryCallback<T, E>,
-        throwable: Throwable
+        context: RetryContext?,
+        callback: RetryCallback<T, E>?,
+        throwable: Throwable?
     ) {
         super.close(context, callback, throwable)
     }
 
     override fun <T : Any?, E : Throwable?> onError(
         context: RetryContext,
-        callback: RetryCallback<T, E>,
-        throwable: Throwable
+        callback: RetryCallback<T, E>?,
+        throwable: Throwable?
     ) {
         log.error(throwable) { "Exception Occurred. retryCount=${context.retryCount}" }
         super.onError(context, callback, throwable)
