@@ -107,8 +107,10 @@ class UpdateKeAccountService(
             val shopUpdateTime = LocalDateTime.now()
             var isActive = true
             while (isActive) {
+                log.debug { "Iterate through keAccountShop. shopId=${keAccountShop.externalShopId}; page=$page" }
                 retryTemplate.execute<Void, Exception> {
                     Thread.sleep(Random().nextLong(1000, 4000))
+                    log.debug { "Update account shop items by shopId=${keAccountShop.externalShopId}" }
                     val accountShopItems = kazanExpressSecureService.getAccountShopItems(
                         userId,
                         keAccountId,
@@ -117,9 +119,11 @@ class UpdateKeAccountService(
                     )
 
                     if (accountShopItems.isEmpty()) {
+                        log.debug { "The list of shops is over. shopId=${keAccountShop.externalShopId}" }
                         isActive = false
                         return@execute null
                     }
+                    log.debug { "Iterate through accountShopItems. shopId=${keAccountShop.externalShopId}; size=${accountShopItems.size}" }
                     val shopItemEntities = accountShopItems.flatMap { accountShopItem ->
                         // Update product data from web KE
                         val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
@@ -161,15 +165,17 @@ class UpdateKeAccountService(
                         }
                         kazanExpressAccountShopItemEntities
                     }
+                    log.debug { "Save new shop items. size=${shopItemEntities.size}" }
                     keAccountShopItemRepository.saveBatch(shopItemEntities)
                     page += 1
                     null
                 }
-                keAccountShopItemRepository.deleteWhereOldLastUpdate(
+                val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
                     keAccountId,
                     keAccountShop.id!!,
                     shopUpdateTime
                 )
+                log.debug { "Deleted $oldItemDeletedCount old products" }
             }
         }
     }
