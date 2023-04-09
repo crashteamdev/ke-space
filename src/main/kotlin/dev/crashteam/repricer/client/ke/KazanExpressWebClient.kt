@@ -10,14 +10,12 @@ import dev.crashteam.repricer.config.properties.ServiceProperties
 import mu.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import java.nio.file.Files
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -129,14 +127,14 @@ class KazanExpressWebClient(
     private fun <T> handleProxyResponse(styxResponse: StyxResponse<T>): T? {
         val originalStatus = styxResponse.originalStatus
         val statusCode = HttpStatus.resolve(originalStatus)
-            ?: throw IllegalStateException("Unknown http status: $originalStatus")
-        val isError = statusCode.series() == HttpStatus.Series.CLIENT_ERROR
+        val isError = statusCode == null
+                || statusCode.series() == HttpStatus.Series.CLIENT_ERROR
                 || statusCode.series() == HttpStatus.Series.SERVER_ERROR
         if (isError) {
             throw KazanExpressProxyClientException(
                 originalStatus,
                 styxResponse.body.toString(),
-                "Bad response from KazanExpress. Status=$originalStatus; Body=${styxResponse.body.toString()}"
+                "Bad response. StyxStatus=${styxResponse.code}; Status=$originalStatus; Body=${styxResponse.body.toString()}"
             )
         }
         if (styxResponse.code != 0) {
