@@ -13,7 +13,7 @@ data class AccountShopItem(
     val category: String,
     val status: ShopItemStatus,
     val moderationStatus: ShopItemModerationStatus,
-    val commission: BigDecimal,
+    val commission: BigDecimal?,
     val commissionDto: ShopItemCommission,
     val skuList: List<ShopItemSku>,
     val image: String,
