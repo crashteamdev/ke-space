@@ -19,7 +19,7 @@
         <db.pg.schema>public</db.pg.schema>
         <db.pg.url>jdbc:postgresql://localhost:${db.pg.port}/${db.pg.name}</db.pg.url>
         <java.version>17</java.version>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.21</kotlin.version>
         <testcontainers.version>1.17.3</testcontainers.version>
         <selenium.version>4.4.0</selenium.version>
         <imageio.version>3.9.4</imageio.version>

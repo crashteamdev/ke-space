@@ -50,6 +50,9 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap { principal ->
             addKeAccountRequest.flatMap { request ->
                 try {
+                    if (request.login.isNullOrEmpty() || request.password.isNullOrEmpty()) {
+                        return@flatMap ResponseEntity.badRequest().build<KeAccount>().toMono()
+                    }
                     val keAccountEntity = keAccountService.addKeAccount(principal.name, request.login, request.password)
                     val keAccount = conversionService.convert(keAccountEntity, KeAccount::class.java)
                     ResponseEntity.ok(keAccount).toMono()
