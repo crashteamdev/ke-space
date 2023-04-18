@@ -3,6 +3,7 @@ package dev.crashteam.repricer.client.ke
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.config.properties.ServiceProperties
+import dev.crashteam.repricer.service.util.RandomUserAgent
 import mu.KotlinLogging
 import org.springframework.http.*
 import org.springframework.stereotype.Component
@@ -22,7 +23,7 @@ class KazanExpressLkClient(
     override fun getAccountShops(userId: String, userToken: String): List<AccountShop> {
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer $userToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -43,7 +44,7 @@ class KazanExpressLkClient(
     ): List<AccountShopItem> {
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer $userToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -65,7 +66,7 @@ class KazanExpressLkClient(
     ): Boolean {
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer $userToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             set(USER_ID_HEADER, userId)
         }
@@ -89,7 +90,7 @@ class KazanExpressLkClient(
     override fun getProductInfo(userId: String, userToken: String, shopId: Long, productId: Long): AccountProductInfo {
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer $userToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -110,7 +111,7 @@ class KazanExpressLkClient(
     ): AccountProductDescription {
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer $userToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -132,7 +133,7 @@ class KazanExpressLkClient(
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
             set("Authorization", "Basic $basicAuthToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -152,7 +153,7 @@ class KazanExpressLkClient(
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
             set("Authorization", "Basic $basicAuthToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
@@ -172,7 +173,7 @@ class KazanExpressLkClient(
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
             set("Authorization", "Basic $basicAuthToken")
-            set("User-Agent", USER_AGENT)
+            set("User-Agent", RandomUserAgent.getRandomUserAgent())
             set(USER_ID_HEADER, userId)
         }
         val responseEntity =
