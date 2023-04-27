@@ -14,6 +14,7 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.*
 
@@ -61,7 +62,8 @@ class PriceChangeService(
                         productId = poolFilledEntity.productId
                     )
                 }
-                val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity, calculationResult)
+                val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity,
+                    calculationResult, poolFilledEntity.minimumThreshold)
                 log.debug { "Trying to change account shop item price. " +
                         "keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                         ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
@@ -129,7 +131,8 @@ class PriceChangeService(
         userId: String,
         keAccountId: UUID,
         poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity,
-        calculationResult: CalculationResult
+        calculationResult: CalculationResult,
+        minimumThreshold: Long?
     ): List<SkuPriceChangeSku> {
         val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
             kazanExpressSecureService.getProductDescription(
@@ -158,11 +161,7 @@ class PriceChangeService(
         val changeSku = SkuPriceChangeSku(
             id = poolFilledEntity.skuId,
             fullPrice = calculationResult.newPriceMinor.movePointLeft(2).toLong(),
-            sellPrice = if (poolFilledEntity.discount != null) {
-                (calculationResult.newPriceMinor - ((calculationResult.newPriceMinor * poolFilledEntity.discount.toBigDecimal()) / BigDecimal(
-                    100
-                ))).movePointLeft(2).toLong()
-            } else calculationResult.newPriceMinor.movePointLeft(2).toLong(),
+            sellPrice = calculateDiscountPrice(poolFilledEntity.discount, minimumThreshold, calculationResult.newPriceMinor),
             skuTitle = poolFilledEntity.skuTitle,
             barCode = poolFilledEntity.barcode.toString(),
         )
@@ -170,6 +169,19 @@ class PriceChangeService(
         return skuList.toMutableList().apply {
             add(changeSku)
         }
+    }
+
+    private fun calculateDiscountPrice(discount: BigInteger?, minimumThreshold: Long?, newPriceMinor: BigDecimal): Long {
+        return if (discount != null) {
+            val discountedPrice = (newPriceMinor - ((newPriceMinor * discount.toBigDecimal()) / BigDecimal(
+                100
+            ))).movePointLeft(2).toLong()
+            if (minimumThreshold != null && discountedPrice < minimumThreshold) {
+                newPriceMinor.movePointLeft(2).toLong()
+            } else {
+                discountedPrice
+            }
+        } else newPriceMinor.movePointLeft(2).toLong()
     }
 
 }
