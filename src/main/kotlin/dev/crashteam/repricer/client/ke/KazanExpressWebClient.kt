@@ -53,7 +53,9 @@ class KazanExpressWebClient(
                         "User-Agent" to USER_AGENT,
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
-                        "x-iid" to UUID.randomUUID().toString()
+                        "x-iid" to "random_uuid()",
+                        "apollographql-client-name" to "web-customers",
+                        "apollographql-client-version" to "1.37.0"
                     )
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(query))
@@ -107,7 +109,8 @@ class KazanExpressWebClient(
                     key = "headers",
                     value = mapOf(
                         "User-Agent" to USER_AGENT,
-                        "Authorization" to "Basic $AUTH_TOKEN"
+                        "Authorization" to "Basic $AUTH_TOKEN",
+                        "x-iid" to "random_uuid()"
                     )
                 )
             )

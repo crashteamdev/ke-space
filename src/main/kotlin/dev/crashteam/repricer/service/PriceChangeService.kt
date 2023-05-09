@@ -122,7 +122,7 @@ class PriceChangeService(
                 }
             } catch (e: Exception) {
                 log.warn(e) { "Failed to change item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId}" +
-                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
+                        ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}, cause - ${e.cause?.message}" }
             }
         }
     }
