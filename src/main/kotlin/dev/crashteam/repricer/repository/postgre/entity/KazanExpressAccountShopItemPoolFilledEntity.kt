@@ -12,7 +12,7 @@ data class KazanExpressAccountShopItemPoolFilledEntity(
     val skuId: Long,
     val productSku: String,
     val price: Long,
-    val purchasePrice: Long,
+    val purchasePrice: Long?,
     val externalShopId: Long,
     val discount: BigInteger? = null,
     val step: Int? = null,
