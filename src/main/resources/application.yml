@@ -78,13 +78,9 @@ proxies:
   proxyline:
     apiKey: proxy-api-key
 
-actuator:
-  user: basic
-  password: passwd
-
 repricer:
   jobEnabled: true
-  password-key: x!z%C*F-JaNdRgUkXp2s5v8y/B?D(G+K
+  passwordKey: x!z%C*F-JaNdRgUkXp2s5v8y/B?D(G+K
   productCron: '0 0 0/6 * * ?'
   accountUpdateDataCron: '0 0 0/1 * * ?'
   priceChangeCron: '0 0/15 * * * ?'
@@ -93,10 +89,6 @@ repricer:
   repairStuckStateCron: '0 0 0/1 * * ?'
   cookieBotProtectionBypassEnabled: true
   maxUpdateInProgress: 3
-
-loki:
-  host: localhost
-  enabled: false
 
 youkassa:
   shopId: 819837
