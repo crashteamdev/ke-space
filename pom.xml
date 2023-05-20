@@ -266,7 +266,7 @@
                 </dependencies>
                 <configuration>
                     <resourceBundles>
-                        <resourceBundle>dev.vality:shared-resources:${shared-resources.version}</resourceBundle>
+                        <resourceBundle>dev.crashteam:shared-resources:${shared-resources.version}</resourceBundle>
                     </resourceBundles>
                     <attachToMain>false</attachToMain>
                     <attachToTest>false</attachToTest>
