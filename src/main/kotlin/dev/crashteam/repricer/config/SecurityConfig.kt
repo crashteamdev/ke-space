@@ -43,7 +43,7 @@ class SecurityConfig(
             .securityMatcher(pathMatchers("/v1/similar/products"))
             .authorizeExchange { spec ->
                 run {
-                    spec.pathMatchers("/actuator/**", "/v1/similar/products").authenticated()
+                    spec.pathMatchers( "/v1/similar/products").authenticated()
                 }
             }
             .exceptionHandling()
