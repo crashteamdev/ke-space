@@ -65,8 +65,6 @@ spring:
         jwt:
           jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
           issuer-uri: https://securetoken.google.com/${FIREBASE_APP_NAME:marketdb-gloom}
-  webflux:
-    base-path: /repricer
 
 service:
   proxy:
