@@ -12,6 +12,8 @@
     <name>repricer</name>
     <description>repricer</description>
     <properties>
+        <server.port>8080</server.port>
+        <management.port>8023</management.port>
         <db.pg.port>5432</db.pg.port>
         <db.pg.user>postgres</db.pg.user>
         <db.pg.password>postgres</db.pg.password>
