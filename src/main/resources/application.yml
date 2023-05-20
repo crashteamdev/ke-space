@@ -4,17 +4,24 @@ server:
     include-stacktrace: ALWAYS
 
 management:
+  security:
+    flag: false
+  server:
+    port: '@management.port@'
+  metrics:
+    prometheus:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metric
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-    distribution:
-      percentiles-histogram:
-        "[http.server.requests]": true
+        include: health,info,prometheus
 
 logging:
   level:
