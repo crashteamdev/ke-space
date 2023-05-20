@@ -2,8 +2,6 @@ server:
   port: 8080
   error:
     include-stacktrace: ALWAYS
-  servlet:
-    context-path: /repricer
 
 management:
   endpoints:
