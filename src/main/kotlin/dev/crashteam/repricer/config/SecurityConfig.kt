@@ -41,21 +41,12 @@ class SecurityConfig(
     fun basicAuthWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
             .cors().configurationSource(createCorsConfigSource()).and()
-            .securityMatcher(pathMatchers("/v1/similar/products"))
+            .securityMatcher(pathMatchers("/actuator/**", "/v1/similar/products")).anonymous().and()
             .authorizeExchange { spec ->
                 run {
-                    spec.pathMatchers("**/health").permitAll()
-                    spec.pathMatchers( "/v1/similar/products").authenticated()
+                    spec.pathMatchers("/actuator/**", "/v1/similar/products").permitAll()
                 }
             }
-            .exceptionHandling()
-            .authenticationEntryPoint { exchange, ex ->
-                Mono.fromRunnable {
-                    exchange.response.headers.set("WWW-Authenticate", "Basic realm=dummy")
-                    exchange.response.statusCode = HttpStatus.UNAUTHORIZED
-                }
-            }
-            .and()
             .build()
     }
 
