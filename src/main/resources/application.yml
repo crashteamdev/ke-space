@@ -25,11 +25,8 @@ management:
 
 logging:
   level:
-    "liquibase": DEBUG
-    org.apache.http: INFO
     dev.crashteam.repricer.service: DEBUG
     dev.crashteam.repricer.price: DEBUG
-    org.jooq.tools.LoggerListener: DEBUG
 
 spring:
   application:
