@@ -7,10 +7,10 @@
         <artifactId>service-parent-pom</artifactId>
         <version>1.0.9</version>
     </parent>
-    <artifactId>repricer</artifactId>
+    <artifactId>ke-space</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>repricer</name>
-    <description>repricer</description>
+    <name>ke-space</name>
+    <description>ke-space</description>
     <properties>
         <server.port>8080</server.port>
         <management.port>8023</management.port>
