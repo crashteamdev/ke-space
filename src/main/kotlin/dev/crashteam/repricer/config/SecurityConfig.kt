@@ -44,8 +44,8 @@ class SecurityConfig(
             .securityMatcher(pathMatchers("/v1/similar/products"))
             .authorizeExchange { spec ->
                 run {
+                    spec.pathMatchers("**/health").permitAll()
                     spec.pathMatchers( "/v1/similar/products").authenticated()
-                    spec.matchers(EndpointRequest.to("health")).permitAll()
                 }
             }
             .exceptionHandling()
