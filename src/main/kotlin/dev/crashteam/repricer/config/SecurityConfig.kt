@@ -2,6 +2,7 @@ package dev.crashteam.repricer.config
 
 import dev.crashteam.repricer.config.security.UserCreationFilter
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
@@ -44,6 +45,7 @@ class SecurityConfig(
             .authorizeExchange { spec ->
                 run {
                     spec.pathMatchers( "/v1/similar/products").authenticated()
+                    spec.matchers(EndpointRequest.to("health")).permitAll()
                 }
             }
             .exceptionHandling()
