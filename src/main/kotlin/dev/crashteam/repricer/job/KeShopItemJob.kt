@@ -23,6 +23,7 @@ class KeShopItemJob : QuartzJobBean() {
         while (true) {
             val categoryResponse =
                 kazanExpressClient.getCategoryGraphQL(categoryId = categoryId.toString(), limit = 48, offset = 0)
+            log.info { "Category response. itemsSize=${categoryResponse?.items?.size}" }
             if (categoryResponse?.items.isNullOrEmpty()) break
             val products = categoryResponse?.items ?: break
             products.mapNotNull { categoryProduct ->
