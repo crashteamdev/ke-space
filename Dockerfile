@@ -6,7 +6,7 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 EXPOSE 8080
 
 WORKDIR root/
-ARG JAR_FILE=repricer-*.jar
+ARG JAR_FILE=ke-space-*.jar
 COPY ${JAR_FILE} ./app.jar
 
 ENTRYPOINT ["java", "-server", "-Xms128M", "-Xmx256M",\

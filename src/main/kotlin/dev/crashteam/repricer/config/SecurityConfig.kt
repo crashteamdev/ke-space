@@ -1,19 +1,14 @@
 package dev.crashteam.repricer.config
 
-import dev.crashteam.repricer.config.properties.ActuatorProperties
 import dev.crashteam.repricer.config.security.UserCreationFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.*
@@ -25,12 +20,10 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import reactor.core.publisher.Mono
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
-    private val actuatorProperties: ActuatorProperties,
     private val userCreationFilter: UserCreationFilter,
 ) {
 
@@ -42,21 +35,12 @@ class SecurityConfig(
     fun basicAuthWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
             .cors().configurationSource(createCorsConfigSource()).and()
-            .securityMatcher(pathMatchers("/actuator/**", "/v1/similar/products"))
-            .httpBasic().authenticationManager { basicAuthenticationDummyAuthentication(it) }.and()
+            .securityMatcher(pathMatchers("/actuator/**", "/v1/similar/products")).anonymous().and()
             .authorizeExchange { spec ->
                 run {
-                    spec.pathMatchers("/actuator/**", "/v1/similar/products").authenticated()
+                    spec.pathMatchers("/actuator/**", "/v1/similar/products").permitAll()
                 }
             }
-            .exceptionHandling()
-            .authenticationEntryPoint { exchange, ex ->
-                Mono.fromRunnable {
-                    exchange.response.headers.set("WWW-Authenticate", "Basic realm=dummy")
-                    exchange.response.statusCode = HttpStatus.UNAUTHORIZED
-                }
-            }
-            .and()
             .build()
     }
 
@@ -116,17 +100,5 @@ class SecurityConfig(
         config.addExposedHeader("*")
         source.registerCorsConfiguration("/**", config)
         return source
-    }
-
-    private fun basicAuthenticationDummyAuthentication(it: Authentication) = when (it) {
-        is UsernamePasswordAuthenticationToken -> {
-            when (it.name == actuatorProperties.user && it.credentials == actuatorProperties.password) {
-                true -> Mono.just<Authentication>(
-                    UsernamePasswordAuthenticationToken(it.principal, it.credentials, it.authorities)
-                )
-                else -> Mono.error(BadCredentialsException("Invalid credentials"))
-            }
-        }
-        else -> Mono.empty()
     }
 }

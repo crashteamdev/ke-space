@@ -1,34 +1,36 @@
 server:
-  port: 8080
+  port: ${server.port}
   error:
     include-stacktrace: ALWAYS
-  servlet:
-    context-path: /repricer
 
 management:
+  security:
+    flag: false
+  server:
+    port: ${management.port}
+  metrics:
+    prometheus:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metric
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-    distribution:
-      percentiles-histogram:
-        "[http.server.requests]": true
+        include: health,info,prometheus
 
 logging:
   level:
-    "liquibase": DEBUG
-    org.apache.http: INFO
     dev.crashteam.repricer.service: DEBUG
     dev.crashteam.repricer.price: DEBUG
-    org.jooq.tools.LoggerListener: DEBUG
 
 spring:
   application:
-    name: '@project.name@'
+    name: ${project.name}
     output:
       ansi:
         enabled: always
@@ -67,8 +69,6 @@ spring:
         jwt:
           jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
           issuer-uri: https://securetoken.google.com/${FIREBASE_APP_NAME:marketdb-gloom}
-  webflux:
-    base-path: /repricer
 
 service:
   proxy:
@@ -78,13 +78,9 @@ proxies:
   proxyline:
     apiKey: proxy-api-key
 
-actuator:
-  user: basic
-  password: passwd
-
 repricer:
   jobEnabled: true
-  password-key: x!z%C*F-JaNdRgUkXp2s5v8y/B?D(G+K
+  passwordKey: x!z%C*F-JaNdRgUkXp2s5v8y/B?D(G+K
   productCron: '0 0 0/6 * * ?'
   accountUpdateDataCron: '0 0 0/1 * * ?'
   priceChangeCron: '0 0/15 * * * ?'
@@ -93,10 +89,6 @@ repricer:
   repairStuckStateCron: '0 0 0/1 * * ?'
   cookieBotProtectionBypassEnabled: true
   maxUpdateInProgress: 3
-
-loki:
-  host: localhost
-  enabled: false
 
 youkassa:
   shopId: 819837
