@@ -30,6 +30,7 @@ class OtherController(
         exchange: ServerWebExchange
     ): Mono<ResponseEntity<Flux<SimilarItem>>> {
         return exchange.getPrincipal<Principal>().flatMap<ResponseEntity<Flux<SimilarItem>>?> { principal ->
+            log.info { "Find similar items by productId=$productId; skuId=$skuId" }
             val similarItems = keShopItemService.findSimilarItemsByProductIdSkuId(productId, skuId).map {
                 SimilarItem().apply {
                     this.productId = it.productId
