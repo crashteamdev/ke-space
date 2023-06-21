@@ -24,5 +24,6 @@ data class KazanExpressAccountShopItemEntity(
     val step: Int? = null,
     val discount: BigInteger? = null,
     val lastUpdate: LocalDateTime,
-    val isInPool: Boolean? = false
+    val isInPool: Boolean? = false,
+    val strategyId: Long?
 )

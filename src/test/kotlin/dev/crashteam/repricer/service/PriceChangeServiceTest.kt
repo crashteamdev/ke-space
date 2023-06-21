@@ -103,7 +103,8 @@ class PriceChangeServiceTest : ContainerConfiguration() {
                 skuTitle = "testSkuTitle",
                 minimumThreshold = 1000,
                 maximumThreshold = 6000,
-                step = 10
+                step = 10,
+                strategyId = null
             )
         )
     }

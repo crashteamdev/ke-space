@@ -1,5 +1,7 @@
 package dev.crashteam.repricer.service
 
+import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
+import dev.crashteam.openapi.kerepricer.model.CloseToMinimalStrategy
 import dev.crashteam.repricer.ContainerConfiguration
 import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.client.ke.model.web.*
@@ -10,6 +12,7 @@ import dev.crashteam.repricer.repository.postgre.*
 import dev.crashteam.repricer.repository.postgre.entity.*
 import dev.crashteam.repricer.service.loader.RemoteImageLoader
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -50,6 +53,9 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
     @Autowired
     lateinit var keAccountShopService: KeAccountShopService
 
+    @Autowired
+    lateinit var strategyRepository: KeAccountShopItemStrategyRepository
+
     @MockBean
     lateinit var kazanExpressWebClient: KazanExpressWebClient
 
@@ -71,6 +77,7 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
     internal fun setUp() {
         val subscriptionEntity = accountSubscriptionRepository.findSubscriptionByPlan(SubscriptionPlan.default_)
         accountRepository.deleteByUserId(userId)
+
         accountRepository.save(
             AccountEntity(
                 userId = userId,
@@ -118,9 +125,21 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
                 skuTitle = "testSkuTitle",
                 minimumThreshold = 1000,
                 maximumThreshold = 2000,
-                step = 10
+                step = 10,
+                strategyId = null
             )
         )
+        val closeToMinimalStrategy = CloseToMinimalStrategy("close_to_minimal", 100.0, 100.0)
+        val strategyRequest = AddStrategyRequest(keAccountShopItemId, closeToMinimalStrategy)
+        keAccountShopItemRepository.saveStrategy(strategyRequest)
+    }
+
+    @Test
+    fun `check if strategy exists`() {
+        val shopItem = keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopItemId)
+        assertNotEquals(null, shopItem?.strategyId)
+        val strategyEntity = shopItem!!.strategyId?.let { strategyRepository.findById(it) }
+        assertEquals(strategyEntity?.strategyType, "close_to_minimal")
     }
 
     @Test
