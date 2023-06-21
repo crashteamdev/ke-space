@@ -26,3 +26,6 @@ ALTER TABLE ke_account_shop_item
         FOREIGN KEY (ke_account_shop_item_strategy_id) REFERENCES ke_account_shop_item_strategy (id) ON DELETE CASCADE;
 
 CREATE UNIQUE INDEX ke_account_shop_item_shop_item_strategy_id_idx ON ke_account_shop_item (ke_account_shop_item_strategy_id);
+
+ALTER TABLE strategy_option
+    ADD step INT;

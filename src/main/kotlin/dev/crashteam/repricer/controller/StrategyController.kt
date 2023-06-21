@@ -6,6 +6,7 @@ import dev.crashteam.openapi.kerepricer.model.KeAccountShopItemStrategy
 import dev.crashteam.openapi.kerepricer.model.PatchStrategy
 import dev.crashteam.openapi.kerepricer.model.StrategyType
 import dev.crashteam.repricer.service.KeShopItemStrategyService
+import org.springframework.core.convert.ConversionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,17 +20,20 @@ import java.util.*
 @RestController
 @RequestMapping("/v1")
 class StrategyController(
-    private val keShopItemStrategyService: KeShopItemStrategyService
+    private val keShopItemStrategyService: KeShopItemStrategyService,
+    private val conversionService: ConversionService
 ) : StrategiesApi {
 
     override fun addStrategy(
         xRequestID: UUID?,
         addStrategyRequest: Mono<AddStrategyRequest>?,
         exchange: ServerWebExchange?
-    ): Mono<ResponseEntity<Long>>? {
+    ): Mono<ResponseEntity<KeAccountShopItemStrategy>>? {
         return addStrategyRequest?.flatMap {
             val strategyId = keShopItemStrategyService.saveStrategy(it)
-            return@flatMap ResponseEntity.status(HttpStatus.CREATED).body(strategyId).toMono()
+            val strategy = keShopItemStrategyService.findStrategy(strategyId)
+            val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
+            return@flatMap ResponseEntity.status(HttpStatus.CREATED).body(itemStrategy).toMono()
         }
     }
 
@@ -54,11 +58,11 @@ class StrategyController(
         exchange: ServerWebExchange?
     ): Mono<ResponseEntity<KeAccountShopItemStrategy>> {
         if (shopItemStrategyId != null) {
-            val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
-
-            val keAccountShopItemStrategy = KeAccountShopItemStrategy
-            keAccountShopItemStrategy.
-
+            exchange?.getPrincipal<Principal>()?.flatMap {
+                val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
+                val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
+                return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            }
         }
         throw IllegalArgumentException("shopItemStrategyId can't be null")
     }

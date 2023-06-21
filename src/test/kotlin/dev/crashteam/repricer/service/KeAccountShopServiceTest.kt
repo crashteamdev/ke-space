@@ -129,7 +129,7 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
                 strategyId = null
             )
         )
-        val closeToMinimalStrategy = CloseToMinimalStrategy("close_to_minimal", 100.0, 100.0)
+        val closeToMinimalStrategy = CloseToMinimalStrategy(10, "close_to_minimal", 100.0, 100.0)
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, closeToMinimalStrategy)
         keAccountShopItemRepository.saveStrategy(strategyRequest)
     }

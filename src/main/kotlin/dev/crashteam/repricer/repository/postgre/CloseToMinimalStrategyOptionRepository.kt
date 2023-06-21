@@ -15,10 +15,12 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
         return dsl.insertInto(
             strategyOption,
             strategyOption.MAXIMUM_THRESHOLD,
-            strategyOption.MINIMUM_THRESHOLD
+            strategyOption.MINIMUM_THRESHOLD,
+            strategyOption.STEP
         ).values(
             strategy.maximumThreshold.toLong(),
-            strategy.minimumThreshold.toLong()
+            strategy.minimumThreshold.toLong(),
+            strategy.step
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }
@@ -29,6 +31,7 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
         return dsl.update(strategyOption)
             .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
             .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
+            .set(strategyOption.STEP, strategy.step)
             .where(strategyOption.ID.eq(id))
             .execute()
     }
