@@ -12,6 +12,7 @@ import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -23,6 +24,7 @@ class KeAccountShopItemRepository(
     private val strategyRepository: KeAccountShopItemStrategyRepository
 ) {
 
+    @Transactional
     fun saveStrategy(strategyRequest: AddStrategyRequest): Long {
         val i = KE_ACCOUNT_SHOP_ITEM
         val strategyId = strategyRepository.save(strategyRequest)

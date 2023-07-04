@@ -72,8 +72,18 @@ class StrategyController(
         shopItemStrategyId: Long?,
         patchStrategy: Mono<PatchStrategy>?,
         exchange: ServerWebExchange?
-    ): Mono<ResponseEntity<Void>> {
-        return super.patchStrategy(xRequestID, shopItemStrategyId, patchStrategy, exchange)
+    ): Mono<ResponseEntity<KeAccountShopItemStrategy>> {
+        if (shopItemStrategyId != null) {
+            patchStrategy?.flatMap {
+                keShopItemStrategyService.updateStrategy(shopItemStrategyId, it)
+                val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
+                val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
+
+                keShopItemStrategyService.deleteStrategy(shopItemStrategyId)
+                return@flatMap ResponseEntity.ok().body(itemStrategy).toMono()
+            }
+        }
+        return Mono.just(ResponseEntity.badRequest().build())
     }
 
     override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<StrategyType>> {

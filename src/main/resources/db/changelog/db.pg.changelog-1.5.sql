@@ -29,3 +29,5 @@ CREATE UNIQUE INDEX ke_account_shop_item_shop_item_strategy_id_idx ON ke_account
 
 ALTER TABLE strategy_option
     ADD step INT;
+
+ALTER TYPE strategy_type ADD VALUE 'equal_price'
