@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.repository.postgre
 
+import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.*
@@ -11,6 +12,7 @@ import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -19,7 +21,19 @@ import java.util.*
 class KeAccountShopItemRepository(
     private val dsl: DSLContext,
     private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper,
+    private val strategyRepository: KeAccountShopItemStrategyRepository
 ) {
+
+    @Transactional
+    fun saveStrategy(strategyRequest: AddStrategyRequest): Long {
+        val i = KE_ACCOUNT_SHOP_ITEM
+        val strategyId = strategyRepository.save(strategyRequest)
+        dsl.update(i)
+            .set(i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID, strategyId)
+            .where(i.ID.eq(strategyRequest.keAccountShopItemId))
+            .execute()
+        return strategyId
+    }
 
     fun save(kazanExpressAccountShopItemEntity: KazanExpressAccountShopItemEntity): UUID? {
         val i = KE_ACCOUNT_SHOP_ITEM

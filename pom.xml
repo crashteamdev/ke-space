@@ -109,7 +109,7 @@
         <dependency>
             <groupId>dev.crashteam</groupId>
             <artifactId>openapi-ke-repricer</artifactId>
-            <version>1.41-33140f6-server</version>
+            <version>1.54-66de0c3-server</version>
         </dependency>
         <dependency>
             <groupId>dev.brachtendorf</groupId>

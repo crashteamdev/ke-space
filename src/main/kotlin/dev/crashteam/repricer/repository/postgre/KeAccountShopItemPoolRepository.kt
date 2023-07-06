@@ -5,6 +5,7 @@ import dev.crashteam.repricer.db.model.tables.KeAccount.KE_ACCOUNT
 import dev.crashteam.repricer.db.model.tables.KeAccountShop.KE_ACCOUNT_SHOP
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemStrategy
 import dev.crashteam.repricer.extensions.paginate
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemPoolEntity
@@ -132,7 +133,8 @@ class KeAccountShopItemPoolRepository(
             i.MAXIMUM_THRESHOLD,
             i.SKU_TITLE,
             i.BARCODE,
-            p.LAST_CHECK
+            p.LAST_CHECK,
+            i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
         )
             .from(i)
             .join(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
@@ -157,7 +159,8 @@ class KeAccountShopItemPoolRepository(
                     maximumThreshold = record.getValue(i.MAXIMUM_THRESHOLD),
                     skuTitle = record.getValue(i.SKU_TITLE),
                     barcode = record.getValue(i.BARCODE),
-                    lastCheck = record.getValue(p.LAST_CHECK)
+                    lastCheck = record.getValue(p.LAST_CHECK),
+                    strategyId = record.getValue(i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID)
                 )
             }
     }

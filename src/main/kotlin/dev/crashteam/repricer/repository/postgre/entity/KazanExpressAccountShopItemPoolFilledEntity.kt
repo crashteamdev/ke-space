@@ -20,5 +20,6 @@ data class KazanExpressAccountShopItemPoolFilledEntity(
     val maximumThreshold: Long? = null,
     val skuTitle: String,
     val barcode: Long,
-    val lastCheck: LocalDateTime? = null
+    val lastCheck: LocalDateTime? = null,
+    val strategyId: Long?
 )

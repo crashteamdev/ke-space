@@ -1,6 +1,8 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.model.lk.*
+import dev.crashteam.repricer.db.model.enums.StrategyType
+import dev.crashteam.repricer.price.CloseToMinimalPriceChangeCalculatorStrategy
 import dev.crashteam.repricer.price.PriceChangeCalculatorStrategy
 import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
@@ -26,8 +28,10 @@ class PriceChangeService(
     private val kazanExpressSecureService: KazanExpressSecureService,
     private val keShopItemPriceHistoryRepository: KeShopItemPriceHistoryRepository,
     private val keAccountShopItemRepository: KeAccountShopItemRepository,
-    private val priceChangeCalculatorStrategy: PriceChangeCalculatorStrategy,
-    private val retryTemplate: RetryTemplate
+    private val closeToMinimalCalculatorStrategy: CloseToMinimalPriceChangeCalculatorStrategy,
+    private val retryTemplate: RetryTemplate,
+    private val strategyService: KeShopItemStrategyService,
+    private val calculators: Map<StrategyType, PriceChangeCalculatorStrategy>
 ) {
 
     @Transactional
@@ -38,15 +42,7 @@ class PriceChangeService(
             try {
                 log.debug { "Begin calculate item price. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                         ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
-                val calculationResult = priceChangeCalculatorStrategy.calculatePrice(
-                    poolFilledEntity.keAccountShopItemId,
-                    BigDecimal.valueOf(poolFilledEntity.price),
-                    CalculatorOptions(
-                        step = poolFilledEntity.step,
-                        minimumThreshold = poolFilledEntity.minimumThreshold,
-                        maximumThreshold = poolFilledEntity.maximumThreshold
-                    )
-                )
+                val calculationResult = calculationResult(poolFilledEntity)
                 log.debug { "Calculation result = $calculationResult. keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                         ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
                 if (calculationResult == null) {
@@ -168,6 +164,32 @@ class PriceChangeService(
 
         return skuList.toMutableList().apply {
             add(changeSku)
+        }
+    }
+
+    private fun calculationResult(poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity): CalculationResult? {
+        if (poolFilledEntity.strategyId != null) {
+            val strategy = strategyService.findStrategy(poolFilledEntity.strategyId)
+            val calculatorStrategy = calculators[StrategyType.valueOf(strategy!!.strategyType)]
+            return calculatorStrategy!!.calculatePrice(
+                poolFilledEntity.keAccountShopItemId,
+                BigDecimal.valueOf(poolFilledEntity.price),
+                CalculatorOptions(
+                    step = strategy.step,
+                    minimumThreshold = strategy.minimumThreshold,
+                    maximumThreshold = poolFilledEntity.maximumThreshold
+                )
+            )
+        } else {
+            return closeToMinimalCalculatorStrategy.calculatePrice(
+                poolFilledEntity.keAccountShopItemId,
+                BigDecimal.valueOf(poolFilledEntity.price),
+                CalculatorOptions(
+                    step = poolFilledEntity.step,
+                    minimumThreshold = poolFilledEntity.minimumThreshold,
+                    maximumThreshold = poolFilledEntity.maximumThreshold
+                )
+            )
         }
     }
 

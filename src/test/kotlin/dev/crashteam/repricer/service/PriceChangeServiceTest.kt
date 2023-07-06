@@ -1,5 +1,7 @@
 package dev.crashteam.repricer.service
 
+import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
+import dev.crashteam.openapi.kerepricer.model.EqualPriceStrategy
 import dev.crashteam.repricer.ContainerConfiguration
 import dev.crashteam.repricer.client.ke.model.lk.AccountProductDescription
 import dev.crashteam.repricer.db.model.enums.MonitorState
@@ -103,33 +105,46 @@ class PriceChangeServiceTest : ContainerConfiguration() {
                 skuTitle = "testSkuTitle",
                 minimumThreshold = 1000,
                 maximumThreshold = 6000,
-                step = 10
+                step = 10,
+                strategyId = null
             )
         )
     }
 
     @Test
-    fun `change user pool item price`() {
-        // Given
+    fun `check equal price strategy`() {
+
         val kazanExpressAccountShopItemCompetitorEntity = KazanExpressAccountShopItemCompetitorEntity(
             id = UUID.randomUUID(),
             keAccountShopItemId = keAccountShopItemId,
-            productId = 635242L,
-            skuId = 4231456L
+            productId = 635243L,
+            skuId = 4231453L
         )
-        val keShopItemEntity = KazanExpressShopItemEntity(
-            productId = 635242L,
-            skuId = 4231456L,
-            categoryId = 556235L,
+        val competitorKeShopItemEntity = KazanExpressShopItemEntity(
+            productId = 635243L,
+            skuId = 4231453L,
+            categoryId = 556231L,
             name = "test",
             photoKey = "test",
             avgHashFingerprint = "test",
             pHashFingerprint = "test",
-            price = 5000,
+            price = 7000,
             availableAmount = 10,
             lastUpdate = LocalDateTime.now()
         )
         keShopItemPoolRepository.save(KazanExpressAccountShopItemPoolEntity(keAccountShopItemId))
+
+        keShopItemRepository.save(competitorKeShopItemEntity)
+        keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
+
+        val equalPriceStrategy = EqualPriceStrategy()
+        equalPriceStrategy.maximumThreshold = 100.0
+        equalPriceStrategy.minimumThreshold = 100.0
+        equalPriceStrategy.strategyType = "equal_price"
+
+        val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
+        keAccountShopItemRepository.saveStrategy(strategyRequest)
+
         whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
             AccountProductDescription(
                 id = 12345L,
@@ -146,9 +161,63 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         }
         whenever(kazanExpressSecureService.changeAccountShopItemPrice(any(), any(), any(), any())).then { true }
 
-        // When
-        keShopItemRepository.save(keShopItemEntity)
+        priceChangeService.recalculateUserShopItemPrice(userId, keAccountId)
+        val paginateEntities =
+            priceHistoryRepository.findHistoryByShopItemId(keAccountShopItemId, limit = 10, offset = 0)
+        val shopItemEntity = keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopId, keAccountShopItemId)
+        val shopItemPoolFilledEntity = keShopItemPoolRepository.findShopItemInPool(userId, keAccountId).first()
+
+        // Then
+        assertEquals(1, paginateEntities.size)
+        assertEquals(10000, paginateEntities.first().item.oldPrice)
+        assertEquals(6000, paginateEntities.first().item.price)
+        assertTrue(shopItemPoolFilledEntity.lastCheck != null)
+        assertEquals(6000, shopItemEntity?.price)
+
+    }
+
+    @Test
+    fun `change user pool item price`() {
+
+        val kazanExpressAccountShopItemCompetitorEntity = KazanExpressAccountShopItemCompetitorEntity(
+            id = UUID.randomUUID(),
+            keAccountShopItemId = keAccountShopItemId,
+            productId = 635242L,
+            skuId = 4231456L
+        )
+        val competitorKeShopItemEntity = KazanExpressShopItemEntity(
+            productId = 635242L,
+            skuId = 4231456L,
+            categoryId = 556235L,
+            name = "test",
+            photoKey = "test",
+            avgHashFingerprint = "test",
+            pHashFingerprint = "test",
+            price = 5000,
+            availableAmount = 10,
+            lastUpdate = LocalDateTime.now()
+        )
+        keShopItemPoolRepository.save(KazanExpressAccountShopItemPoolEntity(keAccountShopItemId))
+
+        keShopItemRepository.save(competitorKeShopItemEntity)
         keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
+
+        whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
+            AccountProductDescription(
+                id = 12345L,
+                shopSkuTitle = "skuTitle",
+                title = "justTitle",
+                productSkuTitle = "productSkuTitle",
+                commission = 1,
+                hasActiveCalendarEvents = true,
+                hasCustomCharacteristics = false,
+                definedCharacteristicList = emptyList(),
+                customCharacteristicList = emptyList(),
+                skuList = emptyList()
+            )
+        }
+        whenever(kazanExpressSecureService.changeAccountShopItemPrice(any(), any(), any(), any())).then { true }
+
         priceChangeService.recalculateUserShopItemPrice(userId, keAccountId)
         val paginateEntities =
             priceHistoryRepository.findHistoryByShopItemId(keAccountShopItemId, limit = 10, offset = 0)
