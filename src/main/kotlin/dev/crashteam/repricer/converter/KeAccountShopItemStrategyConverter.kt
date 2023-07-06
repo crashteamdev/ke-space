@@ -7,7 +7,9 @@ import dev.crashteam.openapi.kerepricer.model.QuantityDependentStrategy
 import dev.crashteam.openapi.kerepricer.model.Strategy
 import dev.crashteam.repricer.db.model.enums.StrategyType
 import dev.crashteam.repricer.repository.postgre.entity.strategy.KazanExpressAccountShopItemStrategyEntity
+import org.springframework.stereotype.Component
 
+@Component
 class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopItemStrategyEntity, KeAccountShopItemStrategy> {
     override fun convert(source: KazanExpressAccountShopItemStrategyEntity): KeAccountShopItemStrategy {
         return KeAccountShopItemStrategy().apply {
