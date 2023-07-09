@@ -177,7 +177,7 @@ class PriceChangeService(
                 CalculatorOptions(
                     step = strategy.step,
                     minimumThreshold = strategy.minimumThreshold,
-                    maximumThreshold = poolFilledEntity.maximumThreshold
+                    maximumThreshold = strategy.maximumThreshold
                 )
             )
         } else {
