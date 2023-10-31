@@ -19,8 +19,8 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption.MAXIMUM_THRESHOLD,
             strategyOption.MINIMUM_THRESHOLD
         ).values(
-            strategy.maximumThreshold.toLong(),
-            strategy.minimumThreshold.toLong()
+            strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
+            strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong()
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }
@@ -29,8 +29,8 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
         val strategy = t as QuantityDependentStrategy
         val strategyOption = StrategyOption.STRATEGY_OPTION
         return dsl.update(strategyOption)
-            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
-            .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
+            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
+            .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .where(strategyOption.ID.eq(id))
             .execute()
     }

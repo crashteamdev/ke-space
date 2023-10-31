@@ -19,8 +19,8 @@ class QuantityDependentStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption.MINIMUM_THRESHOLD,
             strategyOption.STEP
         ).values(
-            strategy.maximumThreshold.toLong(),
-            strategy.minimumThreshold.toLong(),
+            strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
+            strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.step
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
@@ -30,8 +30,8 @@ class QuantityDependentStrategyOptionRepository(private val dsl: DSLContext) :
         val strategy = t as QuantityDependentStrategy
         val strategyOption = StrategyOption.STRATEGY_OPTION
         return dsl.update(strategyOption)
-            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
-            .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toLong())
+            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
+            .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.STEP, strategy.step)
             .where(strategyOption.ID.eq(id))
             .execute()

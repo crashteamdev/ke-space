@@ -8,6 +8,7 @@ import dev.crashteam.openapi.kerepricer.model.Strategy
 import dev.crashteam.repricer.db.model.enums.StrategyType
 import dev.crashteam.repricer.repository.postgre.entity.strategy.KazanExpressAccountShopItemStrategyEntity
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 @Component
 class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopItemStrategyEntity, KeAccountShopItemStrategy> {
@@ -19,13 +20,15 @@ class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopI
     }
 
     private fun getStrategy(source: KazanExpressAccountShopItemStrategyEntity): Strategy {
+        val minimumThreshold = (source.minimumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2)
+        val maximumThreshold = (source.maximumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2)
         return when(source.strategyType) {
             StrategyType.close_to_minimal.name -> CloseToMinimalStrategy(source.step, source.strategyType,
-                source.minimumThreshold?.toDouble(), source.maximumThreshold?.toDouble())
+                minimumThreshold.toDouble(), maximumThreshold.toDouble())
             StrategyType.quantity_dependent.name -> QuantityDependentStrategy(source.step, source.strategyType,
-                source.minimumThreshold?.toDouble(), source.maximumThreshold?.toDouble())
-            StrategyType.equal_price.name -> EqualPriceStrategy(source.strategyType, source.minimumThreshold?.toDouble(),
-                source.maximumThreshold?.toDouble())
+                minimumThreshold.toDouble(), maximumThreshold.toDouble())
+            StrategyType.equal_price.name -> EqualPriceStrategy(source.strategyType, minimumThreshold.toDouble(),
+                maximumThreshold.toDouble())
             else -> throw IllegalArgumentException("No such strategy - ${source.strategyType}")
         }
     }
