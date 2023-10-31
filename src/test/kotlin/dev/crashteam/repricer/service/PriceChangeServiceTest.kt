@@ -138,8 +138,8 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
 
         val equalPriceStrategy = EqualPriceStrategy()
-        equalPriceStrategy.maximumThreshold = 6000.0
-        equalPriceStrategy.minimumThreshold = 100.0
+        equalPriceStrategy.maximumThreshold = 60.0
+        equalPriceStrategy.minimumThreshold = 10.0
         equalPriceStrategy.strategyType = "equal_price"
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
