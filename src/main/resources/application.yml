@@ -2,6 +2,8 @@ server:
   port: ${server.port}
   error:
     include-stacktrace: ALWAYS
+  servlet:
+    context-path: /space
 
 management:
   security:
