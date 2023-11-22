@@ -23,7 +23,10 @@ class AccountSubscriptionRestrictionValidator(
     fun validateItemInPoolCount(userId: String): Boolean {
         val accountEntity = accountRepository.getAccount(userId)!!
 
-        if (accountEntity.subscription == null) return false
+        if (accountEntity.subscription == null) {
+            log.warn { "User with userId=$userId have no active subscription!" }
+            return false
+        }
 
         val itemsInPoolCount = keAccountShopItemPoolRepository.findCountShopItemsInPoolForUser(userId)
         val accountRestriction = subscriptionPlanResolver.toAccountRestriction(accountEntity.subscription.plan)
@@ -52,7 +55,10 @@ class AccountSubscriptionRestrictionValidator(
     fun validateItemCompetitorCount(userId: String, shopItemId: UUID): Boolean {
         val accountEntity = accountRepository.getAccount(userId)!!
 
-        if (accountEntity.subscription == null) return false
+        if (accountEntity.subscription == null) {
+            log.warn { "User with userId=$userId have no active subscription!" }
+            return false
+        }
 
         val itemCompetitorsCount =
             keAccountShopItemCompetitorRepository.findShopItemCompetitorsCount(shopItemId)
