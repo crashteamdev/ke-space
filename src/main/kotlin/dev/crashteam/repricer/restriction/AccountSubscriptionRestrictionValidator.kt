@@ -5,8 +5,11 @@ import dev.crashteam.repricer.repository.postgre.AccountRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemPoolRepository
+import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class AccountSubscriptionRestrictionValidator(
@@ -33,7 +36,10 @@ class AccountSubscriptionRestrictionValidator(
     fun validateKeAccountCount(userId: String): Boolean {
         val accountEntity = accountRepository.getAccount(userId)!!
 
-        if (accountEntity.subscription == null) return false
+        if (accountEntity.subscription == null) {
+            log.warn { "User with userId=$userId have no active subscription!" }
+            return false
+        }
 
         val keAccountCount = keAccountRepository.getKazanExpressAccountsCount(userId)
         val accountRestriction = subscriptionPlanResolver.toAccountRestriction(accountEntity.subscription.plan)
