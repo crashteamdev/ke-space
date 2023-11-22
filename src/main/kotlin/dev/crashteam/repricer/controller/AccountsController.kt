@@ -57,8 +57,10 @@ class AccountsController(
                     val keAccount = conversionService.convert(keAccountEntity, KeAccount::class.java)
                     ResponseEntity.ok(keAccount).toMono()
                 } catch (e: AccountItemPoolLimitExceededException) {
+                    log.error { "Account item pool limit exceeded exception - ${e.message}" }
                     return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<KeAccount>().toMono()
                 } catch (e: IllegalArgumentException) {
+                    log.error { "Illegal argument exception - ${e.message}" }
                     return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<KeAccount>().toMono()
                 }
             }
