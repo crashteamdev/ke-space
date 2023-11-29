@@ -7,6 +7,7 @@ import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.web.*
 import dev.crashteam.repricer.config.RedisConfig
 import dev.crashteam.repricer.config.properties.ServiceProperties
+import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.ParameterizedTypeReference
@@ -70,7 +71,7 @@ class KazanExpressWebClient(
             responseType
         ).body
 
-        return handleProxyResponse(styxResponse!!)!!.data?.makeSearch
+        return StyxUtils.handleProxyResponse(styxResponse!!)!!.data?.makeSearch
     }
 
     fun getRootCategories(): RootCategoriesResponse? {
@@ -96,7 +97,7 @@ class KazanExpressWebClient(
             responseType
         ).body
 
-        return handleProxyResponse(styxResponse!!)!!
+        return StyxUtils.handleProxyResponse(styxResponse!!)!!
     }
 
     @Cacheable(value = [RedisConfig.KE_CLIENT_CACHE_NAME], key = "#productId", unless = "#result == null")
@@ -124,27 +125,7 @@ class KazanExpressWebClient(
             responseType
         ).body
 
-        return handleProxyResponse(styxResponse!!)!!
-    }
-
-    private fun <T> handleProxyResponse(styxResponse: StyxResponse<T>): T? {
-        val originalStatus = styxResponse.originalStatus
-        val statusCode = HttpStatus.resolve(originalStatus)
-        val isError = statusCode == null
-                || statusCode.series() == HttpStatus.Series.CLIENT_ERROR
-                || statusCode.series() == HttpStatus.Series.SERVER_ERROR
-        log.debug { "Styx response: $styxResponse" }
-        if (isError) {
-            throw KazanExpressProxyClientException(
-                originalStatus,
-                styxResponse.body.toString(),
-                "Bad response. StyxStatus=${styxResponse.code}; Status=$originalStatus; Body=${styxResponse.body.toString()}"
-            )
-        }
-        if (styxResponse.code != 0) {
-            log.warn { "Bad proxy status - ${styxResponse.code}" }
-        }
-        return styxResponse.body
+        return StyxUtils.handleProxyResponse(styxResponse!!)!!
     }
 
     companion object {
