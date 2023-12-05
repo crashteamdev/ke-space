@@ -5,7 +5,6 @@ import dev.crashteam.repricer.client.ke.model.ProxyRequestContext
 import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.config.properties.ServiceProperties
-import dev.crashteam.repricer.service.util.RandomUserAgent
 import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.core.ParameterizedTypeReference
@@ -200,7 +199,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
+                        "User-Agent" to USER_AGENT,
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -218,7 +217,9 @@ class KazanExpressLkClient(
             responseType
         ).body
 
-        return StyxUtils.handleProxyResponse(styxResponse!!)!!
+        val authResponse = StyxUtils.handleProxyResponse(styxResponse!!)!!
+        if (authResponse.error != null) throw KazanExpressAuthException(authResponse.error.description)
+        return authResponse
     }
 
     override fun refreshAuth(userId: String, refreshToken: String): ResponseEntity<AuthResponse> {

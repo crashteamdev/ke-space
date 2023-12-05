@@ -23,7 +23,7 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
         val keAccountUpdateInProgressCount = keAccountRepository.findAccountUpdateInProgressCount()
 
         if (keAccountUpdateInProgressCount >= (repricerProperties.maxUpdateInProgress ?: 3)) {
-            log.info { "Too mutch account update in progress - $keAccountUpdateInProgressCount" }
+            log.info { "Too much account update in progress - $keAccountUpdateInProgressCount" }
             return
         }
 
