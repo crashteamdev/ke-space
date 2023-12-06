@@ -99,6 +99,16 @@ class KeAccountRepository(
         return recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(record)
     }
 
+    fun getKazanExpressInitializedAccount(keAccountId: UUID): KazanExpressAccountEntityJoinAccountEntity? {
+        val a = ACCOUNT
+        val k = KE_ACCOUNT
+        val record = dsl.select()
+            .from(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
+            .where(k.ID.eq(keAccountId).and(k.INITIALIZE_STATE.notEqual(InitializeState.error)))
+            .fetchOne() ?: return null
+        return recordToKazanExpressAccountEntityJoinAccountEntityMapper.convert(record)
+    }
+
     fun changeUpdateState(
         userId: String,
         keAccountId: UUID,

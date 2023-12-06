@@ -18,7 +18,7 @@ class KeShopItemPriceChangeJob : QuartzJobBean() {
         val keAccountRepository = applicationContext.getBean(KeAccountRepository::class.java)
         val keAccountId = context.jobDetail.jobDataMap["keAccountId"] as? UUID
             ?: throw IllegalStateException("keAccountId can't be null")
-        val kazanExpressAccountEntity = keAccountRepository.getKazanExpressAccount(keAccountId)!!
+        val kazanExpressAccountEntity = keAccountRepository.getKazanExpressInitializedAccount(keAccountId)!!
         log.info { "Check account items price for userId=${kazanExpressAccountEntity.userId}; keAccountId=$keAccountId" }
         priceChangeService.recalculateUserShopItemPrice(kazanExpressAccountEntity.userId, keAccountId)
     }
