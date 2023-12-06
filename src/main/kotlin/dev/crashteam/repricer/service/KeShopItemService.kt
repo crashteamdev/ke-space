@@ -13,8 +13,10 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.math.BigDecimal
+import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
 import javax.imageio.ImageIO
@@ -24,7 +26,6 @@ private val log = KotlinLogging.logger {}
 @Service
 class KeShopItemService(
     private val keShopItemRepository: KeShopItemRepository,
-    private val remoteImageLoader: RemoteImageLoader,
     private val kazanExpressWebClient: KazanExpressWebClient,
 ) {
 
@@ -169,20 +170,19 @@ class KeShopItemService(
     }
 
     private fun generateImageFingerprints(url: String): ImageFingerprintHolder? {
-        val imageByteArray = remoteImageLoader.loadResource(url)
         return try {
-            val avgHashFingerprint = generateFingerprint(imageByteArray, avgHash)
-            val pHashFingerprint = generateFingerprint(imageByteArray, pHash)
+            val image = ImageIO.read(URL(url))
+            val avgHashFingerprint = generateFingerprint(image, avgHash)
+            val pHashFingerprint = generateFingerprint(image, pHash)
 
             ImageFingerprintHolder(avgHashFingerprint, pHashFingerprint)
         } catch (e: Exception) {
-            log.warn(e) { "Failed to generate fingerprint from url=${url}; imageByteSize=${imageByteArray.size}" }
+            log.warn(e) { "Failed to generate fingerprint from url=${url};" }
             null
         }
     }
 
-    private fun generateFingerprint(byteArray: ByteArray, hashAlgorithm: HashingAlgorithm): String {
-        val image = ImageIO.read(ByteArrayInputStream(byteArray))
+    private fun generateFingerprint(image: BufferedImage, hashAlgorithm: HashingAlgorithm): String {
         return hashAlgorithm.hash(image).hashValue.toString(16).uppercase()
     }
 
