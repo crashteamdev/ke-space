@@ -36,7 +36,7 @@ class UpdateKeAccountService(
     private val retryTemplate: RetryTemplate
 ) {
 
-    val executorService: ExecutorService = Executors.newWorkStealingPool(5)
+    val executorService: ExecutorService = Executors.newFixedThreadPool(5)
 
     @Transactional
     fun executeUpdateJob(userId: String, keAccountId: UUID): Boolean {
@@ -107,9 +107,9 @@ class UpdateKeAccountService(
     @Transactional
     fun updateShopItems(userId: String, keAccountId: UUID) {
         val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
-        val callables: MutableList<Callable<Any>> = mutableListOf()
+        val callables = listOf<Callable<Any>>()
         for (keAccountShop in keAccountShops) {
-            callables.add(processAccountShop(userId, keAccountId, keAccountShop))
+            callables.plus(processAccountShop(userId, keAccountId, keAccountShop))
         }
         executorService.invokeAll(callables)
     }
