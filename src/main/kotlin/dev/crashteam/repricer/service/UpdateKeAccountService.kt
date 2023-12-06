@@ -183,7 +183,7 @@ class UpdateKeAccountService(
                         }
                         kazanExpressAccountShopItemEntities
                     }
-                    log.debug { "Save new shop items. size=${shopItemEntities.size}" }
+                    log.debug { "Save new shop items by shopId=${keAccountShop.externalShopId}. size=${shopItemEntities.size}" }
                     keAccountShopItemRepository.saveBatch(shopItemEntities)
                     page += 1
                     null

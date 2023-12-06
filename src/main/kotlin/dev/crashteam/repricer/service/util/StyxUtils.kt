@@ -16,6 +16,7 @@ object StyxUtils {
                 || statusCode.series() == HttpStatus.Series.CLIENT_ERROR
                 || statusCode.series() == HttpStatus.Series.SERVER_ERROR
         if (isError) {
+            log.error { "Bad response. StyxStatus=${styxResponse.code}; Status=$originalStatus; Body=${styxResponse.body.toString()}" }
             throw KazanExpressProxyClientException(
                 originalStatus,
                 styxResponse.body.toString(),
