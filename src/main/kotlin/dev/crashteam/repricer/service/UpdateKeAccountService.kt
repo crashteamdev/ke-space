@@ -107,11 +107,15 @@ class UpdateKeAccountService(
     @Transactional
     fun updateShopItems(userId: String, keAccountId: UUID) {
         val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
-        val callables = listOf<Callable<Any>>()
+        val callables = mutableListOf<Callable<Any>>()
         for (keAccountShop in keAccountShops) {
-            callables.plus(processAccountShop(userId, keAccountId, keAccountShop))
+            callables.add(processAccountShop(userId, keAccountId, keAccountShop))
         }
-        executorService.invokeAll(callables)
+        val futures = executorService.invokeAll(callables)
+        //TODO: for debug
+        for (future in futures) {
+            future.get()
+        }
     }
 
     fun processAccountShop(userId: String, keAccountId: UUID, keAccountShop: KazanExpressAccountShopEntity) : Callable<Any> {
