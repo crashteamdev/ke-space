@@ -15,7 +15,6 @@ object StyxUtils {
         val isError = statusCode == null
                 || statusCode.series() == HttpStatus.Series.CLIENT_ERROR
                 || statusCode.series() == HttpStatus.Series.SERVER_ERROR
-        log.debug { "Styx response: $styxResponse" }
         if (isError) {
             throw KazanExpressProxyClientException(
                 originalStatus,
