@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -107,19 +106,17 @@ class UpdateKeAccountService(
     @Transactional
     fun updateShopItems(userId: String, keAccountId: UUID) {
         val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
-        val callables = mutableListOf<Callable<Any>>()
-        for (keAccountShop in keAccountShops) {
-            callables.add(processAccountShop(userId, keAccountId, keAccountShop))
-        }
-        val futures = executorService.invokeAll(callables)
-        //TODO: for debug
-        for (future in futures) {
-            future.get()
+        try {
+            for (keAccountShop in keAccountShops) {
+                processAccountShop(userId, keAccountId, keAccountShop)
+            }
+        } finally {
+            executorService.shutdown()
         }
     }
 
-    fun processAccountShop(userId: String, keAccountId: UUID, keAccountShop: KazanExpressAccountShopEntity) : Callable<Any> {
-        return Callable {
+    fun processAccountShop(userId: String, keAccountId: UUID, keAccountShop: KazanExpressAccountShopEntity) {
+        executorService.submit {
             var page = 0
             val shopUpdateTime = LocalDateTime.now()
             var isActive = true
