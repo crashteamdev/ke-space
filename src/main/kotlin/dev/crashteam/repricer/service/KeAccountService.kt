@@ -14,9 +14,7 @@ import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidato
 import dev.crashteam.repricer.service.encryption.PasswordEncryptor
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import org.quartz.JobBuilder
 import org.quartz.ObjectAlreadyExistsException
@@ -27,6 +25,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.Executors
 
 private val log = KotlinLogging.logger {}
 
@@ -42,6 +41,8 @@ class KeAccountService(
     private val updateKeAccountService: UpdateKeAccountService,
     private val keAccountShopRepository: KeAccountShopRepository,
 ) {
+
+    val keShopSyncThreadPool =  Executors.newFixedThreadPool(5)
 
     fun addKeAccount(userId: String, login: String, password: String): KazanExpressAccountEntity {
         log.debug { "Add ke account. userId=$userId; login=$login; password=*****" }
@@ -108,7 +109,7 @@ class KeAccountService(
         updateKeAccountService.updateShops(userId, keAccountId)
         val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
         val keAccountShopUpdateTasks = keAccountShops.map { keAccountShopEntity ->
-            async {
+            async(keShopSyncThreadPool.asCoroutineDispatcher()) {
                 log.info {
                     "Update shop items." +
                             " userId=$userId;keAccountId=$keAccountId;shopId=${keAccountShopEntity.externalShopId}"
