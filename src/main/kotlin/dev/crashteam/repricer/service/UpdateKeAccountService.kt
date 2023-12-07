@@ -100,7 +100,7 @@ class UpdateKeAccountService(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     fun updateShopItems(userId: String, keAccountId: UUID, accountShopEntity: KazanExpressAccountShopEntity) {
         var page = 0
         val shopUpdateTime = LocalDateTime.now()

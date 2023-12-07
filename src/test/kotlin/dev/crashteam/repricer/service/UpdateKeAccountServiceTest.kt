@@ -56,7 +56,7 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
     lateinit var kazanExpressWebClient: KazanExpressWebClient
 
     @MockBean
-    lateinit var keLkClient: KazanExpressLkClient
+    lateinit var kazanExpressLkClient: KazanExpressLkClient
 
     val userId = UUID.randomUUID().toString()
 
@@ -166,6 +166,12 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
     @Test
     fun `update shop items`() {
         // Given
+        val firstAccountShop = AccountShop(
+            id = 1,
+            shopTitle = "test",
+            urlTitle = "testUrl",
+            skuTitle = "testSkuTitle"
+        )
         val keAccountShopEntity = KazanExpressAccountShopEntity(
             id = UUID.randomUUID(),
             keAccountId = keAccountId,
@@ -199,11 +205,15 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
             ),
             image = "https://ke-images.servicecdn.ru/cbtma55i6omb975ssukg/t_product_240_low.jpg"
         )
-        whenever(keLkClient.checkToken(any(), any())).thenReturn(
+        whenever(kazanExpressSecureService.authUser(any(), any())).thenReturn("test")
+        whenever(kazanExpressLkClient.checkToken(any(), any())).thenReturn(
             ResponseEntity.ok(
-                CheckTokenResponse(1L, true, "test", "test", 123L)
+                CheckTokenResponse(14L, true, "test", "test", 123L)
             )
         )
+        whenever(kazanExpressSecureService.getAccountShops(any(), any())).then {
+            listOf(firstAccountShop)
+        }
         whenever(
             kazanExpressSecureService.getAccountShopItems(any(), any(), any(), any())
         ).then { listOf(keShopItem) }.then { emptyList<AccountShopItem>() }
