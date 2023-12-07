@@ -1,16 +1,22 @@
 package dev.crashteam.repricer.service
 
+import dev.crashteam.repricer.client.ke.KazanExpressLkClient
 import dev.crashteam.repricer.db.model.enums.InitializeState
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.enums.UpdateState
 import dev.crashteam.repricer.job.KeAccountInitializeJob
 import dev.crashteam.repricer.repository.postgre.AccountRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountRepository
+import dev.crashteam.repricer.repository.postgre.KeAccountShopItemRepository
+import dev.crashteam.repricer.repository.postgre.KeAccountShopRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountEntity
 import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidator
 import dev.crashteam.repricer.service.encryption.PasswordEncryptor
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.quartz.JobBuilder
 import org.quartz.ObjectAlreadyExistsException
@@ -19,6 +25,7 @@ import org.quartz.SimpleTrigger
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -30,6 +37,11 @@ class KeAccountService(
     private val passwordEncryptor: PasswordEncryptor,
     private val accountRestrictionValidator: AccountSubscriptionRestrictionValidator,
     private val scheduler: Scheduler,
+    private val kazanExpressSecureService: KazanExpressSecureService,
+    private val kazanExpressLkClient: KazanExpressLkClient,
+    private val updateKeAccountService: UpdateKeAccountService,
+    private val keAccountShopRepository: KeAccountShopRepository,
+    private val keAccountShopItemRepository: KeAccountShopItemRepository,
 ) {
 
     fun addKeAccount(userId: String, login: String, password: String): KazanExpressAccountEntity {
@@ -81,6 +93,40 @@ class KeAccountService(
         keAccountRepository.save(updatedKeAccount)
 
         return updatedKeAccount
+    }
+
+    @Transactional
+    fun syncAccount(userId: String, keAccountId: UUID) {
+        val accessToken = kazanExpressSecureService.authUser(userId, keAccountId)
+        val checkToken = kazanExpressLkClient.checkToken(userId, accessToken).body!!
+        val kazanExpressAccount = keAccountRepository.getKazanExpressAccount(userId, keAccountId)!!.copy(
+            externalAccountId = checkToken.accountId,
+            name = checkToken.firstName,
+            email = checkToken.email
+        )
+        keAccountRepository.save(kazanExpressAccount)
+        log.info { "Update shops. userId=$userId;keAccountId=$keAccountId" }
+        updateKeAccountService.updateShops(userId, keAccountId)
+        val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
+        runBlocking {
+            keAccountShops.map { keAccountShopEntity ->
+                async {
+                    log.info { "Update shop items." +
+                            " userId=$userId;keAccountId=$keAccountId;shopId=${keAccountShopEntity.externalShopId}" }
+                    updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShopEntity)
+                }
+            }.awaitAll()
+        }
+        for (keAccountShop in keAccountShops) {
+            updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShop)
+        }
+        log.info { "Change update state to finished. userId=$userId;keAccountId=$keAccountId" }
+        keAccountRepository.changeUpdateState(
+            userId,
+            keAccountId,
+            UpdateState.finished,
+            LocalDateTime.now()
+        )
     }
 
     @Transactional

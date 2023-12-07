@@ -34,6 +34,9 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
     lateinit var updateKeAccountService: UpdateKeAccountService
 
     @Autowired
+    lateinit var keAccountService: KeAccountService
+
+    @Autowired
     lateinit var accountRepository: AccountRepository
 
     @Autowired
@@ -213,7 +216,7 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
         }
 
         // When
-        updateKeAccountService.updateShopItems(userId, keAccountId)
+        keAccountService.syncAccount(userId, keAccountId)
         val shopItems = keAccountShopItemRepository.findShopItems(keAccountId, keAccountShopEntity.id!!)
 
         // Then

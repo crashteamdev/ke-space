@@ -15,6 +15,7 @@ import org.quartz.SimpleTrigger
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
@@ -99,85 +100,82 @@ class UpdateKeAccountService(
         }
     }
 
-    @Transactional
-    fun updateShopItems(userId: String, keAccountId: UUID) {
-        val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
-        for (keAccountShop in keAccountShops) {
-            var page = 0
-            val shopUpdateTime = LocalDateTime.now()
-            var isActive = true
-            while (isActive) {
-                log.debug { "Iterate through keAccountShop. shopId=${keAccountShop.externalShopId}; page=$page" }
-                retryTemplate.execute<Void, Exception> {
-                    Thread.sleep(Random().nextLong(1000, 4000))
-                    log.debug { "Update account shop items by shopId=${keAccountShop.externalShopId}" }
-                    val accountShopItems = kazanExpressSecureService.getAccountShopItems(
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun updateShopItems(userId: String, keAccountId: UUID, accountShopEntity: KazanExpressAccountShopEntity) {
+        var page = 0
+        val shopUpdateTime = LocalDateTime.now()
+        var isActive = true
+        while (isActive) {
+            log.debug { "Iterate through keAccountShop. shopId=${accountShopEntity.externalShopId}; page=$page" }
+            retryTemplate.execute<Void, Exception> {
+                Thread.sleep(Random().nextLong(1000, 4000))
+                log.debug { "Update account shop items by shopId=${accountShopEntity.externalShopId}" }
+                val accountShopItems = kazanExpressSecureService.getAccountShopItems(
+                    userId,
+                    keAccountId,
+                    accountShopEntity.externalShopId,
+                    page
+                )
+
+                if (accountShopItems.isEmpty()) {
+                    log.debug { "The list of shops is over. shopId=${accountShopEntity.externalShopId}" }
+                    isActive = false
+                    return@execute null
+                }
+                log.debug { "Iterate through accountShopItems. shopId=${accountShopEntity.externalShopId}; size=${accountShopItems.size}" }
+                val shopItemEntities = accountShopItems.flatMap { accountShopItem ->
+                    // Update product data from web KE
+                    val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
+                    if (productResponse?.payload?.data != null) {
+                        keShopItemService.addShopItemFromKeData(productResponse.payload.data)
+                    }
+                    // Update product data from LK KE
+                    val productInfo = kazanExpressSecureService.getProductInfo(
                         userId,
                         keAccountId,
-                        keAccountShop.externalShopId,
-                        page
+                        accountShopEntity.externalShopId,
+                        accountShopItem.productId
                     )
-
-                    if (accountShopItems.isEmpty()) {
-                        log.debug { "The list of shops is over. shopId=${keAccountShop.externalShopId}" }
-                        isActive = false
-                        return@execute null
-                    }
-                    log.debug { "Iterate through accountShopItems. shopId=${keAccountShop.externalShopId}; size=${accountShopItems.size}" }
-                    val shopItemEntities = accountShopItems.flatMap { accountShopItem ->
-                        // Update product data from web KE
-                        val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
-                        if (productResponse?.payload?.data != null) {
-                            keShopItemService.addShopItemFromKeData(productResponse.payload.data)
-                        }
-                        // Update product data from LK KE
-                        val productInfo = kazanExpressSecureService.getProductInfo(
-                            userId,
+                    val kazanExpressAccountShopItemEntities = accountShopItem.skuList.map { shopItemSku ->
+                        val kazanExpressAccountShopItemEntity = keAccountShopItemRepository.findShopItem(
                             keAccountId,
-                            keAccountShop.externalShopId,
-                            accountShopItem.productId
+                            accountShopEntity.id!!,
+                            accountShopItem.productId,
+                            shopItemSku.skuId
                         )
-                        val kazanExpressAccountShopItemEntities = accountShopItem.skuList.map { shopItemSku ->
-                            val kazanExpressAccountShopItemEntity = keAccountShopItemRepository.findShopItem(
-                                keAccountId,
-                                keAccountShop.id!!,
-                                accountShopItem.productId,
-                                shopItemSku.skuId
-                            )
-                            val photoKey = accountShopItem.image.split("/")[3]
-                            KazanExpressAccountShopItemEntity(
-                                id = kazanExpressAccountShopItemEntity?.id ?: UUID.randomUUID(),
-                                keAccountId = keAccountId,
-                                keAccountShopId = keAccountShop.id,
-                                categoryId = productInfo.category.id,
-                                productId = accountShopItem.productId,
-                                skuId = shopItemSku.skuId,
-                                name = shopItemSku.productTitle,
-                                photoKey = photoKey,
-                                purchasePrice = shopItemSku.purchasePrice?.movePointRight(2)?.toLong(),
-                                price = shopItemSku.price.movePointRight(2).toLong(),
-                                barCode = shopItemSku.barcode,
-                                productSku = accountShopItem.skuTitle,
-                                skuTitle = shopItemSku.skuFullTitle,
-                                availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,
-                                lastUpdate = shopUpdateTime,
-                                strategyId = kazanExpressAccountShopItemEntity?.strategyId
-                            )
-                        }
-                        kazanExpressAccountShopItemEntities
+                        val photoKey = accountShopItem.image.split("/")[3]
+                        KazanExpressAccountShopItemEntity(
+                            id = kazanExpressAccountShopItemEntity?.id ?: UUID.randomUUID(),
+                            keAccountId = keAccountId,
+                            keAccountShopId = accountShopEntity.id,
+                            categoryId = productInfo.category.id,
+                            productId = accountShopItem.productId,
+                            skuId = shopItemSku.skuId,
+                            name = shopItemSku.productTitle,
+                            photoKey = photoKey,
+                            purchasePrice = shopItemSku.purchasePrice?.movePointRight(2)?.toLong(),
+                            price = shopItemSku.price.movePointRight(2).toLong(),
+                            barCode = shopItemSku.barcode,
+                            productSku = accountShopItem.skuTitle,
+                            skuTitle = shopItemSku.skuFullTitle,
+                            availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,
+                            lastUpdate = shopUpdateTime,
+                            strategyId = kazanExpressAccountShopItemEntity?.strategyId
+                        )
                     }
-                    log.debug { "Save new shop items. size=${shopItemEntities.size}" }
-                    keAccountShopItemRepository.saveBatch(shopItemEntities)
-                    page += 1
-                    null
+                    kazanExpressAccountShopItemEntities
                 }
-                val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
-                    keAccountId,
-                    keAccountShop.id!!,
-                    shopUpdateTime
-                )
-                log.debug { "Deleted $oldItemDeletedCount old products" }
+                log.debug { "Save new shop items. size=${shopItemEntities.size}" }
+                keAccountShopItemRepository.saveBatch(shopItemEntities)
+                page += 1
+                null
             }
+            val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
+                keAccountId,
+                accountShopEntity.id!!,
+                shopUpdateTime
+            )
+            log.debug { "Deleted $oldItemDeletedCount old products" }
         }
     }
 
