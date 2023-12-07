@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 private val log = KotlinLogging.logger {}
@@ -42,7 +43,7 @@ class KeAccountService(
     private val keAccountShopRepository: KeAccountShopRepository,
 ) {
 
-    val keShopSyncThreadPool =  Executors.newFixedThreadPool(5)
+    private val keShopSyncThreadPool: ExecutorService = Executors.newCachedThreadPool()
 
     fun addKeAccount(userId: String, login: String, password: String): KazanExpressAccountEntity {
         log.debug { "Add ke account. userId=$userId; login=$login; password=*****" }
