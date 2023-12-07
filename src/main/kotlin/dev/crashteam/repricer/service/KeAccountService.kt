@@ -116,17 +116,14 @@ class KeAccountService(
                     updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShopEntity)
                 }
             }.awaitAll()
+            log.info { "Change update state to finished. userId=$userId;keAccountId=$keAccountId" }
+            keAccountRepository.changeUpdateState(
+                userId,
+                keAccountId,
+                UpdateState.finished,
+                LocalDateTime.now()
+            )
         }
-        for (keAccountShop in keAccountShops) {
-            updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShop)
-        }
-        log.info { "Change update state to finished. userId=$userId;keAccountId=$keAccountId" }
-        keAccountRepository.changeUpdateState(
-            userId,
-            keAccountId,
-            UpdateState.finished,
-            LocalDateTime.now()
-        )
     }
 
     @Transactional
