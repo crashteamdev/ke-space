@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
+import java.util.stream.Stream
+import kotlin.streams.toList
 
 private val log = KotlinLogging.logger {}
 
@@ -123,7 +125,7 @@ class UpdateKeAccountService(
                     return@execute null
                 }
                 log.debug { "Iterate through accountShopItems. shopId=${accountShopEntity.externalShopId}; size=${accountShopItems.size}" }
-                val shopItemEntities = accountShopItems.flatMap { accountShopItem ->
+                val shopItemEntities = accountShopItems.parallelStream().flatMap { accountShopItem ->
                     // Update product data from web KE
                     val productResponse = kazanExpressWebClient.getProductInfo(accountShopItem.productId.toString())
                     if (productResponse?.payload?.data != null) {
@@ -163,8 +165,8 @@ class UpdateKeAccountService(
                             strategyId = kazanExpressAccountShopItemEntity?.strategyId
                         )
                     }
-                    kazanExpressAccountShopItemEntities
-                }
+                    Stream.of(kazanExpressAccountShopItemEntities)
+                }.toList().flatten()
                 log.debug { "Save new shop items. size=${shopItemEntities.size}" }
                 keAccountShopItemRepository.saveBatch(shopItemEntities)
                 page += 1

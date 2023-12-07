@@ -43,8 +43,6 @@ class KeAccountService(
     private val keAccountShopRepository: KeAccountShopRepository,
 ) {
 
-    private val keShopSyncThreadPool: ExecutorService = Executors.newCachedThreadPool()
-
     fun addKeAccount(userId: String, login: String, password: String): KazanExpressAccountEntity {
         log.debug { "Add ke account. userId=$userId; login=$login; password=*****" }
         val accountEntity = accountRepository.getAccount(userId)
@@ -97,7 +95,7 @@ class KeAccountService(
     }
 
     @Transactional
-    fun syncAccount(userId: String, keAccountId: UUID) = runBlocking {
+    fun syncAccount(userId: String, keAccountId: UUID) {
         val accessToken = kazanExpressSecureService.authUser(userId, keAccountId)
         val checkToken = kazanExpressLkClient.checkToken(userId, accessToken).body!!
         val kazanExpressAccount = keAccountRepository.getKazanExpressAccount(userId, keAccountId)!!.copy(
@@ -109,16 +107,13 @@ class KeAccountService(
         log.info { "Update shops. userId=$userId;keAccountId=$keAccountId" }
         updateKeAccountService.updateShops(userId, keAccountId)
         val keAccountShops = keAccountShopRepository.getKeAccountShops(userId, keAccountId)
-        val keAccountShopUpdateTasks = keAccountShops.map { keAccountShopEntity ->
-            async(keShopSyncThreadPool.asCoroutineDispatcher()) {
-                log.info {
-                    "Update shop items." +
-                            " userId=$userId;keAccountId=$keAccountId;shopId=${keAccountShopEntity.externalShopId}"
-                }
-                updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShopEntity)
+        keAccountShops.forEach {keAccountShopEntity ->
+            log.info {
+                "Update shop items." +
+                        " userId=$userId;keAccountId=$keAccountId;shopId=${keAccountShopEntity.externalShopId}"
             }
+            updateKeAccountService.updateShopItems(userId, keAccountId, keAccountShopEntity)
         }
-        awaitAll(*keAccountShopUpdateTasks.toTypedArray())
         log.info { "Change update state to finished. userId=$userId;keAccountId=$keAccountId" }
         keAccountRepository.changeUpdateState(
             userId,
