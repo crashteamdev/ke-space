@@ -1,12 +1,9 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.ContainerConfiguration
+import dev.crashteam.repricer.client.ke.KazanExpressLkClient
 import dev.crashteam.repricer.client.ke.KazanExpressWebClient
 import dev.crashteam.repricer.client.ke.model.lk.*
-import dev.crashteam.repricer.client.ke.model.web.ProductCategory
-import dev.crashteam.repricer.client.ke.model.web.ProductData
-import dev.crashteam.repricer.client.ke.model.web.ProductDataWrapper
-import dev.crashteam.repricer.client.ke.model.web.ProductResponse
 import dev.crashteam.repricer.db.model.enums.MonitorState
 import dev.crashteam.repricer.db.model.enums.SubscriptionPlan
 import dev.crashteam.repricer.db.model.enums.UpdateState
@@ -22,6 +19,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.ResponseEntity
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -32,6 +30,9 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
 
     @Autowired
     lateinit var updateKeAccountService: UpdateKeAccountService
+
+    @Autowired
+    lateinit var keAccountService: KeAccountService
 
     @Autowired
     lateinit var accountRepository: AccountRepository
@@ -53,6 +54,9 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
 
     @MockBean
     lateinit var kazanExpressWebClient: KazanExpressWebClient
+
+    @MockBean
+    lateinit var kazanExpressLkClient: KazanExpressLkClient
 
     val userId = UUID.randomUUID().toString()
 
@@ -162,6 +166,12 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
     @Test
     fun `update shop items`() {
         // Given
+        val firstAccountShop = AccountShop(
+            id = 1,
+            shopTitle = "test",
+            urlTitle = "testUrl",
+            skuTitle = "testSkuTitle"
+        )
         val keAccountShopEntity = KazanExpressAccountShopEntity(
             id = UUID.randomUUID(),
             keAccountId = keAccountId,
@@ -195,6 +205,15 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
             ),
             image = "https://ke-images.servicecdn.ru/cbtma55i6omb975ssukg/t_product_240_low.jpg"
         )
+        whenever(kazanExpressSecureService.authUser(any(), any())).thenReturn("test")
+        whenever(kazanExpressLkClient.checkToken(any(), any())).thenReturn(
+            ResponseEntity.ok(
+                CheckTokenResponse(14L, true, "test", "test", 123L)
+            )
+        )
+        whenever(kazanExpressSecureService.getAccountShops(any(), any())).then {
+            listOf(firstAccountShop)
+        }
         whenever(
             kazanExpressSecureService.getAccountShopItems(any(), any(), any(), any())
         ).then { listOf(keShopItem) }.then { emptyList<AccountShopItem>() }
@@ -213,7 +232,7 @@ class UpdateKeAccountServiceTest : ContainerConfiguration() {
         }
 
         // When
-        updateKeAccountService.updateShopItems(userId, keAccountId)
+        keAccountService.syncAccount(userId, keAccountId)
         val shopItems = keAccountShopItemRepository.findShopItems(keAccountId, keAccountShopEntity.id!!)
 
         // Then
