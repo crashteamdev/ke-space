@@ -23,6 +23,7 @@ import org.quartz.SimpleTrigger
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ExecutorService
@@ -94,7 +95,6 @@ class KeAccountService(
         return updatedKeAccount
     }
 
-    @Transactional
     fun syncAccount(userId: String, keAccountId: UUID) {
         val accessToken = kazanExpressSecureService.authUser(userId, keAccountId)
         val checkToken = kazanExpressLkClient.checkToken(userId, accessToken).body!!
@@ -121,7 +121,6 @@ class KeAccountService(
             UpdateState.finished,
             LocalDateTime.now()
         )
-
     }
 
     @Transactional

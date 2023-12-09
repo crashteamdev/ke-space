@@ -17,6 +17,7 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Stream
@@ -32,7 +33,7 @@ class UpdateKeAccountService(
     private val kazanExpressWebClient: KazanExpressWebClient,
     private val keShopItemService: KeShopItemService,
     private val scheduler: Scheduler,
-    private val retryTemplate: RetryTemplate
+    private val transactionTemplate: TransactionTemplate,
 ) {
 
     @Transactional
@@ -101,7 +102,6 @@ class UpdateKeAccountService(
         }
     }
 
-    @Transactional
     fun updateShopItems(userId: String, keAccountId: UUID, accountShopEntity: KazanExpressAccountShopEntity) {
         var page = 0
         val shopUpdateTime = LocalDateTime.now()
@@ -164,13 +164,13 @@ class UpdateKeAccountService(
             log.debug { "Save new shop items. size=${shopItemEntities.size}" }
             keAccountShopItemRepository.saveBatch(shopItemEntities)
             page += 1
-            val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
-                keAccountId,
-                accountShopEntity.id!!,
-                shopUpdateTime
-            )
-            log.debug { "Deleted $oldItemDeletedCount old products" }
         }
+        val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
+            keAccountId,
+            accountShopEntity.id!!,
+            shopUpdateTime
+        )
+        log.debug { "Deleted $oldItemDeletedCount old products" }
     }
 
     private fun getProductInfo(
