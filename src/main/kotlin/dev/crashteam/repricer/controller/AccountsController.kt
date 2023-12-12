@@ -3,12 +3,15 @@ package dev.crashteam.repricer.controller
 import dev.crashteam.openapi.kerepricer.api.AccountsApi
 import dev.crashteam.openapi.kerepricer.model.*
 import dev.crashteam.repricer.db.model.enums.MonitorState
-import dev.crashteam.repricer.db.model.tables.KeAccountShop.*
+import dev.crashteam.repricer.db.model.tables.KeAccountShop.KE_ACCOUNT_SHOP
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
-import dev.crashteam.repricer.service.*
+import dev.crashteam.repricer.service.KeAccountService
+import dev.crashteam.repricer.service.KeAccountShopService
+import dev.crashteam.repricer.service.KeShopItemService
+import dev.crashteam.repricer.service.UpdateKeAccountService
 import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.UserNotFoundException
@@ -614,34 +617,6 @@ class AccountsController(
             }
         }.doOnError {
             log.warn(it) { "Exception during reinitialize ke account" }
-        }
-    }
-
-    override fun patchKeAccountShopitem(
-        xRequestID: UUID,
-        id: UUID,
-        shopItemId: UUID,
-        patchKeAccountShopItem: Mono<PatchKeAccountShopItem>,
-        exchange: ServerWebExchange
-    ): Mono<ResponseEntity<KeAccountShopItem>> {
-        return exchange.getPrincipal<Principal>().flatMap { principal ->
-            patchKeAccountShopItem.flatMap { request ->
-                val changeCount = keAccountShopService.changeShopItemPriceOptions(
-                    id,
-                    shopItemId,
-                    request.step,
-                    request.minimumThreshold,
-                    request.maximumThreshold,
-                    request.discount
-                )
-                if (changeCount <= 0) {
-                    ResponseEntity.notFound().build<KeAccountShopItem>().toMono()
-                } else {
-                    val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
-                    val shopItem = conversionService.convert(keAccountShopItem, KeAccountShopItem::class.java)
-                    ResponseEntity.ok(shopItem).toMono()
-                }
-            }
         }
     }
 }
