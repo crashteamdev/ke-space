@@ -28,7 +28,6 @@ class PriceChangeService(
     private val kazanExpressSecureService: KazanExpressSecureService,
     private val keShopItemPriceHistoryRepository: KeShopItemPriceHistoryRepository,
     private val keAccountShopItemRepository: KeAccountShopItemRepository,
-    private val closeToMinimalCalculatorStrategy: CloseToMinimalPriceChangeCalculatorStrategy,
     private val retryTemplate: RetryTemplate,
     private val strategyService: KeShopItemStrategyService,
     private val calculators: Map<StrategyType, PriceChangeCalculatorStrategy>
@@ -58,8 +57,11 @@ class PriceChangeService(
                         productId = poolFilledEntity.productId
                     )
                 }
+
+                val strategy = strategyService.findStrategy(poolFilledEntity.strategyId!!)
+
                 val newSkuList = buildNewSkuList(userId, keAccountId, poolFilledEntity,
-                    calculationResult, poolFilledEntity.minimumThreshold)
+                    calculationResult, strategy?.minimumThreshold, strategy?.discount?.toBigDecimal())
                 log.debug { "Trying to change account shop item price. " +
                         "keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                         ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}" }
@@ -128,7 +130,8 @@ class PriceChangeService(
         keAccountId: UUID,
         poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity,
         calculationResult: CalculationResult,
-        minimumThreshold: Long?
+        minimumThreshold: Long?,
+        discount: BigDecimal?
     ): List<SkuPriceChangeSku> {
         val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
             kazanExpressSecureService.getProductDescription(
@@ -157,7 +160,7 @@ class PriceChangeService(
         val changeSku = SkuPriceChangeSku(
             id = poolFilledEntity.skuId,
             fullPrice = calculationResult.newPriceMinor.movePointLeft(2).toLong(),
-            sellPrice = calculateDiscountPrice(poolFilledEntity.discount, minimumThreshold, calculationResult.newPriceMinor),
+            sellPrice = calculateDiscountPrice(discount, minimumThreshold, calculationResult.newPriceMinor),
             skuTitle = poolFilledEntity.skuTitle,
             barCode = poolFilledEntity.barcode.toString(),
         )
@@ -181,23 +184,14 @@ class PriceChangeService(
                 )
             )
         } else {
-            return closeToMinimalCalculatorStrategy.calculatePrice(
-                poolFilledEntity.keAccountShopItemId,
-                BigDecimal.valueOf(poolFilledEntity.price),
-                CalculatorOptions(
-                    step = poolFilledEntity.step,
-                    minimumThreshold = poolFilledEntity.minimumThreshold,
-                    maximumThreshold = poolFilledEntity.maximumThreshold
-                )
-            )
+            throw IllegalArgumentException("Strategy not exist for pool entity with keAccountShopItemId = ${poolFilledEntity.keAccountShopItemId}")
         }
     }
 
-    private fun calculateDiscountPrice(discount: BigInteger?, minimumThreshold: Long?, newPriceMinor: BigDecimal): Long {
+    private fun calculateDiscountPrice(discount: BigDecimal?, minimumThreshold: Long?, newPriceMinor: BigDecimal): Long {
         return if (discount != null) {
-            val discountedPrice = (newPriceMinor - ((newPriceMinor * discount.toBigDecimal()) / BigDecimal(
-                100
-            ))).movePointLeft(2).toLong()
+            val discountedPrice = (newPriceMinor - ((newPriceMinor * discount) / BigDecimal(100)))
+                .movePointLeft(2).toLong()
             if (minimumThreshold != null && discountedPrice < minimumThreshold) {
                 newPriceMinor.movePointLeft(2).toLong()
             } else {

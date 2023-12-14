@@ -15,7 +15,8 @@ class RecordToKeAccountShopItemStrategyEntityMapper : RecordMapper<KazanExpressA
             record.getValue(STRATEGY_OPTION.ID),
             record.getValue(STRATEGY_OPTION.MINIMUM_THRESHOLD),
             record.getValue(STRATEGY_OPTION.MAXIMUM_THRESHOLD),
-            record.getValue(STRATEGY_OPTION.STEP)
+            record.getValue(STRATEGY_OPTION.STEP),
+            record.getValue(STRATEGY_OPTION.DISCOUNT)
         )
     }
 }

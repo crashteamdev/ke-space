@@ -19,6 +19,7 @@ class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopI
             maximumThreshold = (source.maximumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2).toDouble()
             step = source.step
             strategyType = source.strategyType
+            discount = source.discount?.toBigDecimal()
         }
     }
 }

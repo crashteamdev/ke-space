@@ -79,8 +79,6 @@ class StrategyController(
                 keShopItemStrategyService.updateStrategy(shopItemStrategyId, it)
                 val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
                 val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
-
-                keShopItemStrategyService.deleteStrategy(shopItemStrategyId)
                 return@flatMap ResponseEntity.ok().body(itemStrategy).toMono()
             }
         }

@@ -7,5 +7,6 @@ data class KazanExpressAccountShopItemStrategyEntity(
     val strategyOptionId: Long,
     val minimumThreshold: Long?,
     val maximumThreshold: Long?,
-    val step: Int?
+    val step: Int?,
+    val discount: Int?
 )

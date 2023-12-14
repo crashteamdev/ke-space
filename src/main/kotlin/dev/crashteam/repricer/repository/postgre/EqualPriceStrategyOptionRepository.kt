@@ -17,10 +17,12 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
         return dsl.insertInto(
             strategyOption,
             strategyOption.MAXIMUM_THRESHOLD,
-            strategyOption.MINIMUM_THRESHOLD
+            strategyOption.MINIMUM_THRESHOLD,
+            strategyOption.DISCOUNT
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
-            strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong()
+            strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
+            strategy.discount?.intValueExact()
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }
@@ -31,6 +33,7 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
         return dsl.update(strategyOption)
             .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
+            .set(strategyOption.DISCOUNT, strategy.discount?.intValueExact())
             .where(strategyOption.ID.eq(id))
             .execute()
     }

@@ -16,11 +16,13 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption,
             strategyOption.MAXIMUM_THRESHOLD,
             strategyOption.MINIMUM_THRESHOLD,
-            strategyOption.STEP
+            strategyOption.STEP,
+            strategyOption.DISCOUNT
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
-            strategy.step
+            strategy.step,
+            strategy.discount?.intValueExact()
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }
@@ -32,6 +34,7 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
             .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.STEP, strategy.step)
+            .set(strategyOption.DISCOUNT, strategy.discount?.intValueExact())
             .where(strategyOption.ID.eq(id))
             .execute()
     }
