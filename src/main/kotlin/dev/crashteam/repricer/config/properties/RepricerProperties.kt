@@ -24,6 +24,8 @@ data class RepricerProperties(
     val accountInitializeCron: String? = null,
     @field:NotEmpty
     val repairStuckStateCron: String? = null,
+    @field:NotEmpty
+    val pendingMessageCron: String? = null,
     val cookieBotProtectionBypassEnabled: Boolean = false,
     @field:NotNull
     val maxUpdateInProgress: Int? = null

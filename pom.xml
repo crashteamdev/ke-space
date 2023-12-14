@@ -112,6 +112,16 @@
             <version>1.56-075b630-server</version>
         </dependency>
         <dependency>
+            <groupId>dev.crashteam</groupId>
+            <artifactId>payment-proto</artifactId>
+            <version>0.0.37</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.22.2</version>
+        </dependency>
+        <dependency>
             <groupId>dev.brachtendorf</groupId>
             <artifactId>JImageHash</artifactId>
             <version>1.0.0</version>

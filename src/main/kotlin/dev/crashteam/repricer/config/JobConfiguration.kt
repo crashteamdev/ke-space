@@ -2,6 +2,7 @@ package dev.crashteam.repricer.config
 
 import dev.crashteam.repricer.config.properties.RepricerProperties
 import dev.crashteam.repricer.job.*
+import dev.crashteam.repricer.stream.scheduler.PendingMessageScheduler
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,10 +37,6 @@ class JobConfiguration(
         if (!schedulerFactoryBean.checkExists(TriggerKey(PRICE_CHANGE_TRIGGER_KEY))) {
             schedulerFactoryBean.scheduleJob(priceChangeMasterTrigger())
         }
-        schedulerFactoryBean.addJob(paymentMasterJob(), true, true)
-        if (!schedulerFactoryBean.checkExists(TriggerKey(PAYMENT_TRIGGER_KEY))) {
-            schedulerFactoryBean.scheduleJob(paymentMasterTrigger())
-        }
         schedulerFactoryBean.addJob(keAccountInitializeMasterJob(), true, true)
         if (!schedulerFactoryBean.checkExists(TriggerKey(ACCOUNT_INITIALIZE_TRIGGER_KEY))) {
             schedulerFactoryBean.scheduleJob(keAccountInitializeMasterTrigger())
@@ -47,6 +44,10 @@ class JobConfiguration(
         schedulerFactoryBean.addJob(repairStuckStateJob(), true, true)
         if (!schedulerFactoryBean.checkExists(TriggerKey(REPAIR_STUCK_STATE_TRIGGER_KEY))) {
             schedulerFactoryBean.scheduleJob(repairStuckStateTrigger())
+        }
+        schedulerFactoryBean.addJob(pendingMessageJob(), true, true)
+        if (!schedulerFactoryBean.checkExists(TriggerKey(PENDING_MESSAGE_JOB, PENDING_MESSAGE_GROUP))) {
+            schedulerFactoryBean.scheduleJob(triggerPendingMessageJob())
         }
     }
 
@@ -100,23 +101,6 @@ class JobConfiguration(
             .build()
     }
 
-    fun paymentMasterJob(): JobDetailImpl {
-        val jobDetail = JobDetailImpl()
-        jobDetail.key = JobKey("master-payment-job")
-        jobDetail.jobClass = PaymentMasterJob::class.java
-
-        return jobDetail
-    }
-
-    fun paymentMasterTrigger(): CronTrigger {
-        return TriggerBuilder.newTrigger()
-            .forJob(paymentMasterJob())
-            .withIdentity(PAYMENT_TRIGGER_KEY)
-            .withPriority(Int.MAX_VALUE / 2)
-            .withSchedule(CronScheduleBuilder.cronSchedule(repricerProperties.paymentCron))
-            .build()
-    }
-
     fun keAccountInitializeMasterJob(): JobDetailImpl {
         val jobDetail = JobDetailImpl()
         jobDetail.key = JobKey("master-account-initialize-job")
@@ -151,6 +135,23 @@ class JobConfiguration(
             .build()
     }
 
+    private fun pendingMessageJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(PENDING_MESSAGE_JOB, PENDING_MESSAGE_GROUP)
+        jobDetail.jobClass = PendingMessageScheduler::class.java
+
+        return jobDetail
+    }
+
+    private fun triggerPendingMessageJob(): CronTrigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(pendingMessageJob())
+            .withIdentity(PENDING_MESSAGE_JOB, PENDING_MESSAGE_GROUP)
+            .withSchedule(CronScheduleBuilder.cronSchedule(repricerProperties.pendingMessageCron))
+            .withPriority(Int.MAX_VALUE)
+            .build()
+    }
+
     companion object {
         const val SHOP_TRIGGER_KEY = "master-shop-item-trigger"
         const val ACCOUNT_DATA_UPDATE_TRIGGER_KEY = "master-account-data-update-trigger"
@@ -158,5 +159,7 @@ class JobConfiguration(
         const val PAYMENT_TRIGGER_KEY = "master-payment-trigger"
         const val ACCOUNT_INITIALIZE_TRIGGER_KEY = "master-account-initialize-trigger"
         const val REPAIR_STUCK_STATE_TRIGGER_KEY = "repair-stuck-state-trigger"
+        const val PENDING_MESSAGE_JOB = "pendingMessageJob"
+        const val PENDING_MESSAGE_GROUP = "pendingMessageGroup"
     }
 }

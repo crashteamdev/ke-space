@@ -89,9 +89,20 @@ repricer:
   paymentCron: '0/10 * * * * ?'
   accountInitializeCron: '0/20 * * * * ?'
   repairStuckStateCron: '0 0 0/1 * * ?'
+  pendingMessageCron: '0 0/5 0 ? * * *'
   cookieBotProtectionBypassEnabled: true
   maxUpdateInProgress: 3
 
 youkassa:
   shopId: 819837
   key: 'test_6qE96u7LbOog1NcjX9AocDz8sviH_FIhQ25sO2Jz0Qk'
+
+redis:
+  stream:
+    max-batch-size: 350
+    batch-buffer-duration-ms: 2000
+    batch-parallel-count: 5
+    payment:
+      streamName: payment-stream
+      consumerGroup: ke-space-payment-group
+      consumerName: ke-space-payment-consumer
