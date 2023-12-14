@@ -13,9 +13,6 @@ data class RedisStreamProperty(
     val maxBatchSize: Int,
     val batchBufferDurationMs: Long,
     val batchParallelCount: Int,
-    val keProductInfo: RedisStreamPropertyDetail,
-    val keProductPosition: RedisStreamPropertyDetail,
-    val keCategoryInfo: RedisStreamPropertyDetail,
     val payment: RedisStreamPropertyDetail,
 )
 
