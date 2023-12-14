@@ -61,41 +61,34 @@ class StrategyController(
     }
 
     override fun getStrategy(
-        xRequestID: UUID?,
-        shopItemStrategyId: Long?,
-        exchange: ServerWebExchange?
+        xRequestID: UUID,
+        shopItemStrategyId: Long,
+        exchange: ServerWebExchange
     ): Mono<ResponseEntity<KeAccountShopItemStrategy>> {
-        if (shopItemStrategyId != null) {
-            exchange?.getPrincipal<Principal>()?.flatMap {
-                val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
-                val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
-                return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
-            }?.doOnError {
-                log.warn(it) { "Failed to get strategy. strategyId=$shopItemStrategyId" }
-            }
+        return exchange.getPrincipal<Principal>().flatMap {
+            val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
+            val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
+            return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+        }.doOnError {
+            log.warn(it) { "Failed to get strategy. strategyId=$shopItemStrategyId" }
         }
-        throw IllegalArgumentException("shopItemStrategyId can't be null")
     }
 
     override fun patchStrategy(
-        xRequestID: UUID?,
-        shopItemStrategyId: Long?,
-        patchStrategy: Mono<PatchStrategy>?,
-        exchange: ServerWebExchange?
+        xRequestID: UUID,
+        shopItemStrategyId: Long,
+        patchStrategy: Mono<PatchStrategy>,
+        exchange: ServerWebExchange
     ): Mono<ResponseEntity<KeAccountShopItemStrategy>> {
-        if (shopItemStrategyId != null) {
-            patchStrategy?.flatMap {
-                keShopItemStrategyService.updateStrategy(shopItemStrategyId, it)
-                val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
-                val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
-                return@flatMap ResponseEntity.ok().body(itemStrategy).toMono()
-            }?.doOnError {
-                log.warn(it) { "Failed to patch strategy. strategyId=$shopItemStrategyId" }
-            }
+        return patchStrategy.flatMap {
+            keShopItemStrategyService.updateStrategy(shopItemStrategyId, it)
+            val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
+            val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
+            return@flatMap ResponseEntity.ok().body(itemStrategy).toMono()
+        }.doOnError {
+            log.warn(it) { "Failed to patch strategy. strategyId=$shopItemStrategyId" }
         }
-        return Mono.just(ResponseEntity.badRequest().build())
     }
-
 
     override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<StrategyType>>> {
         return Mono.just(ResponseEntity.ok(Flux.fromIterable(StrategyType.values().toList())))
