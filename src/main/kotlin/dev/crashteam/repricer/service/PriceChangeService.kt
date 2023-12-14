@@ -189,7 +189,7 @@ class PriceChangeService(
     }
 
     private fun calculateDiscountPrice(discount: BigDecimal?, minimumThreshold: Long?, newPriceMinor: BigDecimal): Long {
-        return if (discount != null) {
+        return if (discount != null && !discount.equals(0)) {
             val discountedPrice = (newPriceMinor - ((newPriceMinor * discount) / BigDecimal(100)))
                 .movePointLeft(2).toLong()
             if (minimumThreshold != null && discountedPrice < minimumThreshold) {
