@@ -15,21 +15,10 @@ class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopI
     override fun convert(source: KazanExpressAccountShopItemStrategyEntity): KeAccountShopItemStrategy {
         return KeAccountShopItemStrategy().apply {
             id = source.id
-            strategy = getStrategy(source)
-        }
-    }
-
-    private fun getStrategy(source: KazanExpressAccountShopItemStrategyEntity): Strategy {
-        val minimumThreshold = (source.minimumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2)
-        val maximumThreshold = (source.maximumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2)
-        return when(source.strategyType) {
-            StrategyType.close_to_minimal.name -> CloseToMinimalStrategy(source.step, source.strategyType,
-                minimumThreshold.toDouble(), maximumThreshold.toDouble())
-            StrategyType.quantity_dependent.name -> QuantityDependentStrategy(source.step, source.strategyType,
-                minimumThreshold.toDouble(), maximumThreshold.toDouble())
-            StrategyType.equal_price.name -> EqualPriceStrategy(source.strategyType, minimumThreshold.toDouble(),
-                maximumThreshold.toDouble())
-            else -> throw IllegalArgumentException("No such strategy - ${source.strategyType}")
+            minimumThreshold = (source.minimumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2).toDouble()
+            maximumThreshold = (source.maximumThreshold?.toBigDecimal() ?: BigDecimal.ZERO).movePointLeft(2).toDouble()
+            step = source.step
+            strategyType = source.strategyType
         }
     }
 }

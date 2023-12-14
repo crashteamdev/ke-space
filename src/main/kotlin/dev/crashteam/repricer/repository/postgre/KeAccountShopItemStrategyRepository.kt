@@ -11,6 +11,7 @@ import dev.crashteam.repricer.repository.postgre.mapper.RecordToKeAccountShopIte
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Repository
 class KeAccountShopItemStrategyRepository(
@@ -61,6 +62,7 @@ class KeAccountShopItemStrategyRepository(
         return strategiesMap[strategyEntityType]!!.update(shopItemStrategyId, strategy)
     }
 
+    @Transactional(readOnly = true)
     fun findById(id: Long): KazanExpressAccountShopItemStrategyEntity? {
         val i = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         val o = STRATEGY_OPTION
@@ -70,6 +72,7 @@ class KeAccountShopItemStrategyRepository(
             .fetchOne()?.map { strategyMapper.convert(it) }
     }
 
+    @Transactional
     fun deleteById(id: Long): Int {
         val i = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         return dsl.deleteFrom(i).where(i.ID.eq(id)).execute();

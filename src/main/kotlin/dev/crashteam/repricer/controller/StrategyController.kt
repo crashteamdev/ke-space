@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
 import java.security.Principal
@@ -86,7 +87,8 @@ class StrategyController(
         return Mono.just(ResponseEntity.badRequest().build())
     }
 
-    override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<StrategyType>> {
-        return super.getStrategyTypes(exchange)
+
+    override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<StrategyType>>> {
+        return Mono.just(ResponseEntity.ok(Flux.fromIterable(StrategyType.values().toList())))
     }
 }
