@@ -6,6 +6,7 @@ import dev.crashteam.openapi.kerepricer.model.KeAccountShopItemStrategy
 import dev.crashteam.openapi.kerepricer.model.PatchStrategy
 import dev.crashteam.openapi.kerepricer.model.StrategyType
 import dev.crashteam.repricer.service.KeShopItemStrategyService
+import mu.KotlinLogging
 import org.springframework.core.convert.ConversionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,6 +18,8 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
 import java.security.Principal
 import java.util.*
+
+private val log = KotlinLogging.logger {}
 
 @RestController
 @RequestMapping("/v1")
@@ -35,6 +38,8 @@ class StrategyController(
             val strategy = keShopItemStrategyService.findStrategy(strategyId)
             val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
             return@flatMap ResponseEntity.status(HttpStatus.CREATED).body(itemStrategy).toMono()
+        }?.doOnError {
+            log.warn(it) { "Failed to add strategy" }
         }
     }
 
@@ -47,6 +52,8 @@ class StrategyController(
             return exchange?.getPrincipal<Principal>()?.flatMap {
                 keShopItemStrategyService.deleteStrategy(shopItemStrategyId)
                 return@flatMap ResponseEntity.noContent().build<Void>().toMono()
+            }?.doOnError {
+                log.warn(it) { "Failed to delete strategy. strategyId=$shopItemStrategyId" }
             }
         }
         return Mono.just(ResponseEntity.noContent().build())
@@ -63,6 +70,8 @@ class StrategyController(
                 val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
                 val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
                 return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            }?.doOnError {
+                log.warn(it) { "Failed to get strategy. strategyId=$shopItemStrategyId" }
             }
         }
         throw IllegalArgumentException("shopItemStrategyId can't be null")
@@ -80,6 +89,8 @@ class StrategyController(
                 val strategy = keShopItemStrategyService.findStrategy(shopItemStrategyId)
                 val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
                 return@flatMap ResponseEntity.ok().body(itemStrategy).toMono()
+            }?.doOnError {
+                log.warn(it) { "Failed to patch strategy. strategyId=$shopItemStrategyId" }
             }
         }
         return Mono.just(ResponseEntity.badRequest().build())
