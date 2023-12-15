@@ -20,7 +20,6 @@ class KeShopItemStrategyService(
         return keAccountShopItemRepository.saveStrategy(addStrategyRequest)
     }
 
-    @Transactional
     fun findStrategy(shopItemId: UUID): KazanExpressAccountShopItemStrategyEntity? {
         return strategyRepository.findById(shopItemId)
     }
