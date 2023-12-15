@@ -105,9 +105,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
                 skuTitle = "testSkuTitle",
                 minimumThreshold = 1000,
                 maximumThreshold = 6000,
-                step = 10,
-                strategyId = null
-            )
+                step = 10)
         )
     }
 
@@ -137,10 +135,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         keShopItemRepository.save(competitorKeShopItemEntity)
         keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
 
-        val equalPriceStrategy = EqualPriceStrategy()
-        equalPriceStrategy.maximumThreshold = 60.0
-        equalPriceStrategy.minimumThreshold = 10.0
-        equalPriceStrategy.strategyType = "equal_price"
+        val equalPriceStrategy = EqualPriceStrategy("equal_price", 10.0, 60.0)
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
         keAccountShopItemRepository.saveStrategy(strategyRequest)
@@ -202,10 +197,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         keShopItemRepository.save(competitorKeShopItemEntity)
         keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
 
-        val equalPriceStrategy = EqualPriceStrategy()
-        equalPriceStrategy.maximumThreshold = 40.0
-        equalPriceStrategy.minimumThreshold = 10.0
-        equalPriceStrategy.strategyType = "equal_price"
+        val equalPriceStrategy = EqualPriceStrategy("equal_price", 10.0, 40.0)
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
         keAccountShopItemRepository.saveStrategy(strategyRequest)

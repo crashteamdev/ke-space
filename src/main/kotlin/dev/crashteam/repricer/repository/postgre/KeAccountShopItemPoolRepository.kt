@@ -133,8 +133,7 @@ class KeAccountShopItemPoolRepository(
             i.MAXIMUM_THRESHOLD,
             i.SKU_TITLE,
             i.BARCODE,
-            p.LAST_CHECK,
-            i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
+            p.LAST_CHECK
         )
             .from(i)
             .join(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
@@ -159,8 +158,7 @@ class KeAccountShopItemPoolRepository(
                     maximumThreshold = record.getValue(i.MAXIMUM_THRESHOLD),
                     skuTitle = record.getValue(i.SKU_TITLE),
                     barcode = record.getValue(i.BARCODE),
-                    lastCheck = record.getValue(p.LAST_CHECK),
-                    strategyId = record.getValue(i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID)
+                    lastCheck = record.getValue(p.LAST_CHECK)
                 )
             }
     }

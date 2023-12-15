@@ -28,10 +28,6 @@ class KeAccountShopItemRepository(
     fun saveStrategy(strategyRequest: AddStrategyRequest): Long {
         val i = KE_ACCOUNT_SHOP_ITEM
         val strategyId = strategyRepository.save(strategyRequest)
-        dsl.update(i)
-            .set(i.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID, strategyId)
-            .where(i.ID.eq(strategyRequest.keAccountShopItemId))
-            .execute()
         return strategyId
     }
 

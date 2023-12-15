@@ -155,8 +155,7 @@ class UpdateKeAccountService(
                         productSku = accountShopItem.skuTitle,
                         skuTitle = shopItemSku.skuFullTitle,
                         availableAmount = shopItemSku.quantityActive + shopItemSku.quantityAdditional,
-                        lastUpdate = shopUpdateTime,
-                        strategyId = kazanExpressAccountShopItemEntity?.strategyId
+                        lastUpdate = shopUpdateTime
                     )
                 }
                 Stream.of(kazanExpressAccountShopItemEntities)

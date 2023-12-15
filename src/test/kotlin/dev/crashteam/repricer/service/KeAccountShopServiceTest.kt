@@ -125,8 +125,7 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
                 skuTitle = "testSkuTitle",
                 minimumThreshold = 1000,
                 maximumThreshold = 2000,
-                step = 10,
-                strategyId = null
+                step = 10
             )
         )
         val closeToMinimalStrategy = CloseToMinimalStrategy(10, "close_to_minimal", 100.0, 100.0)
@@ -136,9 +135,7 @@ class KeAccountShopServiceTest : ContainerConfiguration() {
 
     @Test
     fun `check if strategy exists`() {
-        val shopItem = keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopItemId)
-        assertNotEquals(null, shopItem?.strategyId)
-        val strategyEntity = shopItem!!.strategyId?.let { strategyRepository.findById(it) }
+        val strategyEntity = strategyRepository.findById(keAccountShopItemId)
         assertEquals(strategyEntity?.strategyType, "close_to_minimal")
     }
 

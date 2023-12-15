@@ -25,7 +25,6 @@ class KazanExpressAccountShopItemEntityToViewConverter :
             this.step = source.step
             this.discount = source.discount?.toBigDecimal()
             this.isInPool = source.isInPool
-            this.strategyId = source.strategyId
         }
     }
 }

@@ -6,6 +6,8 @@ import dev.crashteam.repricer.repository.postgre.KeAccountShopItemRepository
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemStrategyRepository
 import dev.crashteam.repricer.repository.postgre.entity.strategy.KazanExpressAccountShopItemStrategyEntity
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class KeShopItemStrategyService(
@@ -13,19 +15,23 @@ class KeShopItemStrategyService(
     private val keAccountShopItemRepository: KeAccountShopItemRepository
 ) {
 
+    @Transactional
     fun saveStrategy(addStrategyRequest: AddStrategyRequest): Long {
         return keAccountShopItemRepository.saveStrategy(addStrategyRequest)
     }
 
-    fun findStrategy(id: Long): KazanExpressAccountShopItemStrategyEntity? {
-        return strategyRepository.findById(id)
+    @Transactional
+    fun findStrategy(shopItemId: UUID): KazanExpressAccountShopItemStrategyEntity? {
+        return strategyRepository.findById(shopItemId)
     }
 
-    fun updateStrategy(shopItemStrategyId: Long, patchStrategy: PatchStrategy): Int {
-        return strategyRepository.update(shopItemStrategyId, patchStrategy)
+    @Transactional
+    fun updateStrategy(shopItemId: UUID, patchStrategy: PatchStrategy): Int {
+        return strategyRepository.update(shopItemId, patchStrategy)
     }
 
-    fun deleteStrategy(id: Long): Int? {
-        return strategyRepository.deleteById(id)
+    @Transactional
+    fun deleteStrategy(shopItemId: UUID): Int? {
+        return strategyRepository.deleteById(shopItemId)
     }
 }

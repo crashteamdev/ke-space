@@ -20,6 +20,7 @@ class KeAccountShopItemStrategyConverter: DataConverter<KazanExpressAccountShopI
             step = source.step
             strategyType = source.strategyType
             discount = source.discount?.toBigDecimal()
+            keAccountShopItemId = source.keAccountShopItemId
         }
     }
 }

@@ -2,6 +2,7 @@ package dev.crashteam.repricer.repository.postgre
 
 import dev.crashteam.openapi.kerepricer.model.Strategy
 import dev.crashteam.repricer.db.model.enums.StrategyType
+import java.util.UUID
 
 interface StrategyOptionRepository {
 

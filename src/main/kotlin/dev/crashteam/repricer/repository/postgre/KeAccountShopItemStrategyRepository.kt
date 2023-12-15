@@ -20,7 +20,6 @@ class KeAccountShopItemStrategyRepository(
     private val strategyMapper: RecordToKeAccountShopItemStrategyEntityMapper
 ) {
 
-    @Transactional
     fun save(strategyRequest: AddStrategyRequest): Long {
         val itemStrategy = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         val strategyType = StrategyType.valueOf(strategyRequest.strategy.strategyType)
@@ -29,52 +28,49 @@ class KeAccountShopItemStrategyRepository(
         return dsl.insertInto(
             itemStrategy,
             itemStrategy.STRATEGY_TYPE,
-            itemStrategy.STRATEGY_OPTION_ID
+            itemStrategy.STRATEGY_OPTION_ID,
+            itemStrategy.KE_ACCOUNT_SHOP_ITEM_ID
         ).values(
             strategyType,
-            optionId
+            optionId,
+            strategyRequest.keAccountShopItemId
         ).returningResult(itemStrategy.ID)
             .fetchOne()!!
             .getValue(itemStrategy.ID)
     }
 
-    @Transactional
-    fun update(shopItemStrategyId: Long, patchStrategy: PatchStrategy): Int {
+    fun update(id: UUID, patchStrategy: PatchStrategy): Int {
         val strategyType = StrategyType.valueOf(patchStrategy.strategy.strategyType)
         val itemStrategy = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         val strategyOptionId = dsl.update(itemStrategy)
             .set(itemStrategy.STRATEGY_TYPE, strategyType)
-            .where(itemStrategy.ID.eq(shopItemStrategyId))
+            .where(itemStrategy.KE_ACCOUNT_SHOP_ITEM_ID.eq(id))
             .returningResult(itemStrategy.STRATEGY_OPTION_ID)
             .fetchOne()!!.getValue(itemStrategy.STRATEGY_OPTION_ID)
         return updateOption(strategyOptionId, patchStrategy.strategy)
     }
 
-    @Transactional
     fun saveOption(strategy: Strategy): Long {
         val strategyEntityType = StrategyType.valueOf(strategy.strategyType)
         return strategiesMap[strategyEntityType]!!.save(strategy)
     }
 
-    @Transactional
     fun updateOption(shopItemStrategyId: Long, strategy: Strategy): Int {
         val strategyEntityType = StrategyType.valueOf(strategy.strategyType)
         return strategiesMap[strategyEntityType]!!.update(shopItemStrategyId, strategy)
     }
 
-    @Transactional(readOnly = true)
-    fun findById(id: Long): KazanExpressAccountShopItemStrategyEntity? {
+    fun findById(keAccountShopItemId: UUID): KazanExpressAccountShopItemStrategyEntity? {
         val i = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         val o = STRATEGY_OPTION
         return dsl.select()
             .from(i.leftJoin(o).on(i.STRATEGY_OPTION_ID.eq(o.ID)))
-            .where(i.ID.eq(id))
+            .where(i.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId))
             .fetchOne()?.map { strategyMapper.convert(it) }
     }
 
-    @Transactional
-    fun deleteById(id: Long): Int {
+    fun deleteById(keAccountShopItemId: UUID): Int {
         val i = KE_ACCOUNT_SHOP_ITEM_STRATEGY
-        return dsl.deleteFrom(i).where(i.ID.eq(id)).execute();
+        return dsl.deleteFrom(i).where(i.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId)).execute();
     }
 }
