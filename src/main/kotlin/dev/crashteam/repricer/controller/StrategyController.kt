@@ -63,10 +63,12 @@ class StrategyController(
     ): Mono<ResponseEntity<KeAccountShopItemStrategy>> {
         return exchange.getPrincipal<Principal>().flatMap {
             val strategy = keShopItemStrategyService.findStrategy(keAccountShopItemId)
-            log.info { "strategy - $strategy" }
             val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
-            log.info { "strategy DTO - $strategyDto" }
-            return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            if (strategyDto != null) {
+                return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            } else {
+                return@flatMap Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build())
+            }
         }.doOnError {
             log.warn(it) { "Failed to get strategy. keAccountShopItemId=$keAccountShopItemId" }
         }
