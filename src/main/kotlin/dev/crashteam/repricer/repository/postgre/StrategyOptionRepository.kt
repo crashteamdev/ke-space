@@ -6,7 +6,7 @@ import java.util.UUID
 
 interface StrategyOptionRepository {
 
-    fun <T: Strategy> save(t: T): Long
+    fun <T: Strategy> save(id: Long, t: T): Long
 
     fun <T: Strategy> update(id: Long, t: T): Int
 

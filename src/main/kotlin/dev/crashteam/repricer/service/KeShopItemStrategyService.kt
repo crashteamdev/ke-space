@@ -26,7 +26,7 @@ class KeShopItemStrategyService(
     }
 
     @Transactional
-    fun updateStrategy(shopItemId: UUID, patchStrategy: PatchStrategy): Int {
+    fun updateStrategy(shopItemId: UUID, patchStrategy: PatchStrategy): Long {
         return strategyRepository.update(shopItemId, patchStrategy)
     }
 

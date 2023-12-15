@@ -9,7 +9,7 @@ import org.jooq.DSLContext
 
 class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
     StrategyOptionRepository {
-    override fun <T: Strategy> save(t: T): Long {
+    override fun <T: Strategy> save(id: Long, t: T): Long {
         val strategy = t as CloseToMinimalStrategy
         val strategyOption = StrategyOption.STRATEGY_OPTION
         return dsl.insertInto(
@@ -17,12 +17,14 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption.MAXIMUM_THRESHOLD,
             strategyOption.MINIMUM_THRESHOLD,
             strategyOption.STEP,
-            strategyOption.DISCOUNT
+            strategyOption.DISCOUNT,
+            strategyOption.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.step,
-            strategy.discount?.intValueExact()
+            strategy.discount?.intValueExact(),
+            id
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }

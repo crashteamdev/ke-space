@@ -11,18 +11,20 @@ import org.springframework.stereotype.Repository
 @Repository
 class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
     StrategyOptionRepository {
-    override fun <T: Strategy> save(t: T): Long {
+    override fun <T: Strategy> save(id: Long, t: T): Long {
         val strategyOption = StrategyOption.STRATEGY_OPTION
         val strategy = t as EqualPriceStrategy
         return dsl.insertInto(
             strategyOption,
             strategyOption.MAXIMUM_THRESHOLD,
             strategyOption.MINIMUM_THRESHOLD,
-            strategyOption.DISCOUNT
+            strategyOption.DISCOUNT,
+            strategyOption.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
-            strategy.discount?.intValueExact()
+            strategy.discount?.intValueExact(),
+            id
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)
     }
