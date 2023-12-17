@@ -44,11 +44,11 @@ class StrategyController(
     }
 
     override fun deleteStrategy(
-        xRequestID: UUID?,
+        xRequestID: UUID,
         keAccountShopItemId: UUID,
         exchange: ServerWebExchange
     ): Mono<ResponseEntity<Void>>? {
-        return exchange.getPrincipal<Principal>()?.flatMap {
+        return exchange.getPrincipal<Principal>().flatMap {
             keShopItemStrategyService.deleteStrategy(keAccountShopItemId)
             return@flatMap ResponseEntity.noContent().build<Void>().toMono()
         }?.doOnError {
@@ -64,7 +64,11 @@ class StrategyController(
         return exchange.getPrincipal<Principal>().flatMap {
             val strategy = keShopItemStrategyService.findStrategy(keAccountShopItemId)
             val strategyDto = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
-            return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            if (strategyDto != null) {
+                return@flatMap ResponseEntity.ok().body(strategyDto).toMono()
+            } else {
+                return@flatMap Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build())
+            }
         }.doOnError {
             log.warn(it) { "Failed to get strategy. keAccountShopItemId=$keAccountShopItemId" }
         }

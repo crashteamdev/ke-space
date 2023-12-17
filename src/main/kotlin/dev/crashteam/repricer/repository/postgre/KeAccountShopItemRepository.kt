@@ -20,16 +20,7 @@ import java.util.*
 @Repository
 class KeAccountShopItemRepository(
     private val dsl: DSLContext,
-    private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper,
-    private val strategyRepository: KeAccountShopItemStrategyRepository
-) {
-
-    @Transactional
-    fun saveStrategy(strategyRequest: AddStrategyRequest): Long {
-        val i = KE_ACCOUNT_SHOP_ITEM
-        val strategyId = strategyRepository.save(strategyRequest)
-        return strategyId
-    }
+    private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper) {
 
     fun save(kazanExpressAccountShopItemEntity: KazanExpressAccountShopItemEntity): UUID? {
         val i = KE_ACCOUNT_SHOP_ITEM
