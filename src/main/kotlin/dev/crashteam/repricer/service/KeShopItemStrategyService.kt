@@ -11,13 +11,12 @@ import java.util.UUID
 
 @Service
 class KeShopItemStrategyService(
-    private val strategyRepository: KeAccountShopItemStrategyRepository,
-    private val keAccountShopItemRepository: KeAccountShopItemRepository
+    private val strategyRepository: KeAccountShopItemStrategyRepository
 ) {
 
     @Transactional
     fun saveStrategy(addStrategyRequest: AddStrategyRequest): Long {
-        return keAccountShopItemRepository.saveStrategy(addStrategyRequest)
+        return strategyRepository.save(addStrategyRequest)
     }
 
     fun findStrategy(shopItemId: UUID): KazanExpressAccountShopItemStrategyEntity? {
