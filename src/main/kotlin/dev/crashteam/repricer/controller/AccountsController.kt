@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
+import reactor.core.scheduler.Schedulers
 import java.security.Principal
 import java.util.*
 
@@ -108,28 +109,6 @@ class AccountsController(
             }
         }.doOnError {
             log.warn(it) { "Failed to add ke account shop item competitor. keAccountId=$id" }
-        }
-    }
-
-    override fun addKeAccountShopItemPool(
-        xRequestID: UUID,
-        id: UUID,
-        addKeAccountShopItemPoolRequest: Mono<AddKeAccountShopItemPoolRequest>,
-        exchange: ServerWebExchange
-    ): Mono<ResponseEntity<Void>> {
-        return exchange.getPrincipal<Principal>().flatMap { principal ->
-            addKeAccountShopItemPoolRequest.flatMap { request ->
-                try {
-                    keAccountShopService.addShopItemIntoPool(principal.name, id, request.shopId, request.shopItemId)
-                } catch (e: AccountItemPoolLimitExceededException) {
-                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
-                } catch (e: IllegalArgumentException) {
-                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
-                }
-                ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
-            }
-        }.doOnError {
-            log.warn(it) { "Failed to add shop item into pool. keAccountId=$id" }
         }
     }
 
@@ -459,6 +438,28 @@ class AccountsController(
         }
     }
 
+    override fun addKeAccountShopItemPool(
+        xRequestID: UUID,
+        id: UUID,
+        addKeAccountShopItemPoolRequest: Mono<AddKeAccountShopItemPoolRequest>,
+        exchange: ServerWebExchange
+    ): Mono<ResponseEntity<Void>> {
+        return exchange.getPrincipal<Principal>().flatMap { principal ->
+            addKeAccountShopItemPoolRequest.publishOn(Schedulers.boundedElastic()).flatMap { request ->
+                try {
+                    keAccountShopService.addShopItemIntoPool(principal.name, id, request.shopId, request.shopItemId)
+                } catch (e: AccountItemPoolLimitExceededException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                } catch (e: IllegalArgumentException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                }
+                ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
+            }
+        }.doOnError {
+            log.warn(it) { "Failed to add shop item into pool. keAccountId=$id" }
+        }
+    }
+
     override fun removeKeAccountShopItemFromPool(
         xRequestID: UUID,
         id: UUID,
@@ -477,6 +478,59 @@ class AccountsController(
             }
         }.doOnError {
             log.warn(it) { "Failed to remove ke account shop item from pool. keAccountId=$id" }
+        }
+    }
+
+    override fun addKeAccountShopItemPoolBulk(
+        xRequestID: UUID,
+        id: UUID,
+        addKeAccountShopItemPoolBulkRequest: Mono<AddKeAccountShopItemPoolBulkRequest>,
+        exchange: ServerWebExchange,
+    ): Mono<ResponseEntity<Void>> {
+        return exchange.getPrincipal<Principal>().flatMap { principal ->
+            addKeAccountShopItemPoolBulkRequest.publishOn(Schedulers.boundedElastic()).flatMap { request ->
+                try {
+                    keAccountShopService.addShopItemIntoPoolBulk(
+                        principal.name,
+                        id,
+                        request.shopId,
+                        request.shopItemIds
+                    )
+                } catch (e: AccountItemPoolLimitExceededException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                } catch (e: IllegalArgumentException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                }
+                ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
+            }
+        }.doOnError {
+            log.warn(it) { "Failed to add shop items into pool. keAccountId=$id" }
+        }
+    }
+
+    override fun removeKeAccountShopItemFromPoolBulk(
+        xRequestID: UUID,
+        id: UUID,
+        addKeAccountShopItemPoolBulkRequest: Mono<AddKeAccountShopItemPoolBulkRequest>,
+        exchange: ServerWebExchange
+    ): Mono<ResponseEntity<Void>> {
+        return exchange.getPrincipal<Principal>().flatMap { principal ->
+            addKeAccountShopItemPoolBulkRequest.flatMap { request ->
+                val removeShopItemFromPoolCount =
+                    keAccountShopService.removeShopItemsFromPool(
+                        principal.name,
+                        id,
+                        request.shopId,
+                        request.shopItemIds
+                    )
+                if (removeShopItemFromPoolCount > 0) {
+                    ResponseEntity.ok().build<Void>().toMono()
+                } else {
+                    ResponseEntity.notFound().build<Void>().toMono()
+                }
+            }
+        }.doOnError {
+            log.warn(it) { "Failed to remove ke account shop items from pool. keAccountId=$id" }
         }
     }
 

@@ -37,6 +37,22 @@ class KeAccountShopItemPoolRepository(
         ).onDuplicateKeyIgnore().execute()
     }
 
+    fun saveBatch(kazanExpressAccountShopItemPoolEntities: List<KazanExpressAccountShopItemPoolEntity>): IntArray {
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        return dsl.batch(
+            kazanExpressAccountShopItemPoolEntities.map { kazanExpressAccountShopItemPoolEntity ->
+                dsl.insertInto(
+                    p,
+                    p.KE_ACCOUNT_SHOP_ITEM_ID,
+                    p.LAST_CHECK
+                ).values(
+                    kazanExpressAccountShopItemPoolEntity.keAccountShopItemId,
+                    kazanExpressAccountShopItemPoolEntity.lastCheck
+                ).onDuplicateKeyIgnore()
+            }
+        ).execute()
+    }
+
     fun updateLastCheck(keAccountShopItemId: UUID, lastCheck: LocalDateTime): Int {
         val p = KE_ACCOUNT_SHOP_ITEM_POOL
         return dsl.update(p)
@@ -49,6 +65,13 @@ class KeAccountShopItemPoolRepository(
         val p = KE_ACCOUNT_SHOP_ITEM_POOL
         return dsl.deleteFrom(p)
             .where(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId))
+            .execute()
+    }
+
+    fun delete(keAccountShopItemId: List<UUID>): Int {
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        return dsl.deleteFrom(p)
+            .where(p.KE_ACCOUNT_SHOP_ITEM_ID.`in`(keAccountShopItemId))
             .execute()
     }
 
@@ -65,7 +88,7 @@ class KeAccountShopItemPoolRepository(
                     .join(i).on(s.ID.eq(i.KE_ACCOUNT_SHOP_ID))
                     .join(p).on(i.ID.eq(p.KE_ACCOUNT_SHOP_ITEM_ID))
             )
-                .where(a.USER_ID.eq(userId))
+                .where(a.USER_ID.eq(userId)).forUpdate()
         )
     }
 

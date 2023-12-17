@@ -67,6 +67,7 @@ class KeAccountShopService(
         )
     }
 
+    @Transactional
     fun addShopItemIntoPool(
         userId: String,
         keAccountId: UUID,
@@ -83,6 +84,27 @@ class KeAccountShopService(
 
         val kazanExpressAccountShopItemPoolEntity = KazanExpressAccountShopItemPoolEntity(keAccountShopItemId)
         keAccountShopItemPoolRepository.save(kazanExpressAccountShopItemPoolEntity)
+    }
+
+    @Transactional
+    fun addShopItemIntoPoolBulk(
+        userId: String,
+        keAccountId: UUID,
+        keAccountShopId: UUID,
+        keAccountShopItemIds: List<UUID>,
+    ) {
+        log.debug {
+            "Add shop items into pool. userId=$userId; keAccountId=${keAccountId};" +
+                    " keAccountShopId=$keAccountShopId itemSize=${keAccountShopItemIds.stream()}"
+        }
+        val isValidPoolItemCount = accountSubscriptionRestrictionValidator.validateItemInPoolCount(userId)
+
+        if (!isValidPoolItemCount)
+            throw AccountItemPoolLimitExceededException("Pool limit exceeded for user. userId=$userId")
+
+        val kazanExpressAccountShopItemPoolEntities =
+            keAccountShopItemIds.map { KazanExpressAccountShopItemPoolEntity(it) }
+        keAccountShopItemPoolRepository.saveBatch(kazanExpressAccountShopItemPoolEntities)
     }
 
     @Transactional
@@ -200,6 +222,19 @@ class KeAccountShopService(
                     " keAccountShopId=$keAccountShopId; keShopItemId=$keShopItemId;"
         }
         return keAccountShopItemPoolRepository.delete(keShopItemId)
+    }
+
+    fun removeShopItemsFromPool(
+        userId: String,
+        keAccountId: UUID,
+        keAccountShopId: UUID,
+        keShopItemIds: List<UUID>,
+    ): Int {
+        log.debug {
+            "Remove shop items from pool. userId=$userId; keAccountId=$keAccountId;" +
+                    " keAccountShopId=$keAccountShopId; keShopItemIdsCount=${keShopItemIds.size};"
+        }
+        return keAccountShopItemPoolRepository.delete(keShopItemIds)
     }
 
     fun changeShopItemPriceOptions(
