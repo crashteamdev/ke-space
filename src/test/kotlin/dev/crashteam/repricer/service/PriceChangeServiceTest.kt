@@ -39,6 +39,9 @@ class PriceChangeServiceTest : ContainerConfiguration() {
     lateinit var keAccountShopItemRepository: KeAccountShopItemRepository
 
     @Autowired
+    lateinit var strategyRepository: KeAccountShopItemStrategyRepository
+
+    @Autowired
     lateinit var keShopItemPoolRepository: KeAccountShopItemPoolRepository
 
     @Autowired
@@ -138,7 +141,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         val equalPriceStrategy = EqualPriceStrategy("equal_price", 10.0, 60.0)
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
-        keAccountShopItemRepository.saveStrategy(strategyRequest)
+        strategyRepository.save(strategyRequest)
 
         whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
             AccountProductDescription(
@@ -200,7 +203,7 @@ class PriceChangeServiceTest : ContainerConfiguration() {
         val equalPriceStrategy = EqualPriceStrategy("equal_price", 10.0, 40.0)
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
-        keAccountShopItemRepository.saveStrategy(strategyRequest)
+        strategyRepository.save(strategyRequest)
 
         whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
             AccountProductDescription(
