@@ -9,7 +9,6 @@ WORKDIR root/
 ARG JAR_FILE=ke-space-*.jar
 COPY ${JAR_FILE} ./app.jar
 
-ENTRYPOINT ["java", "-server", "-Xms128M", "-Xmx256M",\
-            "-XX:+UnlockDiagnosticVMOptions", "-XX:+UseContainerSupport",\
+ENTRYPOINT ["java", "-server", "-XX:+UnlockDiagnosticVMOptions", "-XX:+UseContainerSupport",\
             "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=dump.hprof", "-Djava.security.egd=/dev/zrandom",\
             "-jar", "/root/app.jar"]
