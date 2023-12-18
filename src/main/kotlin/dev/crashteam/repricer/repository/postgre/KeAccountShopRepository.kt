@@ -151,14 +151,6 @@ class KeAccountShopRepository(
             .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(p.KE_ACCOUNT_SHOP_ITEM_ID)) as Int
     }
 
-    fun getUserSubscriptionPlan(userId: String): SubscriptionPlan? {
-        val a = ACCOUNT
-        val s = SUBSCRIPTION
-        val plan = dsl.select().from(s).innerJoin(a).on(a.SUBSCRIPTION_ID.eq(s.ID))
-            .where(a.USER_ID.eq(userId)).fetchOne(s.PLAN)
-        return plan
-    }
-
     fun countAccounts(userId: String): Int {
         val a = ACCOUNT
         val ka = KE_ACCOUNT
