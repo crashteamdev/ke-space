@@ -16,7 +16,7 @@ class UserService(
         val plan = accountRepository.getAccount(userId)?.subscription?.plan
         if (plan != null) {
             val accountRestriction = subscriptionPlanResolver.toAccountRestriction(plan)
-            RestrictionEntity(
+            return RestrictionEntity(
                 userId = userId,
                 keAccountLimit = accountRestriction.keAccountLimit(),
                 keAccountLimitCurrent = accountRestriction.keAccountLimit() - keAccountShopRepository.countAccounts(userId),
