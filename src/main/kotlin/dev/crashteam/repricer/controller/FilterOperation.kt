@@ -11,8 +11,10 @@ enum class FilterOperation(
         ":",
         { tableField, value ->
             if (value is String) {
-                tableField.likeIgnoreCase("%$value%")
-            } else tableField.eq(value as Long)
+                if (org.apache.commons.lang3.math.NumberUtils.isCreatable(value)) {
+                    tableField.eq(value.toLong())
+                } else tableField.likeIgnoreCase("%$value%")
+            } else tableField.eq(value)
         }),
     NOT_EQUALS("!", { tableField, value -> tableField.notEqual(value) });
 

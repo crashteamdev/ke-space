@@ -7,6 +7,8 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShop.KE_ACCOUNT_SHOP
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPriceHistory.KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY
+import dev.crashteam.repricer.filter.KeAccountShopItemFilterRecordMapper
+import dev.crashteam.repricer.filter.QueryFilterParser
 import dev.crashteam.repricer.repository.postgre.KeShopItemPriceHistoryRepository
 import dev.crashteam.repricer.service.KeAccountService
 import dev.crashteam.repricer.service.KeAccountShopService
@@ -43,7 +45,8 @@ class AccountsController(
     private val keShopItemService: KeShopItemService,
     private val keShopItemPriceChangeRepository: KeShopItemPriceHistoryRepository,
     private val conversionService: ConversionService,
-    private val urlToProductResolver: UrlToProductResolver
+    private val urlToProductResolver: UrlToProductResolver,
+    private val queryFilterParser: QueryFilterParser,
 ) : AccountsApi {
 
     override fun addKeAccount(
@@ -226,33 +229,15 @@ class AccountsController(
         return exchange.getPrincipal<Principal>().flatMap {
             val limit = limit ?: 10
             val offset = offset ?: 0
-            val mapFields = mapOf(
-                "productId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRODUCT_ID),
-                "skuId" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_ID),
-                "skuTitle" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.SKU_TITLE),
-                "name" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.NAME),
-                "photoKey" to StringTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
-                "purchasePrice" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PURCHASE_PRICE),
-                "price" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.PRICE),
-                "barCode" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.BARCODE),
-                "availableAmount" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.AVAILABLE_AMOUNT),
-                "minimumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MINIMUM_THRESHOLD),
-                "maximumThreshold" to LongTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.MAXIMUM_THRESHOLD),
-                "step" to IntegerTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.STEP),
-                "discount" to BigIntegerTableFieldMapper(KE_ACCOUNT_SHOP_ITEM.DISCOUNT)
-            )
-            val filterCondition = filter?.let {
-                FilterOperation.parse(filter, mapFields)
-            }
-            val sortFields = if (sort != null) {
-                SortOperation.parse(sort, mapFields)
+            val parsedQuery = if (filter != null || sort != null) {
+                queryFilterParser.parseFilter(filter, sort, KeAccountShopItemFilterRecordMapper())
             } else null
             val shopItemCompetitors = keAccountShopService.getKeAccountShopItems(
                 it.name,
                 id,
                 shopId,
-                filterCondition,
-                sortFields,
+                parsedQuery?.filterCondition,
+                parsedQuery?.sortFields,
                 limit.toLong(),
                 offset.toLong()
             )

@@ -11,12 +11,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.Resource
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.math.BigDecimal
 
 @Testcontainers
+@SpringBootTest
 class KeShopItemServiceTest : ContainerConfiguration() {
 
     @Autowired
