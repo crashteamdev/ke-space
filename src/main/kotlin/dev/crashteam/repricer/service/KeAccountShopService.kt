@@ -1,9 +1,13 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.KazanExpressWebClient
+import dev.crashteam.repricer.db.model.enums.SubscriptionPlan
+import dev.crashteam.repricer.db.model.tables.Account
+import dev.crashteam.repricer.db.model.tables.Subscription
 import dev.crashteam.repricer.repository.postgre.*
 import dev.crashteam.repricer.repository.postgre.entity.*
 import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidator
+import dev.crashteam.repricer.restriction.SubscriptionPlanResolver
 import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import mu.KotlinLogging
@@ -25,12 +29,12 @@ class KeAccountShopService(
     private val keShopItemRepository: KeShopItemRepository,
     private val kazanExpressWebClient: KazanExpressWebClient,
     private val keShopItemService: KeShopItemService,
-    private val accountSubscriptionRestrictionValidator: AccountSubscriptionRestrictionValidator,
+    private val accountSubscriptionRestrictionValidator: AccountSubscriptionRestrictionValidator
 ) {
 
-    fun getKeAccountShops(userId: String, keAccountId: UUID): List<KazanExpressAccountShopEntity> {
+    fun getKeAccountShops(userId: String, keAccountId: UUID): List<KazanExpressAccountShopEntityWithData> {
         log.debug { "Get ke account shops. userId=$userId; keAccountId=${keAccountId}" }
-        return keAccountShopRepository.getKeAccountShops(userId, keAccountId)
+        return keAccountShopRepository.getKeAccountShopsWithData(userId, keAccountId)
     }
 
     fun getKeAccountShopItem(
