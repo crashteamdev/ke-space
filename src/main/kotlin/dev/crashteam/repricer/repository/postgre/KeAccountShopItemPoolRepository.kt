@@ -5,7 +5,7 @@ import dev.crashteam.repricer.db.model.tables.KeAccount.KE_ACCOUNT
 import dev.crashteam.repricer.db.model.tables.KeAccountShop.KE_ACCOUNT_SHOP
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL
-import dev.crashteam.repricer.db.model.tables.KeAccountShopItemStrategy
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemStrategy.KE_ACCOUNT_SHOP_ITEM_STRATEGY
 import dev.crashteam.repricer.extensions.paginate
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemPoolEntity
@@ -140,6 +140,7 @@ class KeAccountShopItemPoolRepository(
         val s = KE_ACCOUNT_SHOP
         val i = KE_ACCOUNT_SHOP_ITEM
         val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        val st = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         return dsl.select(
             p.KE_ACCOUNT_SHOP_ITEM_ID,
             k.ID.`as`("ke_account_id"),
@@ -159,6 +160,7 @@ class KeAccountShopItemPoolRepository(
             p.LAST_CHECK
         )
             .from(i)
+            .innerJoin(st).on(st.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
             .join(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
             .join(s).on(i.KE_ACCOUNT_SHOP_ID.eq(s.ID))
             .join(k).on(s.KE_ACCOUNT_ID.eq(k.ID))
