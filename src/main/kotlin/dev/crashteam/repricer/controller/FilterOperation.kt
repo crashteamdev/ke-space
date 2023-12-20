@@ -9,7 +9,13 @@ enum class FilterOperation(
 ) {
     EQUALS(
         ":",
-        { tableField, value -> if (value is String) tableField.likeIgnoreCase("%$value%") else tableField.eq(value) }),
+        { tableField, value ->
+            if (value is String) {
+                if (org.apache.commons.lang3.math.NumberUtils.isCreatable(value)) {
+                    tableField.eq(value.toLong())
+                } else tableField.likeIgnoreCase("%$value%")
+            } else tableField.eq(value)
+        }),
     NOT_EQUALS("!", { tableField, value -> tableField.notEqual(value) });
 
     companion object {

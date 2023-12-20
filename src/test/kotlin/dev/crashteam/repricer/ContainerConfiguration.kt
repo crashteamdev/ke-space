@@ -8,8 +8,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-@SpringBootTest
-class ContainerConfiguration {
+open class ContainerConfiguration {
     companion object {
         @BeforeAll
         @JvmStatic
