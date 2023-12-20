@@ -90,7 +90,7 @@ class KeAccountShopItemCompetitorRepository(
         keAccountShopItemId: UUID,
         productId: Long,
         skuId: Long,
-    ): KazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntity? {
+    ): KazanExpressAccountShopItemCompetitorEntity? {
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
         return dsl.selectFrom(c)
             .where(
@@ -98,7 +98,7 @@ class KeAccountShopItemCompetitorRepository(
                     .and(c.PRODUCT_ID.eq(productId).and(c.SKU_ID.eq(skuId)))
             )
             .fetchOne()
-            ?.map { recordToKazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntityMapper.convert(it) }
+            ?.map { recordToKazanExpressAccountShopItemCompetitorMapper.convert(it) }
     }
 
     fun findShopItemCompetitorsCount(
