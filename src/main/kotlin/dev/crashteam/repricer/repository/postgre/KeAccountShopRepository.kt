@@ -166,12 +166,12 @@ class KeAccountShopRepository(
         val ka = KE_ACCOUNT
         val a = ACCOUNT
 
-        return dsl.select(countDistinct(c.KE_ACCOUNT_SHOP_ITEM_ID))
+        return dsl.select(countDistinct(c.ID))
             .from(c)
             .innerJoin(si).on(si.ID.eq(c.KE_ACCOUNT_SHOP_ITEM_ID))
             .innerJoin(ka).on(ka.ID.eq(si.KE_ACCOUNT_ID))
             .innerJoin(a).on(a.ID.eq(ka.ACCOUNT_ID))
-            .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(c.KE_ACCOUNT_SHOP_ITEM_ID)) as Int
+            .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(c.ID)) as Int
     }
 
     fun getKeAccountShops(keAccountId: UUID): List<KazanExpressAccountShopEntity> {
