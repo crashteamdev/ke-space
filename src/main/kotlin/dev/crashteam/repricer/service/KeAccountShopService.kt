@@ -10,6 +10,7 @@ import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidato
 import dev.crashteam.repricer.restriction.SubscriptionPlanResolver
 import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
+import dev.crashteam.repricer.service.error.CompetitorItemAlreadyExistsException
 import mu.KotlinLogging
 import org.jooq.Condition
 import org.jooq.Field
@@ -128,6 +129,12 @@ class KeAccountShopService(
             accountSubscriptionRestrictionValidator.validateItemCompetitorCount(userId, keAccountShopItemId)
         if (!isValidCompetitorItemCount)
             throw AccountItemCompetitorLimitExceededException("Pool limit exceeded for user. userId=$userId")
+
+        val shopItemCompetitor =
+            keAccountShopItemCompetitorRepository.findShopItemCompetitorForUpdate(keAccountShopItemId, productId, skuId)
+        if (shopItemCompetitor != null) {
+            throw CompetitorItemAlreadyExistsException()
+        }
 
         val kazanExpressAccountShopItemEntity =
             keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopId, keAccountShopItemId)

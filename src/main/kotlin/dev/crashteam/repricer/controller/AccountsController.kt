@@ -16,6 +16,7 @@ import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.UpdateKeAccountService
 import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
+import dev.crashteam.repricer.service.error.CompetitorItemAlreadyExistsException
 import dev.crashteam.repricer.service.error.UserNotFoundException
 import dev.crashteam.repricer.service.resolver.UrlToProductResolver
 import mu.KotlinLogging
@@ -107,6 +108,8 @@ class AccountsController(
                     )
                 } catch (e: AccountItemCompetitorLimitExceededException) {
                     return@flatMap ResponseEntity.status(HttpStatus.FORBIDDEN).build<Void>().toMono()
+                } catch (e: CompetitorItemAlreadyExistsException) {
+                    return@flatMap ResponseEntity.status(HttpStatus.CONFLICT).build<Void>().toMono()
                 }
                 ResponseEntity.status(HttpStatus.OK).build<Void>().toMono()
             }
