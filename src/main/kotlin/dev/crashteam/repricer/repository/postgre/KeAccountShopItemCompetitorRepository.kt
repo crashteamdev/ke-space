@@ -86,6 +86,21 @@ class KeAccountShopItemCompetitorRepository(
         return records.map { recordToKazanExpressAccountShopItemCompetitorMapper.convert(it) }
     }
 
+    fun findShopItemCompetitorForUpdate(
+        keAccountShopItemId: UUID,
+        productId: Long,
+        skuId: Long,
+    ): KazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntity? {
+        val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
+        return dsl.selectFrom(c)
+            .where(
+                c.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId)
+                    .and(c.PRODUCT_ID.eq(productId).and(c.SKU_ID.eq(skuId)))
+            )
+            .fetchOne()
+            ?.map { recordToKazanExpressAccountShopItemCompetitorEntityJoinKeShopItemEntityMapper.convert(it) }
+    }
+
     fun findShopItemCompetitorsCount(
         keAccountShopItemId: UUID
     ): Int {
