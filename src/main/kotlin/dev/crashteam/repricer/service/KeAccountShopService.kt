@@ -46,7 +46,7 @@ class KeAccountShopService(
         log.debug {
             "Get ke account shop item. userId=$userId; keAccountId=${keAccountId}; shopItemId=${shopItemId}"
         }
-        return keAccountShopItemRepository.findShopItem(keAccountId, shopItemId)
+        return keAccountShopItemRepository.findShopItem(userId, keAccountId, shopItemId)
     }
 
     fun getKeAccountShopItems(

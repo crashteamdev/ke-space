@@ -31,6 +31,8 @@ class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpres
             lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE),
             discount = record.getValue(KE_ACCOUNT_SHOP_ITEM.DISCOUNT),
             isInPool = record.get(KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL.KE_ACCOUNT_SHOP_ITEM_ID) != null,
+            //availableCompetitors = record.get("competitor_limit") as Int,
+            competitorsCurrent = record.getValue("competitor_count") as Int
         )
     }
 }

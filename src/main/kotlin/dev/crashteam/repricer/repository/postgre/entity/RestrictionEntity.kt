@@ -5,7 +5,5 @@ data class RestrictionEntity(
     val keAccountLimit: Int,
     val keAccountLimitCurrent: Int,
     val itemPoolLimit: Int,
-    val itemPoolLimitCurrent: Int,
-    val itemCompetitorLimit: Int,
-    val itemCompetitorLimitCurrent: Int
+    val itemPoolLimitCurrent: Int
 )
