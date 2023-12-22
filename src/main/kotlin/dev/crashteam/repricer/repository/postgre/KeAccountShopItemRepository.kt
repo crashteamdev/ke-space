@@ -5,8 +5,10 @@ import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACC
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL
 import dev.crashteam.repricer.extensions.paginate
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntityWithLimitData
 import dev.crashteam.repricer.repository.postgre.entity.PaginateEntity
 import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressAccountShopItemEntityMapper
+import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressAccountShopItemEntityWithLimitDataMapper
 import dev.crashteam.repricer.restriction.SubscriptionPlanResolver
 import org.jooq.Condition
 import org.jooq.DSLContext
@@ -21,6 +23,7 @@ import java.util.*
 class KeAccountShopItemRepository(
     private val dsl: DSLContext,
     private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper,
+    private val recordToKazanExpressAccountShopItemEntityWithLimitDataMapper: RecordToKazanExpressAccountShopItemEntityWithLimitDataMapper,
     private val accountRepository: AccountRepository,
     private val subscriptionPlanResolver: SubscriptionPlanResolver
 ) {
@@ -207,7 +210,7 @@ class KeAccountShopItemRepository(
         userId: String,
         keAccountId: UUID,
         keAccountShopItemId: UUID
-    ): KazanExpressAccountShopItemEntity? {
+    ): KazanExpressAccountShopItemEntityWithLimitData? {
         val i = KE_ACCOUNT_SHOP_ITEM
         val p = KE_ACCOUNT_SHOP_ITEM_POOL
         val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
@@ -227,6 +230,9 @@ class KeAccountShopItemRepository(
 
         val record = dsl.select(
             asterisk(),
+            field(
+                "(SELECT {0})", Integer::class.java, limit
+            ).`as`("competitor_limit"),
             competitorCount
         )
             .from(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
@@ -235,7 +241,7 @@ class KeAccountShopItemRepository(
                 i.ID.eq(keAccountShopItemId),
             ).fetchOne() ?: return null
 
-        return recordToKazanExpressAccountShopItemEntityMapper.convert(record)
+        return recordToKazanExpressAccountShopItemEntityWithLimitDataMapper.convert(record)
     }
 
     fun findAllItems(

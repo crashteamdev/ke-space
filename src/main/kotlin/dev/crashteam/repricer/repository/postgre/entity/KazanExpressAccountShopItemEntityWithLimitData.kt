@@ -4,7 +4,7 @@ import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.*
 
-data class KazanExpressAccountShopItemEntity(
+data class KazanExpressAccountShopItemEntityWithLimitData(
     val id: UUID,
     val keAccountId: UUID,
     val keAccountShopId: UUID,
@@ -24,5 +24,7 @@ data class KazanExpressAccountShopItemEntity(
     val step: Int? = null,
     val discount: BigInteger? = null,
     val lastUpdate: LocalDateTime,
-    val isInPool: Boolean? = false
+    val isInPool: Boolean? = false,
+    val availableCompetitors: Int? = null,
+    val competitorsCurrent: Int? = null
 )

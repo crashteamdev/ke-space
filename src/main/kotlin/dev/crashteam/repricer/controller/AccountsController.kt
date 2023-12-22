@@ -546,7 +546,7 @@ class AccountsController(
         exchange: ServerWebExchange
     ): Mono<ResponseEntity<KeAccountShopItem>> {
         return exchange.getPrincipal<Principal>().flatMap { principal ->
-            val keAccountShopItem = keAccountShopService.getKeAccountShopItem(principal.name, id, shopItemId)
+            val keAccountShopItem = keAccountShopService.getKeAccountShopItemWithLimitData(principal.name, id, shopItemId)
                 ?: return@flatMap ResponseEntity.notFound().build<KeAccountShopItem>().toMono()
             ResponseEntity.ok(conversionService.convert(keAccountShopItem, KeAccountShopItem::class.java)).toMono()
         }.doOnError {

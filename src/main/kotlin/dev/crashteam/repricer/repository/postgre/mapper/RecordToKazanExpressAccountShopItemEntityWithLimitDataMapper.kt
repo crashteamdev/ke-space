@@ -2,15 +2,15 @@ package dev.crashteam.repricer.repository.postgre.mapper
 
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool
-import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntityWithLimitData
 import org.jooq.Record
 import org.springframework.stereotype.Component
 
 @Component
-class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpressAccountShopItemEntity> {
+class RecordToKazanExpressAccountShopItemEntityWithLimitDataMapper : RecordMapper<KazanExpressAccountShopItemEntityWithLimitData> {
 
-    override fun convert(record: Record): KazanExpressAccountShopItemEntity {
-        return KazanExpressAccountShopItemEntity(
+    override fun convert(record: Record): KazanExpressAccountShopItemEntityWithLimitData {
+        return KazanExpressAccountShopItemEntityWithLimitData(
             id = record.getValue(KE_ACCOUNT_SHOP_ITEM.ID),
             keAccountId = record.getValue(KE_ACCOUNT_SHOP_ITEM.KE_ACCOUNT_ID),
             keAccountShopId = record.getValue(KE_ACCOUNT_SHOP_ITEM.KE_ACCOUNT_SHOP_ID),
@@ -30,7 +30,9 @@ class RecordToKazanExpressAccountShopItemEntityMapper : RecordMapper<KazanExpres
             step = record.getValue(KE_ACCOUNT_SHOP_ITEM.STEP),
             lastUpdate = record.getValue(KE_ACCOUNT_SHOP_ITEM.LAST_UPDATE),
             discount = record.getValue(KE_ACCOUNT_SHOP_ITEM.DISCOUNT),
-            isInPool = record.get(KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL.KE_ACCOUNT_SHOP_ITEM_ID) != null
+            isInPool = record.get(KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL.KE_ACCOUNT_SHOP_ITEM_ID) != null,
+            availableCompetitors = record.getValue("competitor_limit") as Int,
+            competitorsCurrent = record.getValue("competitor_count") as Int
         )
     }
 }
