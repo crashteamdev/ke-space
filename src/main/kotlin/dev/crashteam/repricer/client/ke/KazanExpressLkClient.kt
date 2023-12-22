@@ -1,5 +1,6 @@
 package dev.crashteam.repricer.client.ke
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.crashteam.repricer.client.ke.model.ProxyRequestBody
 import dev.crashteam.repricer.client.ke.model.ProxyRequestContext
 import dev.crashteam.repricer.client.ke.model.StyxResponse
@@ -110,6 +111,7 @@ class KazanExpressLkClient(
                 )
             )
         )
+        log.debug { "ITEM PRICE CHANGE REQUEST BODY - ${jacksonObjectMapper().writeValueAsString(proxyRequestBody)}" }
         val responseType: ParameterizedTypeReference<StyxResponse<ShopItemPriceChangePayload>> =
             object : ParameterizedTypeReference<StyxResponse<ShopItemPriceChangePayload>>() {}
         val styxResponse = restTemplate.exchange(
