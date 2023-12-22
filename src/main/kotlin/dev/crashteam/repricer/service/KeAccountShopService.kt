@@ -38,6 +38,17 @@ class KeAccountShopService(
         return keAccountShopRepository.getKeAccountShopsWithData(userId, keAccountId)
     }
 
+    fun getKeAccountShopItemWithLimitData(
+        userId: String,
+        keAccountId: UUID,
+        shopItemId: UUID,
+    ): KazanExpressAccountShopItemEntityWithLimitData? {
+        log.debug {
+            "Get ke account shop item. userId=$userId; keAccountId=${keAccountId}; shopItemId=${shopItemId}"
+        }
+        return keAccountShopItemRepository.findShopItem(userId, keAccountId, shopItemId)
+    }
+
     fun getKeAccountShopItem(
         userId: String,
         keAccountId: UUID,

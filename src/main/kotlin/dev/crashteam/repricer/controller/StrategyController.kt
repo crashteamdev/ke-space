@@ -4,7 +4,7 @@ import dev.crashteam.openapi.kerepricer.api.StrategiesApi
 import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
 import dev.crashteam.openapi.kerepricer.model.KeAccountShopItemStrategy
 import dev.crashteam.openapi.kerepricer.model.PatchStrategy
-import dev.crashteam.openapi.kerepricer.model.StrategyType
+import dev.crashteam.repricer.db.model.enums.StrategyType
 import dev.crashteam.repricer.service.KeShopItemStrategyService
 import mu.KotlinLogging
 import org.springframework.core.convert.ConversionService
@@ -51,7 +51,7 @@ class StrategyController(
         return exchange.getPrincipal<Principal>().flatMap {
             keShopItemStrategyService.deleteStrategy(keAccountShopItemId)
             return@flatMap ResponseEntity.noContent().build<Void>().toMono()
-        }?.doOnError {
+        }.doOnError {
             log.warn(it) { "Failed to delete strategy. keAccountShopItemId=$keAccountShopItemId" }
         }
     }
@@ -90,7 +90,16 @@ class StrategyController(
         }
     }
 
-    override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<StrategyType>>> {
-        return Mono.just(ResponseEntity.ok(Flux.fromIterable(StrategyType.values().toList())))
+    override fun getStrategyTypes(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<String>>> {
+        return Mono.just(
+            ResponseEntity.ok(
+                Flux.fromIterable(
+                    listOf(
+                        StrategyType.close_to_minimal.literal,
+                        StrategyType.equal_price.literal
+                    )
+                )
+            )
+        )
     }
 }

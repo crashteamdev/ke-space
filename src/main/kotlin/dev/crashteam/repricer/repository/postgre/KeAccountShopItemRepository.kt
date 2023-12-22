@@ -1,18 +1,20 @@
 package dev.crashteam.repricer.repository.postgre
 
-import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
 import dev.crashteam.repricer.db.model.tables.KeAccountShopItem.KE_ACCOUNT_SHOP_ITEM
-import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool
-import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.*
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemCompetitor.KE_ACCOUNT_SHOP_ITEM_COMPETITOR
+import dev.crashteam.repricer.db.model.tables.KeAccountShopItemPool.KE_ACCOUNT_SHOP_ITEM_POOL
 import dev.crashteam.repricer.extensions.paginate
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntity
+import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemEntityWithLimitData
 import dev.crashteam.repricer.repository.postgre.entity.PaginateEntity
 import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressAccountShopItemEntityMapper
+import dev.crashteam.repricer.repository.postgre.mapper.RecordToKazanExpressAccountShopItemEntityWithLimitDataMapper
+import dev.crashteam.repricer.restriction.SubscriptionPlanResolver
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.Field
+import org.jooq.impl.DSL.*
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -20,7 +22,11 @@ import java.util.*
 @Repository
 class KeAccountShopItemRepository(
     private val dsl: DSLContext,
-    private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper) {
+    private val recordToKazanExpressAccountShopItemEntityMapper: RecordToKazanExpressAccountShopItemEntityMapper,
+    private val recordToKazanExpressAccountShopItemEntityWithLimitDataMapper: RecordToKazanExpressAccountShopItemEntityWithLimitDataMapper,
+    private val accountRepository: AccountRepository,
+    private val subscriptionPlanResolver: SubscriptionPlanResolver
+) {
 
     fun save(kazanExpressAccountShopItemEntity: KazanExpressAccountShopItemEntity): UUID? {
         val i = KE_ACCOUNT_SHOP_ITEM
@@ -198,6 +204,44 @@ class KeAccountShopItemRepository(
                 i.ID.eq(keAccountShopItemId),
             ).fetchOne() ?: return null
         return recordToKazanExpressAccountShopItemEntityMapper.convert(record)
+    }
+
+    fun findShopItem(
+        userId: String,
+        keAccountId: UUID,
+        keAccountShopItemId: UUID
+    ): KazanExpressAccountShopItemEntityWithLimitData? {
+        val i = KE_ACCOUNT_SHOP_ITEM
+        val p = KE_ACCOUNT_SHOP_ITEM_POOL
+        val c = KE_ACCOUNT_SHOP_ITEM_COMPETITOR
+        val competitorCount = field(
+            select(count(c.KE_ACCOUNT_SHOP_ITEM_ID))
+                .from(c)
+                .where(c.KE_ACCOUNT_SHOP_ITEM_ID.eq(keAccountShopItemId))
+        ).`as`("competitor_count")
+
+        val plan = accountRepository.getAccount(userId)?.subscription?.plan
+        var limit = 0
+        if (plan != null) {
+            val accountRestriction = subscriptionPlanResolver.toAccountRestriction(plan)
+            limit = accountRestriction.itemCompetitorLimit()
+        }
+
+
+        val record = dsl.select(
+            asterisk(),
+            field(
+                "(SELECT {0})", Integer::class.java, limit
+            ).`as`("competitor_limit"),
+            competitorCount
+        )
+            .from(i.leftJoin(p).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID)))
+            .where(
+                i.KE_ACCOUNT_ID.eq(keAccountId),
+                i.ID.eq(keAccountShopItemId),
+            ).fetchOne() ?: return null
+
+        return recordToKazanExpressAccountShopItemEntityWithLimitDataMapper.convert(record)
     }
 
     fun findAllItems(

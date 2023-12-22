@@ -19,11 +19,9 @@ class UserService(
             return RestrictionEntity(
                 userId = userId,
                 keAccountLimit = accountRestriction.keAccountLimit(),
-                keAccountLimitCurrent = accountRestriction.keAccountLimit() - keAccountShopRepository.countAccounts(userId),
+                keAccountLimitCurrent = keAccountShopRepository.countAccounts(userId),
                 itemPoolLimit = accountRestriction.itemPoolLimit(),
-                itemPoolLimitCurrent = accountRestriction.itemPoolLimit() - keAccountShopRepository.countKeAccountShopItemsInPool(userId),
-                itemCompetitorLimit = accountRestriction.itemCompetitorLimit(),
-                itemCompetitorLimitCurrent = accountRestriction.itemCompetitorLimit() - keAccountShopRepository.countCompetitors(userId)
+                itemPoolLimitCurrent = keAccountShopRepository.countKeAccountShopItemsInPool(userId)
             )
         }
         return null

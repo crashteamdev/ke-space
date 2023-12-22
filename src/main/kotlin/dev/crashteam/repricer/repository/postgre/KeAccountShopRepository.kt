@@ -148,7 +148,7 @@ class KeAccountShopRepository(
             .innerJoin(i).on(i.ID.eq(p.KE_ACCOUNT_SHOP_ITEM_ID))
             .innerJoin(ka).on(ka.ID.eq(i.KE_ACCOUNT_ID))
             .innerJoin(a).on(ka.ACCOUNT_ID.eq(a.ID))
-            .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(p.KE_ACCOUNT_SHOP_ITEM_ID)) as Int
+            .where(a.USER_ID.eq(userId)).fetchOne(0, Int::class.java) ?: 0
     }
 
     fun countAccounts(userId: String): Int {
@@ -157,7 +157,7 @@ class KeAccountShopRepository(
         return dsl.select(countDistinct(ka.ACCOUNT_ID))
             .from(ka)
             .innerJoin(a).on(a.ID.eq(ka.ACCOUNT_ID))
-            .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(ka.ACCOUNT_ID)) as Int
+            .where(a.USER_ID.eq(userId)).fetchOne(0, Int::class.java) ?: 0
     }
 
     fun countCompetitors(userId: String): Int {
@@ -171,7 +171,7 @@ class KeAccountShopRepository(
             .innerJoin(si).on(si.ID.eq(c.KE_ACCOUNT_SHOP_ITEM_ID))
             .innerJoin(ka).on(ka.ID.eq(si.KE_ACCOUNT_ID))
             .innerJoin(a).on(a.ID.eq(ka.ACCOUNT_ID))
-            .where(a.USER_ID.eq(userId)).fetchOne()?.getValue(countDistinct(c.ID)) as Int
+            .where(a.USER_ID.eq(userId)).fetchOne(0, Int::class.java) ?: 0
     }
 
     fun getKeAccountShops(keAccountId: UUID): List<KazanExpressAccountShopEntity> {
