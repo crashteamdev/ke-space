@@ -111,7 +111,7 @@ class KazanExpressLkClient(
                 )
             )
         )
-        log.debug { "ITEM PRICE CHANGE REQUEST BODY - ${jacksonObjectMapper().writeValueAsString(proxyRequestBody)}" }
+        log.info { "ITEM PRICE CHANGE REQUEST BODY - ${jacksonObjectMapper().writeValueAsString(proxyRequestBody)}" }
         val responseType: ParameterizedTypeReference<StyxResponse<ShopItemPriceChangePayload>> =
             object : ParameterizedTypeReference<StyxResponse<ShopItemPriceChangePayload>>() {}
         val styxResponse = restTemplate.exchange(
