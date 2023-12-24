@@ -96,6 +96,7 @@ class KazanExpressLkClient(
         shopId: Long,
         payload: ShopItemPriceChangePayload
     ): Boolean {
+        val body = jacksonObjectMapper().writeValueAsBytes(payload)
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/sendSkuData",
             httpMethod = "POST",
@@ -108,7 +109,8 @@ class KazanExpressLkClient(
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
                         USER_ID_HEADER to userId
                     )
-                )
+                ),
+                ProxyRequestContext("content", Base64.getEncoder().encodeToString(body))
             )
         )
         log.info { "ITEM PRICE CHANGE REQUEST BODY - ${jacksonObjectMapper().writeValueAsString(proxyRequestBody)}" }
