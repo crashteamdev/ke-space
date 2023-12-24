@@ -1,13 +1,9 @@
 package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.KazanExpressWebClient
-import dev.crashteam.repricer.db.model.enums.SubscriptionPlan
-import dev.crashteam.repricer.db.model.tables.Account
-import dev.crashteam.repricer.db.model.tables.Subscription
 import dev.crashteam.repricer.repository.postgre.*
 import dev.crashteam.repricer.repository.postgre.entity.*
 import dev.crashteam.repricer.restriction.AccountSubscriptionRestrictionValidator
-import dev.crashteam.repricer.restriction.SubscriptionPlanResolver
 import dev.crashteam.repricer.service.error.AccountItemCompetitorLimitExceededException
 import dev.crashteam.repricer.service.error.AccountItemPoolLimitExceededException
 import dev.crashteam.repricer.service.error.CompetitorItemAlreadyExistsException
@@ -93,7 +89,7 @@ class KeAccountShopService(
         log.debug {
             "Add shop item into pool. userId=$userId; keAccountId=${keAccountId}; keAccountShopId=$keAccountShopId"
         }
-        val isValidPoolItemCount = accountSubscriptionRestrictionValidator.validateItemInPoolCount(userId)
+        val isValidPoolItemCount = accountSubscriptionRestrictionValidator.validateItemInPoolCount(userId, 1)
 
         if (!isValidPoolItemCount)
             throw AccountItemPoolLimitExceededException("Pool limit exceeded for user. userId=$userId")
@@ -113,7 +109,8 @@ class KeAccountShopService(
             "Add shop items into pool. userId=$userId; keAccountId=${keAccountId};" +
                     " keAccountShopId=$keAccountShopId itemSize=${keAccountShopItemIds.stream()}"
         }
-        val isValidPoolItemCount = accountSubscriptionRestrictionValidator.validateItemInPoolCount(userId)
+        val isValidPoolItemCount =
+            accountSubscriptionRestrictionValidator.validateItemInPoolCount(userId, keAccountShopItemIds.size)
 
         if (!isValidPoolItemCount)
             throw AccountItemPoolLimitExceededException("Pool limit exceeded for user. userId=$userId")

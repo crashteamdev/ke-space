@@ -20,7 +20,7 @@ class AccountSubscriptionRestrictionValidator(
     private val subscriptionPlanResolver: SubscriptionPlanResolver
 ) {
 
-    fun validateItemInPoolCount(userId: String): Boolean {
+    fun validateItemInPoolCount(userId: String, quantity: Int): Boolean {
         val accountEntity = accountRepository.getAccount(userId)!!
 
         if (accountEntity.subscription == null) {
@@ -28,10 +28,10 @@ class AccountSubscriptionRestrictionValidator(
             return false
         }
 
-        val itemsInPoolCount = keAccountShopItemPoolRepository.findCountShopItemsInPoolForUser(userId)
+        val itemsInPoolCount = keAccountShopItemPoolRepository.findCountShopItemsInPoolForUser(userId) + quantity
         val accountRestriction = subscriptionPlanResolver.toAccountRestriction(accountEntity.subscription.plan)
         val itemPoolLimit = accountRestriction.itemPoolLimit()
-        val poolLimitExceeded = itemsInPoolCount >= itemPoolLimit
+        val poolLimitExceeded = itemsInPoolCount > itemPoolLimit
 
         return !poolLimitExceeded
     }
