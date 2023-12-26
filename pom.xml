@@ -26,7 +26,7 @@
         <testcontainers.version>1.17.3</testcontainers.version>
         <selenium.version>4.4.0</selenium.version>
         <imageio.version>3.9.4</imageio.version>
-        <openapi-ke-repricer.version>1.67-acd5eea-server</openapi-ke-repricer.version>
+        <openapi-ke-repricer.version>1.68-c079a2a-server</openapi-ke-repricer.version>
     </properties>
     <dependencies>
         <!-- Spring -->
