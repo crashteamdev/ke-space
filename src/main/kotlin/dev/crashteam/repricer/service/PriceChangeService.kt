@@ -68,7 +68,7 @@ class PriceChangeService(
 
                 val newSkuList = buildNewSkuList(
                     userId, keAccountId, poolFilledEntity,
-                    calculationResult, strategy?.minimumThreshold, strategy?.discount?.toBigDecimal()
+                    calculationResult, strategy?.discount?.toBigDecimal()
                 )
                 log.debug {
                     "Trying to change account shop item price. " +
@@ -142,7 +142,6 @@ class PriceChangeService(
         keAccountId: UUID,
         poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity,
         calculationResult: CalculationResult,
-        minimumThreshold: Long?,
         discount: BigDecimal?
     ): List<SkuPriceChangeSku> {
         val accountProductDescription = retryTemplate.execute<AccountProductDescription, Exception> {
@@ -171,8 +170,8 @@ class PriceChangeService(
         }
         val changeSku = SkuPriceChangeSku(
             id = poolFilledEntity.skuId,
-            fullPrice = calculationResult.newPriceMinor.movePointLeft(2).toLong(),
-            sellPrice = calculateDiscountPrice(discount, minimumThreshold, calculationResult.newPriceMinor),
+            fullPrice = calculateDiscountPrice(discount, calculationResult.newPriceMinor),
+            sellPrice = calculationResult.newPriceMinor.movePointLeft(2).toLong(),
             skuTitle = poolFilledEntity.skuTitle,
             barCode = poolFilledEntity.barcode.toString(),
         )
@@ -197,15 +196,10 @@ class PriceChangeService(
     }
 }
 
-private fun calculateDiscountPrice(discount: BigDecimal?, minimumThreshold: Long?, newPriceMinor: BigDecimal): Long {
+private fun calculateDiscountPrice(discount: BigDecimal?, newPriceMinor: BigDecimal): Long {
     return if (discount != null && !discount.equals(0)) {
-        val discountedPrice = (newPriceMinor - ((newPriceMinor * discount) / BigDecimal(100)))
+        return (newPriceMinor + ((newPriceMinor * discount) / BigDecimal(100)))
             .movePointLeft(2).toLong()
-        if (minimumThreshold != null && discountedPrice < minimumThreshold) {
-            newPriceMinor.movePointLeft(2).toLong()
-        } else {
-            discountedPrice
-        }
     } else newPriceMinor.movePointLeft(2).toLong()
 }
 
