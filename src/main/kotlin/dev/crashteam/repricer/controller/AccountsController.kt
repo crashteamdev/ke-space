@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
 import reactor.core.scheduler.Schedulers
+import java.math.BigDecimal
 import java.security.Principal
 import java.util.*
 
@@ -631,6 +632,7 @@ class AccountsController(
                         this.skuId = it.skuId
                         this.name = it.name
                         this.photoKey = it.photoKey
+                        this.price = BigDecimal.valueOf(it.price).movePointLeft(2).toDouble()
                     }
                 }
 
