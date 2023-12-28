@@ -22,7 +22,8 @@ class RecordToKazanExpressAccountShopItemPriceHistoryEntityJoinShopItemAndShopMa
             changeTime = record.getValue(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.CHANGE_TIME),
             oldPrice = record.getValue(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.OLD_PRICE),
             price = record.getValue(KE_ACCOUNT_SHOP_ITEM_PRICE_HISTORY.PRICE),
-            barcode = record.getValue(KE_ACCOUNT_SHOP_ITEM.BARCODE)
+            barcode = record.getValue(KE_ACCOUNT_SHOP_ITEM.BARCODE),
+            photoKey = record.getValue(KE_ACCOUNT_SHOP_ITEM.PHOTO_KEY),
         )
     }
 }

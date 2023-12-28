@@ -13,5 +13,6 @@ data class KazanExpressShopItemPriceHistoryEntityJointItemAndShopEntity(
     val changeTime: LocalDateTime,
     val oldPrice: Long,
     val price: Long,
-    var barcode: Long
+    var barcode: Long,
+    val photoKey: String,
 )

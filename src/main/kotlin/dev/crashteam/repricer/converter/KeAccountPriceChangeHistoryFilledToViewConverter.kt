@@ -20,6 +20,7 @@ class KeAccountPriceChangeHistoryFilledToViewConverter :
             this.newPrice = source.price.toBigDecimal().setScale(2).toDouble()
             this.barcode = source.barcode
             this.changeTime = source.changeTime.atOffset(ZoneOffset.UTC)
+            this.photoKey = source.photoKey
         }
     }
 }
