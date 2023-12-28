@@ -110,6 +110,7 @@ class KeShopItemPriceHistoryRepository(
             i.NAME.`as`("item_name"),
             i.BARCODE,
             s.NAME.`as`("shop_name"),
+            i.PHOTO_KEY,
         )
             .from(p)
             .join(i).on(p.KE_ACCOUNT_SHOP_ITEM_ID.eq(i.ID))
