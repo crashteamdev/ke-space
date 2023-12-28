@@ -1,15 +1,13 @@
 package dev.crashteam.repricer.config.security
 
+import dev.crashteam.repricer.db.model.enums.SubscriptionPlan
 import dev.crashteam.repricer.repository.postgre.AccountRepository
 import dev.crashteam.repricer.repository.postgre.entity.AccountEntity
+import dev.crashteam.repricer.repository.postgre.entity.SubscriptionEntity
 import org.springframework.http.HttpStatus
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.ServerWebInputException
-import org.springframework.web.server.WebFilter
-import org.springframework.web.server.WebFilterChain
+import org.springframework.web.server.*
 import reactor.core.publisher.Mono
 import java.security.Principal
 
@@ -26,7 +24,17 @@ class UserCreationFilter(
             if (it is JwtAuthenticationToken) {
                 val accountEntity = accountRepository.getAccount(it.name)
                 if (accountEntity == null) {
-                    accountRepository.save(AccountEntity(userId = it.name))
+                    accountRepository.save(
+                        AccountEntity(
+                            userId = it.name,
+                            subscription = SubscriptionEntity(
+                                id = 1,
+                                "Базовый",
+                                SubscriptionPlan.default_,
+                                price = 600000
+                            )
+                        )
+                    )
                 }
             }
             chain.filter(exchange)
