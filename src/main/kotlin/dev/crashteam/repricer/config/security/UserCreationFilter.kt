@@ -24,7 +24,7 @@ class UserCreationFilter(
         }.flatMap {
             if (it is JwtAuthenticationToken) {
                 val accountEntity = accountRepository.getAccount(it.name)
-                if (accountEntity == null) {
+                if (accountEntity?.subscription == null) {
                     accountRepository.save(
                         AccountEntity(
                             userId = it.name,
