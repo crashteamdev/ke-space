@@ -9,8 +9,8 @@ class RestrictionEntityToLimitData : DataConverter<RestrictionEntity, LimitData>
     override fun convert(source: RestrictionEntity): LimitData {
         return LimitData().apply {
             userId = source.userId
-            keAccountLimit = source.keAccountLimit.toLong()
-            keAccountLimitCurrent = source.keAccountLimitCurrent.toLong()
+            accountLimit = source.accountLimit.toLong()
+            accountLimitCurrent = source.accountLimitCurrent.toLong()
             itemPoolLimit = source.itemPoolLimit.toLong()
             itemPoolLimitCurrent = source.itemPoolLimitCurrent.toLong()
         }

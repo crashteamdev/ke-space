@@ -35,7 +35,7 @@ class StrategyController(
     ): Mono<ResponseEntity<KeAccountShopItemStrategy>>? {
         return addStrategyRequest?.flatMap {
             keShopItemStrategyService.saveStrategy(it)
-            val strategy = keShopItemStrategyService.findStrategy(it.keAccountShopItemId)
+            val strategy = keShopItemStrategyService.findStrategy(it.accountShopItemId)
             val itemStrategy = conversionService.convert(strategy, KeAccountShopItemStrategy::class.java)
             return@flatMap ResponseEntity.status(HttpStatus.CREATED).body(itemStrategy).toMono()
         }?.doOnError {

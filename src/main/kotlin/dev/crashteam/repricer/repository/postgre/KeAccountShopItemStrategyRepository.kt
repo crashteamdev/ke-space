@@ -28,7 +28,7 @@ class KeAccountShopItemStrategyRepository(
             itemStrategy.KE_ACCOUNT_SHOP_ITEM_ID
         ).values(
             strategyType,
-            strategyRequest.keAccountShopItemId
+            strategyRequest.accountShopItemId
         ).returningResult(itemStrategy.ID)
             .fetchOne()!!
             .getValue(itemStrategy.ID)
