@@ -11,5 +11,5 @@ data class KazanExpressAccountShopItemStrategyEntity(
     val maximumThreshold: Long?,
     val step: Int?,
     val discount: Int?,
-    val keAccountShopItemId: UUID
+    val accountShopItemId: UUID
 )
