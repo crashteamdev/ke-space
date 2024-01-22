@@ -30,7 +30,9 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
         val kazanExpressAccountEntities =
             keAccountRepository.findAccountUpdateNotInProgress(LocalDateTime.now().minusHours(6))
         log.info { "Execute update account job for ${kazanExpressAccountEntities.size} ke account" }
-        for (kazanExpressAccountEntity in kazanExpressAccountEntities) {
+        val accountToUpdateList = kazanExpressAccountEntities.stream()
+            .limit(repricerProperties.maxUpdateInProgress?.toLong() ?: 3L).toList()
+        for (kazanExpressAccountEntity in accountToUpdateList) {
             val updateJob = updateKeAccountService.executeUpdateJob(
                 kazanExpressAccountEntity.userId,
                 kazanExpressAccountEntity.keAccountEntity.id!!
@@ -46,10 +48,6 @@ class UpdateAccountDataMasterJob : QuartzJobBean() {
                             "userId=${kazanExpressAccountEntity.userId}; keAccountId=${kazanExpressAccountEntity.keAccountEntity.id}"
                 }
             }
-
-            if (keAccountRepository.findAccountUpdateInProgressCount() >=
-                (repricerProperties.maxUpdateInProgress ?: 3)
-            ) break
         }
     }
 }
