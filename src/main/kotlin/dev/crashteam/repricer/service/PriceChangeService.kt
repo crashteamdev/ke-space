@@ -2,7 +2,6 @@ package dev.crashteam.repricer.service
 
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.db.model.enums.StrategyType
-import dev.crashteam.repricer.price.CloseToMinimalPriceChangeCalculatorStrategy
 import dev.crashteam.repricer.price.PriceChangeCalculatorStrategy
 import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
@@ -16,7 +15,6 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.*
 
@@ -74,7 +72,7 @@ class PriceChangeService(
                     "Trying to change account shop item price. " +
                             "keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
                             "accountProductDescription=${accountProductDescription}"
-                            ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}"
+                    ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}"
                 }
                 val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(
                     userId = userId,
@@ -84,7 +82,9 @@ class PriceChangeService(
                         productId = poolFilledEntity.productId,
                         skuForProduct = poolFilledEntity.productSku,
                         skuList = newSkuList,
-                        skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics) {
+                        skuTitlesForCustomCharacteristics = if (accountProductDescription.hasCustomCharacteristics
+                            && accountProductDescription.customCharacteristicList != null
+                        ) {
                             accountProductDescription.customCharacteristicList.map { customCharacteristic ->
                                 SkuTitleCharacteristic(
                                     customCharacteristic.characteristicTitle,
