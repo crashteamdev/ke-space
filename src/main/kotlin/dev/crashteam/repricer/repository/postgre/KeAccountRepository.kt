@@ -216,6 +216,7 @@ class KeAccountRepository(
         val records = dsl.selectFrom(k.join(a).on(a.ID.eq(k.ACCOUNT_ID)))
             .where(
                 k.MONITOR_STATE.eq(MonitorState.active).and(a.SUBSCRIPTION_VALID_UNTIL.greaterThan(LocalDateTime.now()))
+                    .and(k.INITIALIZE_STATE.eq(InitializeState.finished))
             )
             .fetch()
 
