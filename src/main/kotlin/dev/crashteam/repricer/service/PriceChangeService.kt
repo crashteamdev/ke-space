@@ -73,6 +73,7 @@ class PriceChangeService(
                 log.debug {
                     "Trying to change account shop item price. " +
                             "keAccountShopItemId=${poolFilledEntity.keAccountShopItemId};" +
+                            "accountProductDescription=${accountProductDescription}"
                             ";productId=${poolFilledEntity.productId};skuId=${poolFilledEntity.skuId}"
                 }
                 val changeAccountShopItemPrice = kazanExpressSecureService.changeAccountShopItemPrice(

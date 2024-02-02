@@ -9,7 +9,7 @@ data class AccountProductDescription(
     val hasActiveCalendarEvents: Boolean,
     val hasCustomCharacteristics: Boolean,
     val definedCharacteristicList: List<DefinedCharacteristic>? = null,
-    val customCharacteristicList: List<CustomCharacteristic>? = null,
+    val customCharacteristicList: List<CustomCharacteristic> = emptyList(),
     val skuList: List<AccountProductSku>
 )
 
