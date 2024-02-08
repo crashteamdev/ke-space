@@ -49,7 +49,7 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
             }
             // If price too much higher than our we need to rise our price
             val expectedPriceMinor =
-                competitorPrice - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO).movePointRight(2)
+                competitorPriceMinor - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO).movePointRight(2)
             if (expectedPriceMinor > sellPriceMinor) {
                 return CalculationResult(
                     newPriceMinor = expectedPriceMinor,
