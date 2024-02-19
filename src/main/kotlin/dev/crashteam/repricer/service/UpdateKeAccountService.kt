@@ -164,12 +164,6 @@ class UpdateKeAccountService(
             keAccountShopItemRepository.saveBatch(shopItemEntities)
             page += 1
         }
-        val oldItemDeletedCount = keAccountShopItemRepository.deleteWhereOldLastUpdate(
-            keAccountId,
-            accountShopEntity.id!!,
-            shopUpdateTime
-        )
-        log.debug { "Deleted $oldItemDeletedCount old products" }
     }
 
     private fun getProductInfo(
