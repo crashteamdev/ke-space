@@ -41,14 +41,15 @@ class KeAccountShopItemStrategyRepository(
         val itemStrategy = KE_ACCOUNT_SHOP_ITEM_STRATEGY
         val o = STRATEGY_OPTION
 
-        dsl.update(itemStrategy)
+        val strategyId = dsl.update(itemStrategy)
             .set(itemStrategy.STRATEGY_TYPE, strategyType)
             .where(itemStrategy.KE_ACCOUNT_SHOP_ITEM_ID.eq(id))
             .returningResult(itemStrategy.ID)
-            .execute()
+            .fetchOne()!!.getValue(itemStrategy.ID)
 
         val strategyOptionId = dsl.select()
             .from(itemStrategy.innerJoin(o).on(itemStrategy.ID.eq(o.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID)))
+            .where(o.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID.eq(strategyId))
             .fetchOne()!!.getValue(o.ID)
         updateOption(strategyOptionId, patchStrategy.strategy)
         return strategyOptionId
