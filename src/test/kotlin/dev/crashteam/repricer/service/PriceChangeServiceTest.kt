@@ -2,6 +2,7 @@ package dev.crashteam.repricer.service
 
 import dev.crashteam.openapi.kerepricer.model.AddStrategyRequest
 import dev.crashteam.openapi.kerepricer.model.EqualPriceStrategy
+import dev.crashteam.openapi.kerepricer.model.PatchStrategy
 import dev.crashteam.repricer.ContainerConfiguration
 import dev.crashteam.repricer.client.ke.model.lk.AccountProductDescription
 import dev.crashteam.repricer.db.model.enums.MonitorState
@@ -144,6 +145,10 @@ class PriceChangeServiceTest : ContainerConfiguration() {
 
         val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
         strategyRepository.save(strategyRequest)
+
+        val patchStrategy = PatchStrategy()
+        patchStrategy.strategy = equalPriceStrategy
+        strategyRepository.update(keAccountShopItemId, patchStrategy)
 
         whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
             AccountProductDescription(

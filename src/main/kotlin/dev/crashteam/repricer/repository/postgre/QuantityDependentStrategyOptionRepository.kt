@@ -34,7 +34,7 @@ class QuantityDependentStrategyOptionRepository(private val dsl: DSLContext) :
         val strategy = t as QuantityDependentStrategy
         val strategyOption = StrategyOption.STRATEGY_OPTION
         return dsl.update(strategyOption)
-            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
+            .set(strategyOption.MAXIMUM_THRESHOLD, strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.STEP, strategy.step)
             .set(strategyOption.DISCOUNT, strategy.discount?.intValueExact())
