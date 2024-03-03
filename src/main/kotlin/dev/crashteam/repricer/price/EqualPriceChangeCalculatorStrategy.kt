@@ -34,19 +34,24 @@ class EqualPriceChangeCalculatorStrategy(
         val competitorPrice: BigDecimal = keShopItemService.getRecentPrice(minimalPriceCompetitor.shopItemEntity)!!
         val competitorPriceMinor = competitorPrice.movePointRight(2)
 
-        if (options?.minimumThreshold != null && competitorPriceMinor < BigDecimal.valueOf(options.minimumThreshold)) {
+        if (options?.minimumThreshold != null && competitorPriceMinor < BigDecimal.valueOf(options.minimumThreshold)
+            && sellPriceMinor != BigDecimal.valueOf(options.minimumThreshold)
+        ) {
             return CalculationResult(
                 newPriceMinor = BigDecimal.valueOf(options.minimumThreshold),
                 competitorId = minimalPriceCompetitor.competitorEntity.id
             )
-        } else if (options?.maximumThreshold != null && competitorPriceMinor > BigDecimal.valueOf(options.maximumThreshold)) {
+        } else if (options?.maximumThreshold != null && competitorPriceMinor > BigDecimal.valueOf(options.maximumThreshold)
+            && sellPriceMinor != BigDecimal.valueOf(options.maximumThreshold)
+        ) {
             return CalculationResult(
-                newPriceMinor =  BigDecimal.valueOf(options.maximumThreshold),
+                newPriceMinor = BigDecimal.valueOf(options.maximumThreshold),
                 competitorId = minimalPriceCompetitor.competitorEntity.id
             )
         }
 
-        if (competitorPriceMinor > sellPriceMinor || competitorPriceMinor < sellPriceMinor) {
+        if ((options?.maximumThreshold == null && competitorPriceMinor > sellPriceMinor)
+            || (options?.minimumThreshold == null && competitorPriceMinor < sellPriceMinor)) {
             return CalculationResult(
                 newPriceMinor = competitorPriceMinor,
                 competitorId = minimalPriceCompetitor.competitorEntity.id
