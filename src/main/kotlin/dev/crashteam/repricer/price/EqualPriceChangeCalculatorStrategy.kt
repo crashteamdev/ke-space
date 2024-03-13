@@ -67,7 +67,7 @@ class EqualPriceChangeCalculatorStrategy(
             )
         }
         log.info { "Competitor price $competitorPrice, ours min price - ${options?.minimumThreshold}, " +
-                "max price ${options?.maximumThreshold}. Shop item id - $keAccountShopItemId" }
+                "max price ${options?.maximumThreshold}. Current sell price - $sellPriceMinor. Shop item id - $keAccountShopItemId" }
         return null;
     }
 }
