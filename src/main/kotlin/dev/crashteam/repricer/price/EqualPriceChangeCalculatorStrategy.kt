@@ -55,7 +55,7 @@ class EqualPriceChangeCalculatorStrategy(
             newPriceMinor = BigDecimal.valueOf(options.maximumThreshold)
         }
         if (newPriceMinor != null && newPriceMinor.compareTo(sellPriceMinor) == 0) {
-            log.info { "New price $newPriceMinor equal to current price for shop item $keAccountShopItemId" }
+            log.info { "New price $newPriceMinor equal to current price $sellPriceMinor for shop item $keAccountShopItemId" }
             return null
         } else if (newPriceMinor != null) {
             return CalculationResult(
