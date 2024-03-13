@@ -183,7 +183,11 @@ class PriceChangeService(
     }
 
     private fun calculationResult(poolFilledEntity: KazanExpressAccountShopItemPoolFilledEntity): CalculationResult? {
-        val strategy = strategyService.findStrategy(poolFilledEntity.keAccountShopItemId) ?: return null
+        val strategy = strategyService.findStrategy(poolFilledEntity.keAccountShopItemId)
+        if (strategy == null) {
+            log.warn { "Not found strategy for product. productId=${poolFilledEntity.productId}" }
+            return null
+        }
         val calculatorStrategy = calculators[StrategyType.valueOf(strategy.strategyType)]
         return calculatorStrategy!!.calculatePrice(
             poolFilledEntity.keAccountShopItemId,
