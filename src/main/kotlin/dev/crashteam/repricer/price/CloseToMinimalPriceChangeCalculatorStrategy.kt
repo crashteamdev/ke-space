@@ -8,6 +8,7 @@ import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import org.springframework.util.CollectionUtils
 import java.math.BigDecimal
 import java.util.*
 
@@ -26,6 +27,10 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
     ): CalculationResult? {
         val shopItemCompetitors: List<KazanExpressAccountShopItemCompetitorEntity> =
             keAccountShopItemCompetitorRepository.findShopItemCompetitors(keAccountShopItemId)
+        if (CollectionUtils.isEmpty(shopItemCompetitors)) {
+            log.info { "Not found competitors for shop item with id $keAccountShopItemId pool items." }
+            return null
+        }
         val minimalPriceCompetitor: ShopItemCompetitor = shopItemCompetitors.mapNotNull {
             val shopItemEntity = keShopItemService.findShopItem(
                 it.productId,

@@ -6,8 +6,13 @@ import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepo
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
 import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
+import liquibase.util.CollectionUtil
+import mu.KotlinLogging
+import org.springframework.util.CollectionUtils
 import java.math.BigDecimal
 import java.util.*
+
+private val log = KotlinLogging.logger {}
 
 class EqualPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
@@ -20,6 +25,10 @@ class EqualPriceChangeCalculatorStrategy(
     ): CalculationResult? {
         val shopItemCompetitors: List<KazanExpressAccountShopItemCompetitorEntity> =
             keAccountShopItemCompetitorRepository.findShopItemCompetitors(keAccountShopItemId)
+        if (CollectionUtils.isEmpty(shopItemCompetitors)) {
+            log.info { "Not found competitors for shop item with id $keAccountShopItemId pool items." }
+            return null
+        }
         val minimalPriceCompetitor: ShopItemCompetitor = shopItemCompetitors.mapNotNull {
             val shopItemEntity = keShopItemService.findShopItem(
                 it.productId,
@@ -57,6 +66,8 @@ class EqualPriceChangeCalculatorStrategy(
                 competitorId = minimalPriceCompetitor.competitorEntity.id
             )
         }
+        log.info { "Competitor price $competitorPrice, ours min price - ${options?.minimumThreshold}, " +
+                "max price ${options?.maximumThreshold}. Shop item id - $keAccountShopItemId" }
         return null;
     }
 }
