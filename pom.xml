@@ -325,7 +325,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.15.0</version>
+                <version>4.27.0</version>
                 <configuration>
                     <changeLogDirectory>src/main/resources</changeLogDirectory>
                     <changeLogFile>db/changelog/db.pg.changelog-main.yml</changeLogFile>
