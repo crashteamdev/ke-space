@@ -3,6 +3,7 @@ package dev.crashteam.repricer.client.ke
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.crashteam.repricer.client.ke.model.ProxyRequestBody
 import dev.crashteam.repricer.client.ke.model.ProxyRequestContext
+import dev.crashteam.repricer.client.ke.model.ProxySource
 import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.web.*
 import dev.crashteam.repricer.config.RedisConfig
@@ -47,6 +48,7 @@ class KazanExpressWebClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://dshop.kznexpress.ru/",
             httpMethod = "POST",
+            proxySource = ProxySource.MOBILE_PROXY,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -78,6 +80,7 @@ class KazanExpressWebClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/main/root-categories",
             httpMethod = "GET",
+            proxySource = ProxySource.MOBILE_PROXY,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -104,6 +107,7 @@ class KazanExpressWebClient(
     fun getProductInfo(productId: String): ProductResponse? {
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/v2/product/$productId",
+            proxySource = ProxySource.MOBILE_PROXY,
             httpMethod = "GET",
             context = listOf(
                 ProxyRequestContext(
