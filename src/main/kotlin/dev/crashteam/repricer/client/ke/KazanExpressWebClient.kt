@@ -48,7 +48,7 @@ class KazanExpressWebClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://dshop.kznexpress.ru/",
             httpMethod = "POST",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -80,7 +80,7 @@ class KazanExpressWebClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/main/root-categories",
             httpMethod = "GET",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -107,7 +107,7 @@ class KazanExpressWebClient(
     fun getProductInfo(productId: String): ProductResponse? {
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/v2/product/$productId",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             httpMethod = "GET",
             context = listOf(
                 ProxyRequestContext(

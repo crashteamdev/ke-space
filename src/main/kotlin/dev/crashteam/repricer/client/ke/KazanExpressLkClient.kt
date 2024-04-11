@@ -32,7 +32,7 @@ class KazanExpressLkClient(
 
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             httpMethod = "GET",
             context = listOf(
                 ProxyRequestContext(
@@ -69,7 +69,7 @@ class KazanExpressLkClient(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/getProducts?" +
                     "searchQuery=&filter=active&sortBy=id&order=descending&size=99&page=$page",
             httpMethod = "GET",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -103,7 +103,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/sendSkuData",
             httpMethod = "POST",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -135,7 +135,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product?productId=$productId",
             httpMethod = "GET",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -169,7 +169,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/$productId/description-response",
             httpMethod = "GET",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -205,7 +205,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/oauth/token",
             httpMethod = "POST",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -243,7 +243,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/oauth/token",
             httpMethod = "POST",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
@@ -277,7 +277,7 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/auth/seller/check_token",
             httpMethod = "POST",
-            proxySource = ProxySource.MOBILE_PROXY,
+            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",

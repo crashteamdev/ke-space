@@ -14,5 +14,6 @@ data class ProxyRequestContext(
 
 enum class ProxySource(val value: String) {
     PROXY_LINE("PROXY_LINE"),
-    MOBILE_PROXY("MOBILE_PROXY")
+    MOBILE_PROXY("MOBILE_PROXY"),
+    PROXYS_IO("PROXYS_IO")
 }
