@@ -18,11 +18,17 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption.MAXIMUM_THRESHOLD,
             strategyOption.MINIMUM_THRESHOLD,
             strategyOption.DISCOUNT,
+            strategyOption.CHANGE_NOT_AVAILABLE_ITEM_PRICE,
+            strategyOption.COMPETITOR_AVAILABLE_AMOUNT,
+            strategyOption.COMPETITOR_SALES_AMOUNT,
             strategyOption.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.discount?.intValueExact(),
+            strategy.changeNotAvailableItemPrice,
+            strategy.competitorAvailableAmount,
+            strategy.competitorSalesAmount,
             id
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)

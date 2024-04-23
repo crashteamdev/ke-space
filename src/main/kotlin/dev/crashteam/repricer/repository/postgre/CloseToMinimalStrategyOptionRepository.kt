@@ -18,12 +18,18 @@ class CloseToMinimalStrategyOptionRepository(private val dsl: DSLContext) :
             strategyOption.MINIMUM_THRESHOLD,
             strategyOption.STEP,
             strategyOption.DISCOUNT,
+            strategyOption.CHANGE_NOT_AVAILABLE_ITEM_PRICE,
+            strategyOption.COMPETITOR_AVAILABLE_AMOUNT,
+            strategyOption.COMPETITOR_SALES_AMOUNT,
             strategyOption.KE_ACCOUNT_SHOP_ITEM_STRATEGY_ID
         ).values(
             strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong(),
             strategy.step,
             strategy.discount?.intValueExact(),
+            strategy.changeNotAvailableItemPrice,
+            strategy.competitorAvailableAmount,
+            strategy.competitorSalesAmount,
             id
         ).returningResult(strategyOption.ID)
             .fetchOne()!!.getValue(strategyOption.ID)

@@ -195,7 +195,10 @@ class PriceChangeService(
             CalculatorOptions(
                 step = strategy.step,
                 minimumThreshold = strategy.minimumThreshold,
-                maximumThreshold = strategy.maximumThreshold
+                maximumThreshold = strategy.maximumThreshold,
+                changeNotAvailableItemPrice = strategy.changeNotAvailableItemPrice,
+                competitorAvailableAmount = strategy.competitorAvailableAmount,
+                competitorSalesAmount = strategy.competitorSalesAmount
             )
         )
     }
