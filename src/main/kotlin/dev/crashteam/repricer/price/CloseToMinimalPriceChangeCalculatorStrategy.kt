@@ -1,24 +1,16 @@
 package dev.crashteam.repricer.price
 
-import dev.crashteam.mp.base.Date
-import dev.crashteam.mp.base.DateRange
-import dev.crashteam.mp.external.analytics.category.ExternalCategoryAnalyticsServiceGrpc
-import dev.crashteam.mp.external.analytics.category.GetProductDailyAnalyticsRequest
-import dev.crashteam.mp.external.analytics.category.GetProductDailyAnalyticsResponse
 import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
 import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
-import dev.crashteam.repricer.service.error.GrpcIntegrationException
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
 import mu.KotlinLogging
-import net.devh.boot.grpc.client.inject.GrpcClient
 import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.*
 
 private val log = KotlinLogging.logger {}
