@@ -134,8 +134,7 @@ class KazanExpressWebClient(
 
     companion object {
         private const val AUTH_TOKEN = "a2F6YW5leHByZXNzLWN1c3RvbWVyOmN1c3RvbWVyU2VjcmV0S2V5"
-        private const val USER_AGENT =
-            "Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Mobile Safari/537.36"
+        private const val USER_AGENT = "PostmanRuntime/7.37.3"
     }
 
 }
