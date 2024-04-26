@@ -19,7 +19,8 @@ class RecordToKeAccountShopItemStrategyEntityMapper : RecordMapper<KazanExpressA
             record.getValue(STRATEGY_OPTION.DISCOUNT),
             record.getValue(KE_ACCOUNT_SHOP_ITEM_STRATEGY.KE_ACCOUNT_SHOP_ITEM_ID),
             record.getValue(STRATEGY_OPTION.CHANGE_NOT_AVAILABLE_ITEM_PRICE),
-            record.getValue(STRATEGY_OPTION.COMPETITOR_AVAILABLE_AMOUNT)
+            record.getValue(STRATEGY_OPTION.COMPETITOR_AVAILABLE_AMOUNT),
+            record.getValue(STRATEGY_OPTION.COMPETITOR_SALES_AMOUNT)
         )
     }
 }

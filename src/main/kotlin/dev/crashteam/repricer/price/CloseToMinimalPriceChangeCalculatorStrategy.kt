@@ -18,10 +18,9 @@ private val log = KotlinLogging.logger {}
 @Component
 class CloseToMinimalPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
-    private val keShopItemService: KeShopItemService
+    private val keShopItemService: KeShopItemService,
+    private val analyticsService: AnalyticsService
 ) : PriceChangeCalculatorStrategy {
-
-    private lateinit var analyticsService: AnalyticsService
 
     override fun calculatePrice(
         keAccountShopItemId: UUID,

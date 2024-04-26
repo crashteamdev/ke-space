@@ -5,6 +5,7 @@ import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressShopItemEntity
+import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
@@ -26,6 +27,9 @@ class CloseToMinimalPriceChangeCalculatorStrategyTest : ContainerConfiguration()
 
     @MockBean
     lateinit var keShopItemService: KeShopItemService
+
+    @MockBean
+    lateinit var analyticsService: AnalyticsService
 
     @Test
     fun `calculate price change with multiple competitors`() {
@@ -101,7 +105,7 @@ class CloseToMinimalPriceChangeCalculatorStrategyTest : ContainerConfiguration()
         whenever(keShopItemService.getRecentPrice(secondShopItem)).thenReturn(BigDecimal(1970))
         whenever(keShopItemService.getRecentPrice(thirdShopItem)).thenReturn(BigDecimal(4210))
         val priceChangeCalculatorStrategy =
-            CloseToMinimalPriceChangeCalculatorStrategy(keAccountShopItemCompetitorRepository, keShopItemService)
+            CloseToMinimalPriceChangeCalculatorStrategy(keAccountShopItemCompetitorRepository, keShopItemService, analyticsService)
         val calculatePrice = priceChangeCalculatorStrategy.calculatePrice(
             accountShopItemId,
             BigDecimal(297000L),

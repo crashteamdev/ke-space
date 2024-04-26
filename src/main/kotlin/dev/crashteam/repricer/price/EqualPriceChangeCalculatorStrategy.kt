@@ -8,6 +8,7 @@ import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
 import java.math.BigDecimal
@@ -18,10 +19,9 @@ private val log = KotlinLogging.logger {}
 @Component
 class EqualPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
-    private val keShopItemService: KeShopItemService
+    private val keShopItemService: KeShopItemService,
+    private val analyticsService: AnalyticsService
 ) : PriceChangeCalculatorStrategy {
-
-    private lateinit var analyticsService: AnalyticsService
 
     override fun calculatePrice(
         keAccountShopItemId: UUID,

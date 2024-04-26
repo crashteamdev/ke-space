@@ -10,6 +10,7 @@ import dev.crashteam.repricer.repository.postgre.CloseToMinimalStrategyOptionRep
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.QuantityDependentStrategyOptionRepository
 import dev.crashteam.repricer.repository.postgre.StrategyOptionRepository
+import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
 import org.jooq.DSLContext
 import org.springframework.context.annotation.Bean
@@ -31,19 +32,23 @@ class StrategyConfig {
     fun calculators(
         competitorRepository: KeAccountShopItemCompetitorRepository,
         keShopItemService: KeShopItemService,
+        analyticsService: AnalyticsService
     ): Map<StrategyType, PriceChangeCalculatorStrategy> {
         return mapOf(
             StrategyType.close_to_minimal to CloseToMinimalPriceChangeCalculatorStrategy(
                 competitorRepository,
-                keShopItemService
+                keShopItemService,
+                analyticsService
             ),
             StrategyType.quantity_dependent to QuantityDependentPriceChangeCalculatorStrategy(
                 competitorRepository,
-                keShopItemService
+                keShopItemService,
+                analyticsService
             ),
             StrategyType.equal_price to EqualPriceChangeCalculatorStrategy(
                 competitorRepository,
-                keShopItemService
+                keShopItemService,
+                analyticsService
             )
         )
     }

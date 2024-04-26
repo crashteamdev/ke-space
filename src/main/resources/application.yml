@@ -109,4 +109,4 @@ redis:
 
 grpc:
   client:
-    keAnalyticsService: static://localhost:9090
+    keAnalyticsService.address: static://localhost:9090
