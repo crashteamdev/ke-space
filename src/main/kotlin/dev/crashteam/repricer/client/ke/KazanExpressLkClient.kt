@@ -318,7 +318,6 @@ class KazanExpressLkClient(
     companion object {
         const val basicAuthToken = "a2F6YW5leHByZXNzOnNlY3JldEtleQ=="
         const val USER_ID_HEADER = "X-USER-ID"
-        const val USER_AGENT =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
+        const val USER_AGENT = "PostmanRuntime/7.37.3"
     }
 }
