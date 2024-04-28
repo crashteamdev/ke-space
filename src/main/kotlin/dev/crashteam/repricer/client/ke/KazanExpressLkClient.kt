@@ -318,6 +318,6 @@ class KazanExpressLkClient(
     companion object {
         const val basicAuthToken = "a2F6YW5leHByZXNzOnNlY3JldEtleQ=="
         const val USER_ID_HEADER = "X-USER-ID"
-        const val USER_AGENT = "PostmanRuntime/7.37.3"
+        const val USER_AGENT = "Opera/9.64 (X11; Linux x86_64; U; cs) Presto/2.1.1"
     }
 }
