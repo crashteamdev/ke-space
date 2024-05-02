@@ -16,6 +16,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.net.URLEncoder
 import java.util.*
 
@@ -38,7 +40,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -74,7 +76,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -108,7 +110,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
                         USER_ID_HEADER to userId
@@ -140,7 +142,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -174,7 +176,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -210,7 +212,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -248,7 +250,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -282,7 +284,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to USER_AGENT,
+                        "User-Agent" to getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -313,6 +315,33 @@ class KazanExpressLkClient(
             result.append(URLEncoder.encode(value, "UTF-8"))
         }
         return result.toString()
+    }
+
+    fun getRandomUserAgent(): String {
+        val leftLimit = 48 // numeral '0'
+        val rightLimit = 122 // letter 'z'
+        val targetStringLength = 10
+        val random = Random()
+
+        val generatedString = random.ints(leftLimit, rightLimit + 1)
+            .filter { i: Int -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97) }
+            .limit(targetStringLength.toLong())
+            .collect(
+                { StringBuilder() },
+                { obj: java.lang.StringBuilder, codePoint: Int ->
+                    obj.appendCodePoint(
+                        codePoint
+                    )
+                },
+                { obj: java.lang.StringBuilder, s: java.lang.StringBuilder? ->
+                    obj.append(
+                        s
+                    )
+                })
+            .toString()
+
+        val version = random.nextDouble(3.0)
+        return generatedString + " " + BigDecimal.valueOf(version).setScale(3, RoundingMode.HALF_UP)
     }
 
     companion object {
