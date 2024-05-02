@@ -26,7 +26,7 @@
         <testcontainers.version>1.17.3</testcontainers.version>
         <selenium.version>4.4.0</selenium.version>
         <imageio.version>3.9.4</imageio.version>
-        <openapi-ke-repricer.version>1.73-b3abb7c-server</openapi-ke-repricer.version>
+        <openapi-ke-repricer.version>1.74-0ff6e47-server</openapi-ke-repricer.version>
         <analitycs-proto-version>0.0.16</analitycs-proto-version>
     </properties>
     <dependencies>
