@@ -59,6 +59,9 @@ class PriceChangeServiceTest : ContainerConfiguration() {
     @MockBean
     lateinit var kazanExpressSecureService: KazanExpressSecureService
 
+    @MockBean
+    lateinit var analyticsService: AnalyticsService
+
     val userId = UUID.randomUUID().toString()
 
     val keAccountId = UUID.randomUUID()
@@ -113,6 +116,63 @@ class PriceChangeServiceTest : ContainerConfiguration() {
                 maximumThreshold = 6000,
                 step = 10)
         )
+    }
+
+    @Test
+    fun `test not change price when competitor without sales`() {
+
+        whenever(analyticsService.getCompetitorSales(635243L)).then {0L}
+
+        val kazanExpressAccountShopItemCompetitorEntity = KazanExpressAccountShopItemCompetitorEntity(
+            id = UUID.randomUUID(),
+            keAccountShopItemId = keAccountShopItemId,
+            productId = 635243L,
+            skuId = 4231453L
+        )
+        val competitorKeShopItemEntity = KazanExpressShopItemEntity(
+            productId = 635243L,
+            skuId = 4231453L,
+            categoryId = 556231L,
+            name = "test",
+            photoKey = "test",
+            avgHashFingerprint = "test",
+            pHashFingerprint = "test",
+            price = 7000,
+            availableAmount = 10,
+            lastUpdate = LocalDateTime.now()
+        )
+        keShopItemPoolRepository.save(KazanExpressAccountShopItemPoolEntity(keAccountShopItemId))
+
+        keShopItemRepository.save(competitorKeShopItemEntity)
+        keAccountShopItemCompetitorRepository.save(kazanExpressAccountShopItemCompetitorEntity)
+
+        val equalPriceStrategy = EqualPriceStrategy("equal_price", 10.0, 60.0)
+        equalPriceStrategy.competitorSalesAmount = 0
+        val strategyRequest = AddStrategyRequest(keAccountShopItemId, equalPriceStrategy)
+        strategyRepository.save(strategyRequest)
+
+        val patchStrategy = PatchStrategy()
+        patchStrategy.strategy = equalPriceStrategy
+        strategyRepository.update(keAccountShopItemId, patchStrategy)
+
+        whenever(kazanExpressSecureService.getProductDescription(any(), any(), any(), any() )).then {
+            AccountProductDescription(
+                id = 12345L,
+                shopSkuTitle = "skuTitle",
+                title = "justTitle",
+                productSkuTitle = "productSkuTitle",
+                commission = 1,
+                hasActiveCalendarEvents = true,
+                hasCustomCharacteristics = false,
+                definedCharacteristicList = emptyList(),
+                customCharacteristicList = emptyList(),
+                skuList = emptyList()
+            )
+        }
+        whenever(kazanExpressSecureService.changeAccountShopItemPrice(any(), any(), any(), any())).then { true }
+        priceChangeService.recalculateUserShopItemPrice(userId, keAccountId)
+        assertEquals( keAccountShopItemRepository.findShopItem(keAccountId, keAccountShopItemId)?.price, 10000)
+
     }
 
     @Test

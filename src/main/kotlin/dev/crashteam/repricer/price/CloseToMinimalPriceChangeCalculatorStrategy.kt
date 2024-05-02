@@ -4,6 +4,7 @@ import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
+import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
 import mu.KotlinLogging
@@ -18,6 +19,7 @@ private val log = KotlinLogging.logger {}
 class CloseToMinimalPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
     private val keShopItemService: KeShopItemService,
+    private val analyticsService: AnalyticsService
 ) : PriceChangeCalculatorStrategy {
 
     override fun calculatePrice(
@@ -38,10 +40,30 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
             ) ?: return@mapNotNull null
             ShopItemCompetitor(shopItemEntity, it)
         }.filter {
-            it.shopItemEntity.availableAmount > 0
+            if (options?.competitorAvailableAmount != null) {
+                it.shopItemEntity.availableAmount > options.competitorAvailableAmount
+            } else {
+                true
+            }
         }.minByOrNull {
             keShopItemService.getRecentPrice(it.shopItemEntity)!!
         } ?: return null
+
+        if (minimalPriceCompetitor.shopItemEntity.availableAmount.toInt() <= 0 && options?.changeNotAvailableItemPrice == false) {
+            log.info { "Competitor available amount is 0, not changing price" }
+            return null
+        }
+
+        if (options?.competitorSalesAmount != null) {
+            val competitorSales = analyticsService.getCompetitorSales(minimalPriceCompetitor.competitorEntity.productId)
+                ?: return null
+            if (competitorSales <= options.competitorSalesAmount) {
+                log.info { "Last sale value of competitor is $competitorSales and our barrier is ${options.competitorSalesAmount}." }
+                return null
+            }
+        }
+
+
         log.debug { "Minimal price competitor: $minimalPriceCompetitor" }
         val competitorPrice: BigDecimal = keShopItemService.getRecentPrice(minimalPriceCompetitor.shopItemEntity)!!
         val competitorPriceMinor = competitorPrice.movePointRight(2)
@@ -55,7 +77,9 @@ class CloseToMinimalPriceChangeCalculatorStrategy(
             // If price too much higher than our we need to rise our price
             val expectedPriceMinor =
                 competitorPriceMinor - (options?.step?.toBigDecimal() ?: BigDecimal.ZERO).movePointRight(2)
-            if (expectedPriceMinor > sellPriceMinor && options?.maximumThreshold != null && expectedPriceMinor <= BigDecimal.valueOf(options.maximumThreshold)) {
+            if (expectedPriceMinor > sellPriceMinor && options?.maximumThreshold != null
+                && expectedPriceMinor <= BigDecimal.valueOf(options.maximumThreshold)
+            ) {
                 return CalculationResult(
                     newPriceMinor = expectedPriceMinor,
                     competitorId = minimalPriceCompetitor.competitorEntity.id

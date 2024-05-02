@@ -106,3 +106,7 @@ redis:
       streamName: payment-stream
       consumerGroup: ke-space-payment-group
       consumerName: ke-space-payment-consumer
+
+grpc:
+  client:
+    keAnalyticsService.address: static://localhost:9090

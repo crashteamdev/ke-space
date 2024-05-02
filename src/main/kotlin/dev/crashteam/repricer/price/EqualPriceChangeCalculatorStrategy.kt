@@ -4,20 +4,25 @@ import dev.crashteam.repricer.price.model.CalculationResult
 import dev.crashteam.repricer.price.model.CalculatorOptions
 import dev.crashteam.repricer.repository.postgre.KeAccountShopItemCompetitorRepository
 import dev.crashteam.repricer.repository.postgre.entity.KazanExpressAccountShopItemCompetitorEntity
+import dev.crashteam.repricer.service.AnalyticsService
 import dev.crashteam.repricer.service.KeShopItemService
 import dev.crashteam.repricer.service.model.ShopItemCompetitor
-import liquibase.util.CollectionUtil
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
 import java.math.BigDecimal
 import java.util.*
 
 private val log = KotlinLogging.logger {}
 
+@Component
 class EqualPriceChangeCalculatorStrategy(
     private val keAccountShopItemCompetitorRepository: KeAccountShopItemCompetitorRepository,
-    private val keShopItemService: KeShopItemService
+    private val keShopItemService: KeShopItemService,
+    private val analyticsService: AnalyticsService
 ) : PriceChangeCalculatorStrategy {
+
     override fun calculatePrice(
         keAccountShopItemId: UUID,
         sellPriceMinor: BigDecimal,
@@ -36,10 +41,29 @@ class EqualPriceChangeCalculatorStrategy(
             ) ?: return@mapNotNull null
             ShopItemCompetitor(shopItemEntity, it)
         }.filter {
-            it.shopItemEntity.availableAmount > 0
+            if (options?.competitorAvailableAmount != null) {
+                it.shopItemEntity.availableAmount > options.competitorAvailableAmount
+            } else {
+                true
+            }
         }.minByOrNull {
             keShopItemService.getRecentPrice(it.shopItemEntity)!!
         } ?: return null
+
+        if (minimalPriceCompetitor.shopItemEntity.availableAmount.toInt() <= 0 && options?.changeNotAvailableItemPrice == false) {
+            log.info { "Competitor available amount is 0, not changing price" }
+            return null
+        }
+
+        if (options?.competitorSalesAmount != null) {
+            val competitorSales = analyticsService.getCompetitorSales(minimalPriceCompetitor.competitorEntity.productId)
+                ?: return null
+            if (competitorSales <= options.competitorSalesAmount) {
+                log.info { "Last sale value of competitor is $competitorSales and our barrier is ${options.competitorSalesAmount}." }
+                return null
+            }
+        }
+
         val competitorPrice: BigDecimal = keShopItemService.getRecentPrice(minimalPriceCompetitor.shopItemEntity)!!
         val competitorPriceMinor = competitorPrice.movePointRight(2)
 
@@ -76,6 +100,6 @@ class EqualPriceChangeCalculatorStrategy(
             "Competitor price $competitorPriceMinor, ours min price - ${options?.minimumThreshold}, " +
                     "max price ${options?.maximumThreshold}. Current sell price - $sellPriceMinor. Shop item id - $keAccountShopItemId"
         }
-        return null;
+        return null
     }
 }

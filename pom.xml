@@ -26,7 +26,8 @@
         <testcontainers.version>1.17.3</testcontainers.version>
         <selenium.version>4.4.0</selenium.version>
         <imageio.version>3.9.4</imageio.version>
-        <openapi-ke-repricer.version>1.71-e34d79d-server</openapi-ke-repricer.version>
+        <openapi-ke-repricer.version>1.73-b3abb7c-server</openapi-ke-repricer.version>
+        <analitycs-proto-version>0.0.16</analitycs-proto-version>
     </properties>
     <dependencies>
         <!-- Spring -->
@@ -234,6 +235,18 @@
             <artifactId>mockito-kotlin</artifactId>
             <version>4.0.0</version>
             <scope>test</scope>
+        </dependency>
+
+        <!--GRPC libs-->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>2.14.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.crashteam</groupId>
+            <artifactId>analytics-proto</artifactId>
+            <version>${analitycs-proto-version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
