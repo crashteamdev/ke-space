@@ -41,6 +41,9 @@ class EqualPriceStrategyOptionRepository(private val dsl: DSLContext) :
             .set(strategyOption.MAXIMUM_THRESHOLD, strategy.maximumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.MINIMUM_THRESHOLD, strategy.minimumThreshold.toBigDecimal().movePointRight(2).toLong())
             .set(strategyOption.DISCOUNT, strategy.discount?.intValueExact())
+            .set(strategyOption.CHANGE_NOT_AVAILABLE_ITEM_PRICE, strategy.changeNotAvailableItemPrice)
+            .set(strategyOption.COMPETITOR_AVAILABLE_AMOUNT, strategy.competitorAvailableAmount)
+            .set(strategyOption.COMPETITOR_SALES_AMOUNT, strategy.competitorSalesAmount)
             .where(strategyOption.ID.eq(id))
             .execute()
     }
