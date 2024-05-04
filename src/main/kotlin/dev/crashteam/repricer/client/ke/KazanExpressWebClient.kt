@@ -8,6 +8,7 @@ import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.web.*
 import dev.crashteam.repricer.config.RedisConfig
 import dev.crashteam.repricer.config.properties.ServiceProperties
+import dev.crashteam.repricer.service.util.RandomUserAgent
 import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
@@ -55,7 +56,7 @@ class KazanExpressWebClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
                         "x-iid" to "random_uuid()",
@@ -87,7 +88,7 @@ class KazanExpressWebClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN"
                     )
                 )
@@ -115,7 +116,7 @@ class KazanExpressWebClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "x-iid" to "random_uuid()"
                     )
@@ -132,33 +133,6 @@ class KazanExpressWebClient(
         ).body
 
         return StyxUtils.handleProxyResponse(styxResponse!!)!!
-    }
-    
-    fun getRandomUserAgent(): String {
-        val leftLimit = 48 // numeral '0'
-        val rightLimit = 122 // letter 'z'
-        val targetStringLength = 10
-        val random = Random()
-
-        val generatedString = random.ints(leftLimit, rightLimit + 1)
-            .filter { i: Int -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97) }
-            .limit(targetStringLength.toLong())
-            .collect(
-                { StringBuilder() },
-                { obj: java.lang.StringBuilder, codePoint: Int ->
-                    obj.appendCodePoint(
-                        codePoint
-                    )
-                },
-                { obj: java.lang.StringBuilder, s: java.lang.StringBuilder? ->
-                    obj.append(
-                        s
-                    )
-                })
-            .toString()
-
-        val version = random.nextDouble(3.0)
-        return generatedString + " " + BigDecimal.valueOf(version).setScale(3, RoundingMode.HALF_UP)
     }
 
     companion object {

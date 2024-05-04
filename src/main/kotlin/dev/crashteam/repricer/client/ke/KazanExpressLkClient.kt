@@ -7,6 +7,7 @@ import dev.crashteam.repricer.client.ke.model.ProxySource
 import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.config.properties.ServiceProperties
+import dev.crashteam.repricer.service.util.RandomUserAgent
 import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.core.ParameterizedTypeReference
@@ -40,7 +41,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -76,7 +77,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -110,7 +111,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
                         USER_ID_HEADER to userId
@@ -142,7 +143,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -176,7 +177,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
@@ -212,7 +213,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -250,7 +251,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -284,7 +285,7 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to getRandomUserAgent(),
+                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
@@ -315,33 +316,6 @@ class KazanExpressLkClient(
             result.append(URLEncoder.encode(value, "UTF-8"))
         }
         return result.toString()
-    }
-
-    fun getRandomUserAgent(): String {
-        val leftLimit = 48 // numeral '0'
-        val rightLimit = 122 // letter 'z'
-        val targetStringLength = 10
-        val random = Random()
-
-        val generatedString = random.ints(leftLimit, rightLimit + 1)
-            .filter { i: Int -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97) }
-            .limit(targetStringLength.toLong())
-            .collect(
-                { StringBuilder() },
-                { obj: java.lang.StringBuilder, codePoint: Int ->
-                    obj.appendCodePoint(
-                        codePoint
-                    )
-                },
-                { obj: java.lang.StringBuilder, s: java.lang.StringBuilder? ->
-                    obj.append(
-                        s
-                    )
-                })
-            .toString()
-
-        val version = random.nextDouble(3.0)
-        return generatedString + " " + BigDecimal.valueOf(version).setScale(3, RoundingMode.HALF_UP)
     }
 
     companion object {
