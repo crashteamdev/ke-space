@@ -7,7 +7,6 @@ import dev.crashteam.repricer.client.ke.model.ProxySource
 import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.lk.*
 import dev.crashteam.repricer.config.properties.ServiceProperties
-import dev.crashteam.repricer.service.util.RandomUserAgent
 import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.core.ParameterizedTypeReference
@@ -17,8 +16,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.net.URLEncoder
 import java.util.*
 
@@ -35,16 +32,18 @@ class KazanExpressLkClient(
 
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/",
-            proxySource = ProxySource.PROXYS_IO,
             httpMethod = "GET",
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
@@ -72,15 +71,17 @@ class KazanExpressLkClient(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/getProducts?" +
                     "searchQuery=&filter=active&sortBy=id&order=descending&size=99&page=$page",
             httpMethod = "GET",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
@@ -106,16 +107,18 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/sendSkuData",
             httpMethod = "POST",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(body))
             )
@@ -138,15 +141,17 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product?productId=$productId",
             httpMethod = "GET",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
@@ -172,15 +177,17 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/seller/shop/$shopId/product/$productId/description-response",
             httpMethod = "GET",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Bearer $userToken",
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
@@ -208,16 +215,18 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/oauth/token",
             httpMethod = "POST",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlEncodedString.encodeToByteArray()))
             )
@@ -246,16 +255,18 @@ class KazanExpressLkClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.business.kazanexpress.ru/api/oauth/token",
             httpMethod = "POST",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlEncodedString.encodeToByteArray()))
             )
@@ -285,11 +296,14 @@ class KazanExpressLkClient(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $basicAuthToken",
                         "Content-Type" to MediaType.APPLICATION_FORM_URLENCODED_VALUE,
                         USER_ID_HEADER to userId
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(urlEncodedString.encodeToByteArray()))
             )

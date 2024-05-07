@@ -8,19 +8,15 @@ import dev.crashteam.repricer.client.ke.model.StyxResponse
 import dev.crashteam.repricer.client.ke.model.web.*
 import dev.crashteam.repricer.config.RedisConfig
 import dev.crashteam.repricer.config.properties.ServiceProperties
-import dev.crashteam.repricer.service.util.RandomUserAgent
 import dev.crashteam.repricer.service.util.StyxUtils
 import mu.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -49,20 +45,22 @@ class KazanExpressWebClient(
         )
         val query = jacksonObjectMapper().writeValueAsBytes(categoryGQLQuery)
         val proxyRequestBody = ProxyRequestBody(
-            url = "https://dshop.kznexpress.ru/",
+            url = "https://graphql.kazanexpress.ru/",
             httpMethod = "POST",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "Content-Type" to MediaType.APPLICATION_JSON_VALUE,
-                        "x-iid" to "random_uuid()",
+                        "X-Iid" to "random_uuid()",
                         "apollographql-client-name" to "web-customers",
-                        "apollographql-client-version" to "1.37.0"
+                        "apollographql-client-version" to "1.47.2"
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 ),
                 ProxyRequestContext("content", Base64.getEncoder().encodeToString(query))
             )
@@ -83,14 +81,16 @@ class KazanExpressWebClient(
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/main/root-categories",
             httpMethod = "GET",
-            proxySource = ProxySource.PROXYS_IO,
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN"
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
@@ -110,16 +110,18 @@ class KazanExpressWebClient(
     fun getProductInfo(productId: String): ProductResponse? {
         val proxyRequestBody = ProxyRequestBody(
             url = "https://api.kazanexpress.ru/api/v2/product/$productId",
-            proxySource = ProxySource.PROXYS_IO,
             httpMethod = "GET",
             context = listOf(
                 ProxyRequestContext(
                     key = "headers",
                     value = mapOf(
-                        "User-Agent" to RandomUserAgent.getRandomUserAgent(),
                         "Authorization" to "Basic $AUTH_TOKEN",
                         "x-iid" to "random_uuid()"
                     )
+                ),
+                ProxyRequestContext(
+                    key = "market",
+                    value = "KE"
                 )
             )
         )
